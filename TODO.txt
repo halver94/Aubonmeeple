@@ -13,7 +13,6 @@ Parsing Bugfix
 
 Features:
 - multithread requests
-- sort best deal
 - poc a levenstein distance heuristic when comparing names
 - scrap older annonces
 - add more website comparison
@@ -28,4 +27,4 @@ Bugfix:
 
 Refacto:
 - Game should have a list of "Game review"
-- make vec of games a vec of index or a vec of box
+- make vec of games a vec of index or a vec of box (or use a DB)

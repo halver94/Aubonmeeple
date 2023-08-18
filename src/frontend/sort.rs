@@ -4,25 +4,23 @@ use crate::game::Game;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Sort {
-    pub sort: Option<String>,
+    pub sort: String,
 }
 
 impl Default for Sort {
     fn default() -> Self {
-        Self { sort: None }
+        Self {
+            sort: String::from("updated"),
+        }
     }
 }
 
 impl Sort {
-    pub fn sort(self, games: Vec<Game>) -> Vec<Game> {
+    pub fn sort(&self, games: Vec<Game>) -> Vec<Game> {
         //println!("filters : {:#?}", self);
 
-        if self.sort.is_none() {
-            return games.clone();
-        }
-
-        let mut games = games.clone();
-        match self.sort.unwrap().as_str() {
+        let mut games = games;
+        match self.sort.as_str() {
             "updated" => games.sort_by(|a, b| {
                 b.okkazeo_announce
                     .last_modification_date

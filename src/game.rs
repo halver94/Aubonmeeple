@@ -1,7 +1,8 @@
 use chrono::{DateTime, Utc};
-use image::DynamicImage;
 use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering, collections::HashMap};
+
+use crate::frontend::server::State;
 
 #[derive(Debug, Default, Clone)]
 pub struct Games {
@@ -113,7 +114,23 @@ impl Games {
         }
     }
 
-    pub fn create_html_table(self) -> String {
+    pub fn create_html_table(&self, state: &State) -> String {
+        let params = format!(
+            "page={}&per_page={}{}{}",
+            state.pagination.page,
+            state.pagination.per_page,
+            if state.filters.city.is_some() {
+                format!("&city={}", state.filters.city.as_ref().unwrap())
+            } else {
+                String::new()
+            },
+            if state.filters.name.is_some() {
+                format!("&name={}", state.filters.name.as_ref().unwrap())
+            } else {
+                String::new()
+            },
+        );
+
         let mut table = String::new();
         table.push_str(
             "<style>
@@ -141,20 +158,34 @@ impl Games {
                     </style>",
         );
         table.push_str("<table>");
-        table.push_str(r#"<tr>
-            <th>Updated <button onclick="window.location.href='/?sort=updated';">Sort</button></th>
+        table.push_str(
+            format!(
+                "{}{}{}{}{}{}{}{}{}",
+                r#"<tr>
+            <th>Updated <button onclick="window.location.href='/?"#,
+                params,
+                r#"&sort=updated';">Sort</button></th>
             <th>Name</th>
             <th>City</th>
             <th>Seller</th>
-            <th>Deal <button onclick="window.location.href='/?sort=deal';">Sort</button></th>
+            <th>Deal <button onclick="window.location.href='/?"#,
+                params,
+                r#"&sort=deal';">Sort</button></th>
             <th>Okkazeo</th>
             <th>Philibert</th>
             <th>Agorajeux</th>
             <th>Ultrajeux</th>
             <th>Ludocortex</th>
-            <th>TricTrac Note <button onclick="window.location.href='/?sort=trictrac';">Sort</button></th>
-            <th>BGG Note <button onclick="window.location.href='/?sort=bgg';">Sort</button></th>
-        </tr>"#);
+            <th>TricTrac Note <button onclick="window.location.href='/?"#,
+                params,
+                r#"&sort=trictrac';">Sort</button></th>
+            <th>BGG Note <button onclick="window.location.href='/?"#,
+                params,
+                r#"&sort=bgg';">Sort</button></th>
+        </tr>"#
+            )
+            .as_str(),
+        );
 
         for game in self.games.iter() {
             table.push_str("<tr>");

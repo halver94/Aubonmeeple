@@ -1,5 +1,5 @@
 use axum::extract::Query;
-use axum::response::{Html, Response};
+use axum::response::Html;
 use axum::Extension;
 use axum::{routing::get, Router};
 use std::sync::Arc;
@@ -11,7 +11,13 @@ use crate::game::Games;
 use super::filter::Filters;
 use super::footer::generate_footer_html;
 use super::pagination::Pagination;
-use super::sort::{self, Sort};
+use super::sort::Sort;
+
+pub struct State {
+    pub pagination: Pagination,
+    pub filters: Filters,
+    pub sort: Sort,
+}
 
 pub async fn root(
     pagination: Option<Query<Pagination>>,
@@ -21,28 +27,28 @@ pub async fn root(
     Extension(games): Extension<Arc<std::sync::Mutex<Games>>>,
 ) -> Html<String> {
     //debug!("pagination : {:#?}", pagination);
-    let mut pagination = pagination.unwrap_or_default().0;
-    let filters = filters.unwrap_or_default().0;
-    let sort = sort.unwrap_or_default().0;
+    let mut pagination_param = pagination.unwrap_or_default().0;
+    let filters_param = filters.unwrap_or_default().0;
+    let sort_param = sort.unwrap_or_default().0;
 
-    let games_filtered = filters.filter(games);
+    let games_filtered = filters_param.filter(games);
 
     let sorted_games = Games {
-        games: sort.sort(games_filtered),
+        games: sort_param.sort(games_filtered),
     };
 
     let total_items = sorted_games.games.len();
     if total_items == 0 {
-        return Html(Games::new().create_html_table());
+        return Html(String::new());
     }
 
-    let max_page = total_items / pagination.per_page;
-    if max_page < pagination.page {
-        pagination.page = 0;
+    let max_page = total_items / pagination_param.per_page;
+    if max_page < pagination_param.page {
+        pagination_param.page = 0;
     }
 
-    let start_index = pagination.page * pagination.per_page;
-    let mut end_index = start_index + pagination.per_page;
+    let start_index = pagination_param.page * pagination_param.per_page;
+    let mut end_index = start_index + pagination_param.per_page;
 
     if end_index > total_items {
         end_index = total_items;
@@ -52,9 +58,15 @@ pub async fn root(
         games: Vec::from_iter(sorted_games.games[start_index..end_index].iter().cloned()),
     };
 
-    let filter_html = Filters::create_html();
-    let response_html = part_games.create_html_table();
-    let pagination_html = generate_pagination_links(total_items, &pagination);
+    let state = State {
+        pagination: pagination_param,
+        sort: sort_param,
+        filters: filters_param,
+    };
+
+    let filter_html = Filters::create_html(&state);
+    let response_html = part_games.create_html_table(&state);
+    let pagination_html = generate_pagination_links(total_items, &state);
     let footer_html = generate_footer_html();
     Html(format!(
         "{}{}{}{}",

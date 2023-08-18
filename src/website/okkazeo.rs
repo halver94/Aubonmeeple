@@ -1,6 +1,5 @@
 use std::{
-    env,
-    fs::{self, File},
+    fs::File,
     io::{Cursor, Write},
     path::Path,
 };
@@ -9,8 +8,7 @@ use feed_rs::{
     model::Feed,
     parser::{self, ParseFeedError},
 };
-use image::DynamicImage;
-use image::{io::Reader as ImageReader, ImageOutputFormat};
+use image::io::Reader as ImageReader;
 use log::debug;
 use regex::Regex;
 use reqwest::get;

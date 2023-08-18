@@ -4,23 +4,16 @@ use serde::{Deserialize, Serialize};
 
 use crate::game::{Game, Games};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Filters {
-    city: Option<String>,
-    name: Option<String>,
-}
+use super::server::State;
 
-impl Default for Filters {
-    fn default() -> Self {
-        Self {
-            city: None,
-            name: None,
-        }
-    }
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Filters {
+    pub city: Option<String>,
+    pub name: Option<String>,
 }
 
 impl Filters {
-    pub fn filter(self, games: Arc<std::sync::Mutex<Games>>) -> Vec<Game> {
+    pub fn filter(&self, games: Arc<std::sync::Mutex<Games>>) -> Vec<Game> {
         //println!("filters : {:#?}", self);
 
         if self.city.is_none() && self.name.is_none() {
@@ -57,8 +50,15 @@ impl Filters {
         filtered_games
     }
 
-    pub fn create_html() -> String {
-        let html = r#"
+    pub fn create_html(state: &State) -> String {
+        let params = format!(
+            "sort={}&page={}&per_page={}",
+            state.sort.sort, state.pagination.page, state.pagination.per_page,
+        );
+
+        let html = format!(
+            "{}{}{}",
+            r#"
         <form id="filters">
         <input type="text" id="city" name="city" placeholder="Filter on city" ><br><br>
         <input type="text" id="name" name="name" placeholder="Filter on game name" ><br><br>
@@ -81,13 +81,16 @@ impl Filters {
             }
             
             const queryString = queryParams.join("&");
-            const urlWithParams = `/?${queryString}`;
+            const urlWithParams = `/?"#,
+            params,
+            r#"&${queryString}`;
             
             window.location.href = urlWithParams;
         }
-    </script>"#;
+    </script>"#,
+        );
 
-        html.to_string()
+        html
     }
 }
 

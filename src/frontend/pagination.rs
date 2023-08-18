@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use super::server::State;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Pagination {
     pub per_page: usize,
@@ -14,8 +16,22 @@ impl Default for Pagination {
     }
 }
 
-pub fn generate_pagination_links(total_items: usize, pagination: &Pagination) -> String {
-    let total_pages = (total_items + pagination.per_page - 1) / pagination.per_page;
+pub fn generate_pagination_links(total_items: usize, state: &State) -> String {
+    let params = format!(
+        "sort={}{}{}",
+        state.sort.sort,
+        if state.filters.city.is_some() {
+            format!("&city={}", state.filters.city.as_ref().unwrap())
+        } else {
+            String::new()
+        },
+        if state.filters.name.is_some() {
+            format!("&name={}", state.filters.name.as_ref().unwrap())
+        } else {
+            String::new()
+        },
+    );
+    let total_pages = (total_items + state.pagination.per_page - 1) / state.pagination.per_page;
 
     let style = r#"<style>
     .pagination {
@@ -39,31 +55,34 @@ pub fn generate_pagination_links(total_items: usize, pagination: &Pagination) ->
 
     let mut pagination_html = String::from(style);
     pagination_html.push_str(r#"<center><div class="pagination">"#);
-    if pagination.page != 0 {
+    if state.pagination.page != 0 {
         pagination_html.push_str(&format!(
-            r#"<a href="/?page={}&per_page={}">Previous</a>"#,
-            pagination.page - 1,
-            pagination.per_page,
+            r#"<a href="/?{}&page={}&per_page={}">Previous</a>"#,
+            params,
+            state.pagination.page - 1,
+            state.pagination.per_page,
         ));
     }
     for page in 0..=total_pages - 1 {
         pagination_html.push_str(&format!(
-            r#"<a {} href="/?page={}&per_page={}">{}</a>"#,
-            if page == pagination.page {
+            r#"<a {} href="/?{}&page={}&per_page={}">{}</a>"#,
+            if page == state.pagination.page {
                 r#"class="active""#
             } else {
                 ""
             },
+            params,
             page,
-            pagination.per_page,
+            state.pagination.per_page,
             page,
         ));
     }
-    if pagination.page != total_pages - 1 {
+    if state.pagination.page != total_pages - 1 {
         pagination_html.push_str(&format!(
-            r#"<a href="/?page={}&per_page={}">Next</a>"#,
-            pagination.page + 1,
-            pagination.per_page,
+            r#"<a href="/?{}&page={}&per_page={}">Next</a>"#,
+            params,
+            state.pagination.page + 1,
+            state.pagination.per_page,
         ));
     }
     pagination_html.push_str("</div></center>");
