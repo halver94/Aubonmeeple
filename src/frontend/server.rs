@@ -9,6 +9,7 @@ use crate::frontend::pagination::generate_pagination_links;
 use crate::game::Games;
 
 use super::filter::Filters;
+use super::footer::generate_footer_html;
 use super::pagination::Pagination;
 
 pub async fn root(
@@ -41,9 +42,10 @@ pub async fn root(
     let filter_html = Filters::create_html();
     let response_html = part_games.create_html_table();
     let pagination_html = generate_pagination_links(total_items, &pagination);
+    let footer_html = generate_footer_html();
     Html(format!(
-        "{}{}{}",
-        filter_html, response_html, pagination_html
+        "{}{}{}{}",
+        filter_html, response_html, pagination_html, footer_html
     ))
 }
 
@@ -51,6 +53,7 @@ pub async fn set_server(games: Arc<std::sync::Mutex<Games>>) {
     let app = Router::new()
         .route("/", get(root))
         .nest_service("/img", ServeDir::new("img"))
+        .nest_service("/assets", ServeDir::new("assets"))
         .layer(Extension(games));
 
     // run our app with hyper, listening globally on port 3000
