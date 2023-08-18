@@ -151,7 +151,7 @@ impl Games {
                 table.push_str(&format!(
                     "<td style=\"color: {}\">{}{}€ ({}{}%)</td>",
                     if diff_price < 0 { "green" } else { "red" },
-                    if diff_price > 0 { "+" } else { "" },
+                    if diff_price >= 0 { "+" } else { "" },
                     diff_price,
                     if percent_saved > 0 { "+" } else { "" },
                     percent_saved,

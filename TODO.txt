@@ -12,7 +12,6 @@ Parsing Bugfix
     - remove - VF or - VO
 
 Features:
-- parse okkazeo to see if there is and extension or not (think about how this will influence the result)
 - do result pagination
 - filtre city (name and/or zipcode)
 - filtre game name

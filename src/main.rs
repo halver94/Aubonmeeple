@@ -179,8 +179,8 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
     let games = Arc::new(Mutex::new(Games::new()));
     let interval = Duration::from_secs(60 * 5); // Remplacez X par le nombre de minutes souhaité
 
-    let mut game_clone = games.clone();
-    let _ = tokio::spawn(async move { server::set_server(&mut game_clone).await });
+    let game_clone = games.clone();
+    let _ = tokio::spawn(async move { server::set_server(game_clone).await });
 
     loop {
         let start = Instant::now();
