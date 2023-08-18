@@ -120,6 +120,15 @@ impl Games {
                     th {
                         background-color: lightgray;
                     }
+                   
+                    .flex-container {
+                        display: flex;
+                        align-items: center; /* Alignement vertical */
+                    }
+                    .flex-container img {
+                        margin-right: 10px; /* Espacement entre l'image et le texte */
+                    }
+
                     </style>",
         );
         table.push_str("<table>");
@@ -135,7 +144,12 @@ impl Games {
                     .format("%d/%m/%Y %H:%M")
             ));
             table.push_str(&format!(
-                "<td><img src=\"{}\" alt=\"fail\" width=\"150\" height=\"150\" />{}<br>({})</td>",
+                "<td>
+                    <div class=\"flex-container\">
+                        <img src=\"{}\" alt=\"fail\" width=\"100\" height=\"100\" />
+                        {}<br>({})
+                    </div>
+                </td>",
                 game.okkazeo_announce.image,
                 game.okkazeo_announce.name,
                 game.okkazeo_announce.extension

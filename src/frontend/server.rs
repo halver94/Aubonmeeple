@@ -2,12 +2,8 @@ use axum::extract::Query;
 use axum::response::{Html, Response};
 use axum::Extension;
 use axum::{routing::get, Router};
-use hyper::StatusCode;
-use log::debug;
-use reqwest::Body;
-use std::fs::File;
-use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use tower_http::services::ServeDir;
 
 use crate::frontend::pagination::generate_pagination_links;
 use crate::game::Games;
@@ -54,7 +50,7 @@ pub async fn root(
 pub async fn set_server(games: Arc<std::sync::Mutex<Games>>) {
     let app = Router::new()
         .route("/", get(root))
-        .route("/img/:filename", get(image_handler))
+        .nest_service("/img", ServeDir::new("img"))
         .layer(Extension(games));
 
     // run our app with hyper, listening globally on port 3000
@@ -62,18 +58,4 @@ pub async fn set_server(games: Arc<std::sync::Mutex<Games>>) {
         .serve(app.into_make_service())
         .await
         .unwrap();
-}
-
-async fn image_handler(
-    Extension(image_path): Extension<PathBuf>,
-) -> Result<Response<Body>, StatusCode> {
-    let full_path = Path::new("img").join(&image_path);
-
-    if full_path.exists() && full_path.is_file() {
-        let file = tokio::fs::File::open(full_path).await.unwrap();
-        let body = Body::from_reader(file, None);
-        Ok(Response::new(body))
-    } else {
-        Err(StatusCode::NOT_FOUND)
-    }
 }
