@@ -8,7 +8,10 @@ use website::agorajeux::get_agorajeux_price_and_url_by_name;
 use website::bgg::get_bgg_note;
 use website::knapix::get_knapix_prices;
 use website::ludocortex::get_ludocortex_price_and_url;
-use website::okkazeo::{get_atom_feed, get_okkazeo_barcode_and_city};
+use website::okkazeo::{
+    get_atom_feed, get_okkazeo_announce_page, get_okkazeo_barcode, get_okkazeo_city,
+    get_okkazeo_seller,
+};
 use website::philibert::get_philibert_price_and_url;
 use website::trictrac::get_trictrac_note;
 use website::ultrajeux::get_ultrajeux_price_and_url;
@@ -72,8 +75,10 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
             ..Default::default()
         };
 
-        (game.okkazeo_announce.barcode, game.okkazeo_announce.city) =
-            get_okkazeo_barcode_and_city(game.okkazeo_announce.id).await;
+        let document = get_okkazeo_announce_page(game.okkazeo_announce.id).await;
+        game.okkazeo_announce.barcode = get_okkazeo_barcode(&document).await;
+        game.okkazeo_announce.city = get_okkazeo_city(&document).await;
+        game.okkazeo_announce.seller = get_okkazeo_seller(&document).await.unwrap();
 
         get_knapix_prices(&mut game).await;
 

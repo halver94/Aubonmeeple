@@ -15,11 +15,19 @@ pub struct Reference {
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct Seller {
+    pub name: String,
+    pub url: String,
+    pub nb_announces: u32,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct OkkazeoAnnounce {
     pub id: u32,
     pub name: String,
     pub price: f32,
     pub url: String,
+    pub seller: Seller,
     pub barcode: Option<u64>,
     pub city: Option<String>,
     pub last_modification_date: Option<DateTime<Utc>>,
@@ -60,7 +68,7 @@ impl Eq for Game {}
 impl Game {
     fn get_deal_advantage(&self) -> Option<(i32, i32)> {
         // okkazeo is counted as a ref, so we need at least 2 refs
-        if self.references.len() == 0 {
+        if self.references.is_empty() {
             return None;
         }
 
@@ -112,7 +120,7 @@ impl Games {
                     </style>",
         );
         table.push_str("<table>");
-        table.push_str("<tr><th>Updated</th><th>Name</th><th>City</th><th>Barcode</th><th>Deal</th><th>Okkazeo</th><th>Philibert</th><th>Agorajeux</th><th>Ultrajeux</th><th>Ludocortex</th><th>TricTrac Note</th><th>BGG Note</th></tr>");
+        table.push_str("<tr><th>Updated</th><th>Name</th><th>City</th><th>Seller</th><th>Deal</th><th>Okkazeo</th><th>Philibert</th><th>Agorajeux</th><th>Ultrajeux</th><th>Ludocortex</th><th>TricTrac Note</th><th>BGG Note</th></tr>");
 
         for game in self.games.iter().rev() {
             table.push_str("<tr>");
@@ -129,8 +137,10 @@ impl Games {
                 game.okkazeo_announce.city.clone().unwrap_or(String::new())
             ));
             table.push_str(&format!(
-                "<td>{}</td>",
-                game.okkazeo_announce.barcode.unwrap_or(0)
+                "<td><a href=\"{}\">{} <br>({} announces)</a></td>",
+                game.okkazeo_announce.seller.url,
+                game.okkazeo_announce.seller.name,
+                game.okkazeo_announce.seller.nb_announces
             ));
 
             if let Some((diff_price, percent_saved)) = game.get_deal_advantage() {
