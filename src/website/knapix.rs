@@ -3,7 +3,7 @@ use scraper::{Html, Selector};
 use crate::game::{Game, Reference};
 
 pub async fn get_knapix_prices(game: &mut Game) {
-    let name = game.name.replace(' ', "+");
+    let name = game.okkazeo_announce.name.replace(' ', "+");
     let search = format!(
         "https://www.knapix.com/comparateur.php?nom_jeu={}&checkbox-exact=on&affiner=",
         name

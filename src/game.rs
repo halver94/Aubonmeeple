@@ -15,13 +15,20 @@ pub struct Reference {
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
-pub struct Game {
+pub struct OkkazeoAnnounce {
     pub id: u32,
     pub name: String,
+    pub price: f32,
+    pub url: String,
     pub barcode: Option<u64>,
-    pub references: HashMap<String, Reference>,
-    pub last_modification_date: Option<DateTime<Utc>>,
     pub city: Option<String>,
+    pub last_modification_date: Option<DateTime<Utc>>,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct Game {
+    pub okkazeo_announce: OkkazeoAnnounce,
+    pub references: HashMap<String, Reference>,
     pub note_trictrac: f32,
     pub review_count_trictrac: u32,
     pub note_bgg: f32,
@@ -30,8 +37,9 @@ pub struct Game {
 
 impl Ord for Game {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.last_modification_date
-            .cmp(&other.last_modification_date)
+        self.okkazeo_announce
+            .last_modification_date
+            .cmp(&other.okkazeo_announce.last_modification_date)
     }
 }
 impl PartialOrd for Game {
@@ -42,7 +50,8 @@ impl PartialOrd for Game {
 
 impl PartialEq for Game {
     fn eq(&self, other: &Self) -> bool {
-        self.last_modification_date == other.last_modification_date
+        self.okkazeo_announce.last_modification_date
+            == other.okkazeo_announce.last_modification_date
     }
 }
 
@@ -51,16 +60,13 @@ impl Eq for Game {}
 impl Game {
     fn get_deal_advantage(&self) -> Option<(i32, i32)> {
         // okkazeo is counted as a ref, so we need at least 2 refs
-        if self.references.len() == 1 {
+        if self.references.len() == 0 {
             return None;
         }
 
         let mut min_price = 0.0;
         let mut first_ref = true;
-        for (name, reference) in self.references.iter() {
-            if name == "okkazeo" {
-                continue;
-            }
+        for (_, reference) in self.references.iter() {
             if first_ref {
                 min_price = reference.price;
                 first_ref = false;
@@ -70,10 +76,8 @@ impl Game {
                 min_price = reference.price;
             }
         }
-        let percent: i32 = ((self.references.get("okkazeo").unwrap().price * 100.0) / min_price)
-            .round() as i32
-            - 100;
-        let economy = (self.references.get("okkazeo").unwrap().price - min_price).round() as i32;
+        let percent: i32 = ((self.okkazeo_announce.price * 100.0) / min_price).round() as i32 - 100;
+        let economy = (self.okkazeo_announce.price - min_price).round() as i32;
 
         if economy == 0 || percent == 0 {
             return None;
@@ -114,16 +118,20 @@ impl Games {
             table.push_str("<tr>");
             table.push_str(&format!(
                 "<td>{}</td>",
-                game.last_modification_date
+                game.okkazeo_announce
+                    .last_modification_date
                     .unwrap()
                     .format("%d/%m/%Y %H:%M")
             ));
-            table.push_str(&format!("<td>{}</td>", game.name));
+            table.push_str(&format!("<td>{}</td>", game.okkazeo_announce.name));
             table.push_str(&format!(
                 "<td>{}</td>",
-                game.city.clone().unwrap_or(String::new())
+                game.okkazeo_announce.city.clone().unwrap_or(String::new())
             ));
-            table.push_str(&format!("<td>{}</td>", game.barcode.unwrap_or(0)));
+            table.push_str(&format!(
+                "<td>{}</td>",
+                game.okkazeo_announce.barcode.unwrap_or(0)
+            ));
 
             if let Some((diff_price, percent_saved)) = game.get_deal_advantage() {
                 table.push_str(&format!(
@@ -138,15 +146,10 @@ impl Games {
                 table.push_str("<td>-</td>");
             }
 
-            if game.references.get("okkazeo").is_some() {
-                table.push_str(&format!(
-                    "<td><a href=\"{}\">{} &euro;</a></td>",
-                    game.references.get("okkazeo").unwrap().url,
-                    game.references.get("okkazeo").unwrap().price,
-                ));
-            } else {
-                table.push_str("<td>-</td>");
-            }
+            table.push_str(&format!(
+                "<td><a href=\"{}\">{} &euro;</a></td>",
+                game.okkazeo_announce.url, game.okkazeo_announce.price,
+            ));
 
             if game.references.get("philibert").is_some() {
                 table.push_str(&format!(

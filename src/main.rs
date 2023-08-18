@@ -1,4 +1,4 @@
-use game::{Game, Games, Reference};
+use game::{Game, Games, OkkazeoAnnounce, Reference};
 use std::collections::HashMap;
 use std::error::Error;
 use std::sync::{Arc, Mutex};
@@ -24,7 +24,7 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
 
         let id = entry.id.parse::<u32>().unwrap();
         for g in games.lock().unwrap().games.iter() {
-            if g.id == id {
+            if g.okkazeo_announce.id == id {
                 continue 'outer;
             }
         }
@@ -47,40 +47,42 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
         }
 
         let mut game = Game {
-            id,
-            name,
+            okkazeo_announce: OkkazeoAnnounce {
+                id,
+                name,
+                last_modification_date: entry.updated,
+                url: entry.links.first().cloned().unwrap().href,
+                price: entry
+                    .summary
+                    .unwrap()
+                    .content
+                    .split('>')
+                    .collect::<Vec<&str>>()
+                    .last()
+                    .unwrap()
+                    .split('€')
+                    .collect::<Vec<&str>>()
+                    .first()
+                    .unwrap()
+                    .parse::<f32>()
+                    .unwrap(),
+                ..Default::default()
+            },
             references: HashMap::<String, Reference>::new(),
-            last_modification_date: entry.updated,
             ..Default::default()
         };
 
-        let okkazeo_reference = Reference {
-            name: String::from("okkazeo"),
-            url: entry.links.first().cloned().unwrap().href,
-            price: entry
-                .summary
-                .unwrap()
-                .content
-                .split('>')
-                .collect::<Vec<&str>>()
-                .last()
-                .unwrap()
-                .split('€')
-                .collect::<Vec<&str>>()
-                .first()
-                .unwrap()
-                .parse::<f32>()
-                .unwrap(),
-        };
-        game.references
-            .insert(String::from("okkazeo"), okkazeo_reference);
-
-        (game.barcode, game.city) = get_okkazeo_barcode_and_city(game.id).await;
+        (game.okkazeo_announce.barcode, game.okkazeo_announce.city) =
+            get_okkazeo_barcode_and_city(game.okkazeo_announce.id).await;
 
         get_knapix_prices(&mut game).await;
 
         if game.references.get("philibert").is_none() {
-            if let Some((price, url)) = get_philibert_price_and_url(&game.name, game.barcode).await
+            if let Some((price, url)) = get_philibert_price_and_url(
+                &game.okkazeo_announce.name,
+                game.okkazeo_announce.barcode,
+            )
+            .await
             {
                 game.references.insert(
                     "philibert".to_string(),
@@ -93,7 +95,9 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
             }
         }
         if game.references.get("agorajeux").is_none() {
-            if let Some((price, url)) = get_agorajeux_price_and_url_by_name(&game.name).await {
+            if let Some((price, url)) =
+                get_agorajeux_price_and_url_by_name(&game.okkazeo_announce.name).await
+            {
                 game.references.insert(
                     "agorajeux".to_string(),
                     Reference {
@@ -106,7 +110,11 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
         }
 
         if game.references.get("ultrajeux").is_none() {
-            if let Some((price, url)) = get_ultrajeux_price_and_url(&game.name, game.barcode).await
+            if let Some((price, url)) = get_ultrajeux_price_and_url(
+                &game.okkazeo_announce.name,
+                game.okkazeo_announce.barcode,
+            )
+            .await
             {
                 game.references.insert(
                     "ultrajeux".to_string(),
@@ -120,7 +128,11 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
         }
 
         if game.references.get("ludocortex").is_none() {
-            if let Some((price, url)) = get_ludocortex_price_and_url(&game.name, game.barcode).await
+            if let Some((price, url)) = get_ludocortex_price_and_url(
+                &game.okkazeo_announce.name,
+                game.okkazeo_announce.barcode,
+            )
+            .await
             {
                 game.references.insert(
                     "ludocortex".to_string(),
@@ -133,14 +145,14 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
             }
         }
 
-        let note = get_trictrac_note(&game.name).await;
+        let note = get_trictrac_note(&game.okkazeo_announce.name).await;
         if note.is_some() {
             (game.note_trictrac, game.review_count_trictrac) = note.unwrap();
         } else {
             println!("Cannot get trictrac note");
         }
 
-        let note = get_bgg_note(&game.name).await;
+        let note = get_bgg_note(&game.okkazeo_announce.name).await;
         if note.is_some() {
             (game.note_bgg, game.review_count_bgg) = note.unwrap();
         } else {
