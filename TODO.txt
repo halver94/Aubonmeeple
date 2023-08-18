@@ -12,7 +12,6 @@ Parsing Bugfix
     - remove - VF or - VO
 
 Features:
-- do result pagination
 - filtre city (name and/or zipcode)
 - filtre game name
 - multithread requests

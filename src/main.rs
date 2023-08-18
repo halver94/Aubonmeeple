@@ -1,3 +1,4 @@
+use frontend::server;
 use game::{Game, Games, OkkazeoAnnounce, Reference};
 use std::collections::HashMap;
 use std::error::Error;
@@ -16,8 +17,8 @@ use website::philibert::get_philibert_price_and_url;
 use website::trictrac::get_trictrac_note;
 use website::ultrajeux::get_ultrajeux_price_and_url;
 
+mod frontend;
 mod game;
-mod server;
 mod website;
 
 async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
