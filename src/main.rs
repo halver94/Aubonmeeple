@@ -35,7 +35,7 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
         let title = entry.title.unwrap();
 
         let mut vec_name = title.content.split('-').collect::<Vec<&str>>();
-        let _ = vec_name.pop();
+        let extension = vec_name.pop().unwrap().trim().to_string();
         let name = vec_name.join("-").trim().to_string();
         let mut result = String::new();
         let mut inside_parentheses = false;
@@ -55,6 +55,7 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
                 name,
                 last_modification_date: entry.updated,
                 url: entry.links.first().cloned().unwrap().href,
+                extension,
                 price: entry
                     .summary
                     .unwrap()

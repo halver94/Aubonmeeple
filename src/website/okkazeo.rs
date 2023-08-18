@@ -32,14 +32,14 @@ pub async fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
         "Seller: {}, Href: {}, Nb Annonces: {}",
         seller_name, href_attr, nb_annonces_text
     );
-    return Some(Seller {
+    Some(Seller {
         name: seller_name.to_string(),
         url: format!(
             "https://www.okkazeo.com/{}",
             href_attr.to_string().replace("viewProfil", "stock")
         ),
         nb_announces: nb_annonces_text,
-    });
+    })
 }
 
 pub async fn get_okkazeo_barcode(document: &Html) -> Option<u64> {

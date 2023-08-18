@@ -27,6 +27,7 @@ pub struct OkkazeoAnnounce {
     pub name: String,
     pub price: f32,
     pub url: String,
+    pub extension: String,
     pub seller: Seller,
     pub barcode: Option<u64>,
     pub city: Option<String>,
@@ -131,7 +132,10 @@ impl Games {
                     .unwrap()
                     .format("%d/%m/%Y %H:%M")
             ));
-            table.push_str(&format!("<td>{}</td>", game.okkazeo_announce.name));
+            table.push_str(&format!(
+                "<td>{}<br>({})</td>",
+                game.okkazeo_announce.name, game.okkazeo_announce.extension
+            ));
             table.push_str(&format!(
                 "<td>{}</td>",
                 game.okkazeo_announce.city.clone().unwrap_or(String::new())
