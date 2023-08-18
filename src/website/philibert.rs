@@ -1,3 +1,4 @@
+use log::debug;
 use scraper::{Html, Selector};
 
 pub async fn get_philibert_price_and_url_by_barcode(barcode: u64) -> Option<(f32, String)> {
@@ -5,7 +6,7 @@ pub async fn get_philibert_price_and_url_by_barcode(barcode: u64) -> Option<(f32
         "https://www.philibertnet.com/fr/recherche?search_query={}&submit_search=",
         barcode
     );
-    println!("Search on philibert: {}", &search);
+    debug!("Search on philibert: {}", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
 
@@ -34,7 +35,7 @@ pub async fn get_philibert_price_and_url_by_barcode(barcode: u64) -> Option<(f32
                     .unwrap()
                     .contains(&barcode.to_string())
                 {
-                    println!("href : {} , barcode : {}", href_attr, barcode);
+                    debug!("href : {} , barcode : {}", href_attr, barcode);
                     return Some((price_text, href_attr.to_string()));
                 }
             }
@@ -48,7 +49,7 @@ pub async fn get_philibert_price_and_url_by_name(name: &str) -> Option<(f32, Str
         "https://www.philibertnet.com/fr/recherche?search_query={}&submit_search=",
         name
     );
-    println!("Search on philibert: {}", &search);
+    debug!("Search on philibert: {}", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
 

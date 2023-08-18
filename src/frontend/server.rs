@@ -2,6 +2,7 @@ use axum::extract::Query;
 use axum::response::Html;
 use axum::Extension;
 use axum::{routing::get, Router};
+use log::debug;
 use std::sync::Arc;
 
 use crate::frontend::pagination::generate_pagination_links;
@@ -15,11 +16,12 @@ pub async fn root(
     filters: Option<Query<Filters>>,
     Extension(games): Extension<Arc<std::sync::Mutex<Games>>>,
 ) -> Html<String> {
-    println!("pagination : {:#?}", pagination);
+    debug!("pagination : {:#?}", pagination);
     let pagination = pagination.unwrap_or_default().0;
     let filters = filters.unwrap_or_default().0;
 
     let games_filtered = filters.filter(games);
+    //let games_filtered = &games.lock().unwrap().games;
     let total_items = games_filtered.len();
     if total_items == 0 {
         return Html(Games::new().create_html_table());
@@ -29,16 +31,20 @@ pub async fn root(
     let mut end_index = start_index + pagination.per_page;
 
     if end_index > total_items {
-        end_index = total_items - 1;
+        end_index = total_items;
     }
 
     let part_games: Games = Games {
         games: Vec::from_iter(games_filtered[start_index..end_index].iter().cloned()),
     };
 
+    let filter_html = Filters::create_html();
     let response_html = part_games.create_html_table();
     let pagination_html = generate_pagination_links(total_items, &pagination);
-    Html(format!("{}{}", response_html, pagination_html))
+    Html(format!(
+        "{}{}{}",
+        filter_html, response_html, pagination_html
+    ))
 }
 
 pub async fn set_server(games: Arc<std::sync::Mutex<Games>>) {

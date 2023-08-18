@@ -1,8 +1,9 @@
+use log::debug;
 use scraper::{Html, Selector};
 
 pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f32, String)> {
     let search = format!("https://www.ludocortex.fr/jolisearch?s={}", barcode);
-    println!("Search on ludocortex: {}", &search);
+    debug!("Search on ludocortex: {}", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
 
@@ -25,7 +26,7 @@ pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f3
             .next()
             .map(|price| price.inner_html());
         regular_price.as_ref()?;
-        println!("!!!{}!!!", regular_price.as_ref().unwrap());
+        debug!("!!!{}!!!", regular_price.as_ref().unwrap());
         let regular_price = regular_price
             .unwrap()
             .trim()
@@ -33,10 +34,10 @@ pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f3
             .replace(',', ".")
             .parse::<f32>();
 
-        println!("Title: {:?}", title);
-        println!("Href: {:?}", href);
-        println!("Regular Price: {:?}", regular_price);
-        println!("----------------------");
+        debug!("Title: {:?}", title);
+        debug!("Href: {:?}", href);
+        debug!("Regular Price: {:?}", regular_price);
+        debug!("----------------------");
 
         if href.is_none() || title.is_none() || regular_price.is_err() {
             return None;
@@ -52,7 +53,7 @@ pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f3
 
 pub async fn get_ludocortex_price_and_url_by_name(name: &String) -> Option<(f32, String)> {
     let search = format!("https://www.ludocortex.fr/jolisearch?s={}", name);
-    println!("Search on ludocortex: {}", &search);
+    debug!("Search on ludocortex: {}", &search);
 
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
@@ -83,7 +84,7 @@ pub async fn get_ludocortex_price_and_url_by_name(name: &String) -> Option<(f32,
             .replace(',', ".")
             .parse::<f32>();
 
-        println!(
+        debug!(
             "Title: {:?}, Href: {:?}, Regular Price: {:?}",
             title, href, regular_price
         );

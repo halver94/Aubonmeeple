@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate log;
+
 use frontend::server;
 use game::{Game, Games, OkkazeoAnnounce, Reference};
 use std::collections::HashMap;
@@ -17,11 +20,14 @@ use website::philibert::get_philibert_price_and_url;
 use website::trictrac::get_trictrac_note;
 use website::ultrajeux::get_ultrajeux_price_and_url;
 
+use log::{debug, error, info, warn};
+
 mod frontend;
 mod game;
 mod website;
 
 async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
+    debug!("parsing game feed");
     let feed = get_atom_feed().await.unwrap();
     'outer: for entry in feed.entries {
         //println!("entry: {:#?}", entry);
@@ -156,35 +162,50 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
         if note.is_some() {
             (game.note_trictrac, game.review_count_trictrac) = note.unwrap();
         } else {
-            println!("Cannot get trictrac note");
+            debug!(
+                "cannot get trictrac note for {}",
+                game.okkazeo_announce.name
+            );
         }
 
         let note = get_bgg_note(&game.okkazeo_announce.name).await;
         if note.is_some() {
             (game.note_bgg, game.review_count_bgg) = note.unwrap();
         } else {
-            println!("Cannot get bgg note");
+            debug!("cannot get bgg note for {}", game.okkazeo_announce.name);
         }
 
         //println!("{:#?}", game);
         let mut locked_games = games.lock().unwrap();
         match locked_games.games.binary_search(&game) {
-            Ok(_) => {} // element already in vector @ `pos`
-            Err(pos) => locked_games.games.insert(pos, game),
+            Ok(_) => {
+                debug!(
+                    "game id {} already present in vec",
+                    game.okkazeo_announce.id
+                )
+            } // element already in vector @ `pos`
+            Err(pos) => {
+                debug!("inserting game into vec : {:?}", game);
+                locked_games.games.insert(pos, game)
+            }
         }
     }
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + 'static>> {
+    env_logger::init();
+    info!("starting program");
     let games = Arc::new(Mutex::new(Games::new()));
     let interval = Duration::from_secs(60 * 5); // Remplacez X par le nombre de minutes souhaité
+    info!("parsing game feed every {:#?} minutes", interval);
 
     let game_clone = games.clone();
     let _ = tokio::spawn(async move { server::set_server(game_clone).await });
 
     loop {
         let start = Instant::now();
+        info!("scraping time : {:#?}", start);
         parse_game_feed(&mut games.clone()).await;
         let duration = start.elapsed();
 

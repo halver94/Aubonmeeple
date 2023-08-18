@@ -1,3 +1,4 @@
+use log::debug;
 use scraper::{Html, Selector};
 
 pub async fn get_trictrac_note(name: &str) -> Option<(f32, u32)> {
@@ -7,7 +8,7 @@ pub async fn get_trictrac_note(name: &str) -> Option<(f32, u32)> {
             .replace([':', '\''], "")
             .to_lowercase()
     );
-    println!("Getting tric trac note: {}\n", &search);
+    debug!("Getting tric trac note: {}\n", &search);
     let content = reqwest::get(search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
 
@@ -34,10 +35,10 @@ pub async fn get_trictrac_note(name: &str) -> Option<(f32, u32)> {
             .and_then(|node| node.value().attr("content"))
             .and_then(|content| content.parse::<u32>().ok());
 
-        println!("Title: {:#?}", title);
-        println!("Rating Value: {:?}", rating_value);
-        println!("Review Count: {:?}", review_count);
-        println!("---------------------");
+        debug!("Title: {:#?}", title);
+        debug!("Rating Value: {:?}", rating_value);
+        debug!("Review Count: {:?}", review_count);
+        debug!("---------------------");
 
         if rating_value.is_none() || title.is_none() || review_count.is_none() {
             return None;

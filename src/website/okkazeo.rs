@@ -2,12 +2,13 @@ use feed_rs::{
     model::Feed,
     parser::{self, ParseFeedError},
 };
+use log::debug;
 use scraper::{Html, Selector};
 
 use crate::game::Seller;
 
 pub async fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
-    println!("Getting seller from okkazeo");
+    debug!("Getting seller from okkazeo");
 
     let seller_selector = Selector::parse(".seller").unwrap();
     let href_selector = Selector::parse(".div-seller").unwrap();
@@ -28,7 +29,7 @@ pub async fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
         .parse::<u32>()
         .unwrap();
 
-    println!(
+    debug!(
         "Seller: {}, Href: {}, Nb Annonces: {}",
         seller_name, href_attr, nb_annonces_text
     );
@@ -43,7 +44,7 @@ pub async fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
 }
 
 pub async fn get_okkazeo_barcode(document: &Html) -> Option<u64> {
-    println!("Getting barcode from okkazeo");
+    debug!("Getting barcode from okkazeo");
 
     let barcode_selector = Selector::parse("i.fa-barcode").unwrap();
     let barcode = if let Some(barcode) = document.select(&barcode_selector).next() {
@@ -60,7 +61,7 @@ pub async fn get_okkazeo_barcode(document: &Html) -> Option<u64> {
 }
 
 pub async fn get_okkazeo_city(document: &Html) -> Option<String> {
-    println!("Getting city from okkazeo");
+    debug!("Getting city from okkazeo");
 
     let city_selector = Selector::parse("div.gray div.grid-x div.cell").unwrap();
 
@@ -74,7 +75,7 @@ pub async fn get_okkazeo_city(document: &Html) -> Option<String> {
 
 pub async fn get_okkazeo_announce_page(id: u32) -> Html {
     let search = format!("https://www.okkazeo.com/annonces/view/{}", id);
-    println!("Getting city and barcode from okkazeo : {}", &search);
+    debug!("Getting city and barcode from okkazeo : {}", &search);
     let content = reqwest::get(search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
     document

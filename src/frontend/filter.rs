@@ -4,35 +4,90 @@ use serde::{Deserialize, Serialize};
 
 use crate::game::{Game, Games};
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Filters {
-    city: String,
-    name: String,
+    city: Option<String>,
+    name: Option<String>,
+}
+
+impl Default for Filters {
+    fn default() -> Self {
+        Self {
+            city: None,
+            name: None,
+        }
+    }
 }
 
 impl Filters {
     pub fn filter(self, games: Arc<std::sync::Mutex<Games>>) -> Vec<Game> {
         println!("filters : {:#?}", self);
 
-        let filtered_games = games
+        if self.city.is_none() && self.name.is_none() {
+            return games.lock().unwrap().games.clone();
+        }
+
+        let filtered_games: Vec<Game> = games
             .lock()
             .unwrap()
             .games
             .clone()
             .into_iter()
             .filter(|game| {
-                (self.city.is_empty() || game.okkazeo_announce.name.contains(&self.name))
-                    && (self.name.is_empty()
-                        || (game.okkazeo_announce.city.is_some()
-                            && game
-                                .okkazeo_announce
-                                .city
-                                .as_ref()
-                                .unwrap()
-                                .contains(&self.city)))
+                self.name.is_none()
+                    || game
+                        .okkazeo_announce
+                        .name
+                        .to_lowercase()
+                        .contains(self.name.as_ref().unwrap())
+            })
+            .filter(|game| {
+                self.city.is_none()
+                    || (game.okkazeo_announce.city.is_some()
+                        && game
+                            .okkazeo_announce
+                            .city
+                            .as_ref()
+                            .unwrap()
+                            .to_lowercase()
+                            .contains(self.city.as_ref().unwrap()))
             })
             .collect();
+        println!("len of filtered games : {}", filtered_games.len());
         filtered_games
+    }
+
+    pub fn create_html() -> String {
+        let html = r#"
+        <form id="filters">
+        <input type="text" id="city" name="city" placeholder="Filter on city" ><br><br>
+        <input type="text" id="name" name="name" placeholder="Filter on game name" ><br><br>
+        <button type="button" onclick="submitForm()">Filter</button>
+    </form>
+
+    <script>
+        function submitForm() {
+            const city = document.getElementById("city").value;
+            const name = document.getElementById("name").value;
+            
+            const queryParams = [];
+            
+            if (city) {
+                queryParams.push(`city=${encodeURIComponent(city)}`);
+            }
+            
+            if (name) {
+                queryParams.push(`name=${encodeURIComponent(name)}`);
+            }
+            
+            const queryString = queryParams.join("&");
+            const urlWithParams = `/?${queryString}`;
+            
+            window.location.href = urlWithParams;
+        }
+    </script>"#;
+
+        html.to_string()
     }
 }
 
@@ -116,27 +171,12 @@ body {
   }
 }
 </style>
-</head>
-<body>
 
-<div class="topnav">
-  <a class="active" href="#home">Home</a>
-  <a href="#about">About</a>
-  <a href="#contact">Contact</a>
   <div class="search-container">
     <form action="/action_page.php">
       <input type="text" placeholder="Search.." name="search">
       <button type="submit"><i class="fa fa-search"></i></button>
     </form>
   </div>
-</div>
 
-<div style="padding-left:16px">
-  <h2>Responsive Search Bar</h2>
-  <p>Navigation bar with a search box and a submit button inside of it.</p>
-  <p>Resize the browser window to see the responsive effect.</p>
-</div>
-
-</body>
-</html>
 */
