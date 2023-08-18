@@ -14,18 +14,18 @@ Parsing Bugfix
 Features:
 - multithread requests
 - sort best deal
-- sort on best review
 - poc a levenstein distance heuristic when comparing names
 - scrap older annonces
 - add more website comparison
 - add if new product is available or not
 - proper logs
 - add shipping and shipping cost
-- add buy me a coffee option
 - make average of game review and make review score clickable to redirect to the site
 
 Bugfix:
 - on okkazeo, if same game announce id, update last modified and price
+- keep a consistent state for pagination, filter and sort
 
 Refacto:
 - Game should have a list of "Game review"
+- make vec of games a vec of index or a vec of box

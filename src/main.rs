@@ -186,6 +186,8 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
             debug!("cannot get bgg note for {}", game.okkazeo_announce.name);
         }
 
+        game.get_deal_advantage();
+
         //println!("{:#?}", game);
         let mut locked_games = games.lock().unwrap();
         match locked_games.games.binary_search(&game) {

@@ -11,21 +11,34 @@ use crate::game::Games;
 use super::filter::Filters;
 use super::footer::generate_footer_html;
 use super::pagination::Pagination;
+use super::sort::{self, Sort};
 
 pub async fn root(
     pagination: Option<Query<Pagination>>,
     filters: Option<Query<Filters>>,
+    sort: Option<Query<Sort>>,
+
     Extension(games): Extension<Arc<std::sync::Mutex<Games>>>,
 ) -> Html<String> {
     //debug!("pagination : {:#?}", pagination);
-    let pagination = pagination.unwrap_or_default().0;
+    let mut pagination = pagination.unwrap_or_default().0;
     let filters = filters.unwrap_or_default().0;
+    let sort = sort.unwrap_or_default().0;
 
     let games_filtered = filters.filter(games);
 
-    let total_items = games_filtered.len();
+    let sorted_games = Games {
+        games: sort.sort(games_filtered),
+    };
+
+    let total_items = sorted_games.games.len();
     if total_items == 0 {
         return Html(Games::new().create_html_table());
+    }
+
+    let max_page = total_items / pagination.per_page;
+    if max_page < pagination.page {
+        pagination.page = 0;
     }
 
     let start_index = pagination.page * pagination.per_page;
@@ -36,7 +49,7 @@ pub async fn root(
     }
 
     let part_games: Games = Games {
-        games: Vec::from_iter(games_filtered[start_index..end_index].iter().cloned()),
+        games: Vec::from_iter(sorted_games.games[start_index..end_index].iter().cloned()),
     };
 
     let filter_html = Filters::create_html();

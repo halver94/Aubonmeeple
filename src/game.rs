@@ -40,10 +40,17 @@ pub struct OkkazeoAnnounce {
 pub struct Game {
     pub okkazeo_announce: OkkazeoAnnounce,
     pub references: HashMap<String, Reference>,
+    pub deal: Deal,
     pub note_trictrac: f32,
     pub review_count_trictrac: u32,
     pub note_bgg: f32,
     pub review_count_bgg: u32,
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct Deal {
+    pub deal_price: i32,
+    pub deal_percentage: i32,
 }
 
 impl Ord for Game {
@@ -70,10 +77,10 @@ impl PartialEq for Game {
 impl Eq for Game {}
 
 impl Game {
-    fn get_deal_advantage(&self) -> Option<(i32, i32)> {
+    pub fn get_deal_advantage(&mut self) {
         // okkazeo is counted as a ref, so we need at least 2 refs
         if self.references.is_empty() {
-            return None;
+            return;
         }
 
         let mut min_price = 0.0;
@@ -92,9 +99,10 @@ impl Game {
         let economy = (self.okkazeo_announce.price - min_price).round() as i32;
 
         if economy == 0 || percent == 0 {
-            return None;
+            return;
         }
-        Some((economy, percent))
+        self.deal.deal_price = economy;
+        self.deal.deal_percentage = percent;
     }
 }
 
@@ -133,7 +141,20 @@ impl Games {
                     </style>",
         );
         table.push_str("<table>");
-        table.push_str("<tr><th>Updated</th><th>Name</th><th>City</th><th>Seller</th><th>Deal</th><th>Okkazeo</th><th>Philibert</th><th>Agorajeux</th><th>Ultrajeux</th><th>Ludocortex</th><th>TricTrac Note</th><th>BGG Note</th></tr>");
+        table.push_str(r#"<tr>
+            <th>Updated <button onclick="window.location.href='/?sort=updated';">Sort</button></th>
+            <th>Name</th>
+            <th>City</th>
+            <th>Seller</th>
+            <th>Deal <button onclick="window.location.href='/?sort=deal';">Sort</button></th>
+            <th>Okkazeo</th>
+            <th>Philibert</th>
+            <th>Agorajeux</th>
+            <th>Ultrajeux</th>
+            <th>Ludocortex</th>
+            <th>TricTrac Note <button onclick="window.location.href='/?sort=trictrac';">Sort</button></th>
+            <th>BGG Note <button onclick="window.location.href='/?sort=bgg';">Sort</button></th>
+        </tr>"#);
 
         for game in self.games.iter() {
             table.push_str("<tr>");
@@ -166,14 +187,22 @@ impl Games {
                 game.okkazeo_announce.seller.nb_announces
             ));
 
-            if let Some((diff_price, percent_saved)) = game.get_deal_advantage() {
+            if game.deal.deal_price != 0 {
                 table.push_str(&format!(
                     "<td style=\"color: {}\">{}{}€ ({}{}%)</td>",
-                    if diff_price < 0 { "green" } else { "red" },
-                    if diff_price >= 0 { "+" } else { "" },
-                    diff_price,
-                    if percent_saved > 0 { "+" } else { "" },
-                    percent_saved,
+                    if game.deal.deal_price < 0 {
+                        "green"
+                    } else {
+                        "red"
+                    },
+                    if game.deal.deal_price >= 0 { "+" } else { "" },
+                    game.deal.deal_price,
+                    if game.deal.deal_percentage > 0 {
+                        "+"
+                    } else {
+                        ""
+                    },
+                    game.deal.deal_percentage,
                 ));
             } else {
                 table.push_str("<td>-</td>");
