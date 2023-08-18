@@ -7,16 +7,20 @@ use std::sync::Arc;
 use crate::frontend::pagination::generate_pagination_links;
 use crate::game::Games;
 
+use super::filter::Filters;
 use super::pagination::Pagination;
 
 pub async fn root(
     pagination: Option<Query<Pagination>>,
+    filters: Option<Query<Filters>>,
     Extension(games): Extension<Arc<std::sync::Mutex<Games>>>,
 ) -> Html<String> {
     println!("pagination : {:#?}", pagination);
     let pagination = pagination.unwrap_or_default().0;
+    let filters = filters.unwrap_or_default().0;
 
-    let total_items = games.lock().unwrap().games.len();
+    let games_filtered = filters.filter(games);
+    let total_items = games_filtered.len();
     if total_items == 0 {
         return Html(Games::new().create_html_table());
     }
@@ -29,12 +33,9 @@ pub async fn root(
     }
 
     let part_games: Games = Games {
-        games: Vec::from_iter(
-            games.lock().unwrap().games[start_index..end_index]
-                .iter()
-                .cloned(),
-        ),
+        games: Vec::from_iter(games_filtered[start_index..end_index].iter().cloned()),
     };
+
     let response_html = part_games.create_html_table();
     let pagination_html = generate_pagination_links(total_items, &pagination);
     Html(format!("{}{}", response_html, pagination_html))

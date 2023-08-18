@@ -22,6 +22,7 @@ Features:
 - add more website comparison
 - add if new product is available or not
 - proper logs
+- add game image
 
 Bugfix:
 - on okkazeo, if same game announce id, update last modified and price
