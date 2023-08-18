@@ -20,3 +20,4 @@ chrono = {version = "0.4.26", features = ["serde"] }
 axum = "0.6.20"
 env_logger = "0.10.0"
 log = "0.4.20"
+image = "0.24.7"

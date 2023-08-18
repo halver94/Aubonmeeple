@@ -1,8 +1,9 @@
 use chrono::{DateTime, Utc};
+use image::DynamicImage;
 use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering, collections::HashMap};
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone)]
 pub struct Games {
     pub games: Vec<Game>,
 }
@@ -21,10 +22,11 @@ pub struct Seller {
     pub nb_announces: u32,
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone)]
 pub struct OkkazeoAnnounce {
     pub id: u32,
     pub name: String,
+    pub image: String,
     pub price: f32,
     pub url: String,
     pub extension: String,
@@ -34,7 +36,7 @@ pub struct OkkazeoAnnounce {
     pub last_modification_date: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone)]
 pub struct Game {
     pub okkazeo_announce: OkkazeoAnnounce,
     pub references: HashMap<String, Reference>,

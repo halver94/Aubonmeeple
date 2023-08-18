@@ -3,6 +3,7 @@ extern crate log;
 
 use frontend::server;
 use game::{Game, Games, OkkazeoAnnounce, Reference};
+use regex::Regex;
 use std::collections::HashMap;
 use std::error::Error;
 use std::sync::{Arc, Mutex};
@@ -21,6 +22,8 @@ use website::trictrac::get_trictrac_note;
 use website::ultrajeux::get_ultrajeux_price_and_url;
 
 use log::{debug, error, info, warn};
+
+use crate::website::okkazeo::get_okkazeo_game_image;
 
 mod frontend;
 mod game;
@@ -65,6 +68,7 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
                 extension,
                 price: entry
                     .summary
+                    .as_ref()
                     .unwrap()
                     .content
                     .split('>')
@@ -82,6 +86,14 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
             references: HashMap::<String, Reference>::new(),
             ..Default::default()
         };
+
+        let re = Regex::new(r#"<img src="([^"]+)"#).unwrap();
+        if let Some(captures) = re.captures(&entry.summary.unwrap().content) {
+            if let Some(url) = captures.get(1) {
+                println!("image url {}", url.as_str().to_string());
+                game.okkazeo_announce.image = get_okkazeo_game_image(url.as_str()).await.unwrap();
+            }
+        }
 
         let document = get_okkazeo_announce_page(game.okkazeo_announce.id).await;
         game.okkazeo_announce.barcode = get_okkazeo_barcode(&document).await;

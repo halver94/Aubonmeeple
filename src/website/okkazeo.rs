@@ -1,8 +1,18 @@
+use std::{
+    fs::{self, File},
+    io::{Cursor, Write},
+    path::Path,
+};
+
 use feed_rs::{
     model::Feed,
     parser::{self, ParseFeedError},
 };
+use image::DynamicImage;
+use image::{io::Reader as ImageReader, ImageOutputFormat};
 use log::debug;
+use regex::Regex;
+use reqwest::get;
 use scraper::{Html, Selector};
 
 use crate::game::Seller;
@@ -79,6 +89,43 @@ pub async fn get_okkazeo_announce_page(id: u32) -> Html {
     let content = reqwest::get(search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
     document
+}
+
+pub async fn get_okkazeo_game_image(url: &str) -> Result<String, Box<dyn std::error::Error>> {
+    println!("Getting image from {}", url);
+    let response = get(url).await?;
+    let image_bytes = response.bytes().await?;
+
+    // Créer un lecteur d'image à partir des données téléchargées
+    let image_reader = ImageReader::new(std::io::Cursor::new(image_bytes))
+        .with_guessed_format()
+        .expect("Failed to guess image format");
+
+    // Lire l'image depuis le lecteur
+    let image = image_reader.decode().unwrap();
+
+    // Convertissez l'image en PNG (vous pouvez également utiliser JPEG)
+    let mut bytes: Vec<u8> = Vec::new();
+    image.write_to(&mut Cursor::new(&mut bytes), image::ImageOutputFormat::Png)?;
+
+    let re = Regex::new(r#"/([^/]+)\.(jpg|png)$"#).unwrap();
+    let mut name: &str = "unknown";
+    if let Some(captures) = re.captures(url) {
+        if let Some(filename) = captures.get(1) {
+            name = filename.as_str();
+        }
+    }
+
+    // Enregistrez l'image convertie sur le disque
+    if !fs::metadata("./img").is_ok() {
+        // Créer le dossier "img" s'il n'existe pas
+        fs::create_dir("./img")?;
+    }
+    let output_path = Path::new("./img/").join(name).join(".png");
+    let mut output_file = File::create(&output_path)?;
+    output_file.write_all(&bytes)?;
+
+    Ok(output_path.to_str().unwrap().to_string())
 }
 
 pub async fn get_atom_feed() -> Result<Feed, ParseFeedError> {

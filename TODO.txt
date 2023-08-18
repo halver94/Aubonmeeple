@@ -12,8 +12,6 @@ Parsing Bugfix
     - remove - VF or - VO
 
 Features:
-- filtre city (name and/or zipcode)
-- filtre game name
 - multithread requests
 - sort best deal
 - sort on best review
@@ -23,6 +21,7 @@ Features:
 - add if new product is available or not
 - proper logs
 - add game image
+- ajout si livraison ou pas
 
 Bugfix:
 - on okkazeo, if same game announce id, update last modified and price
