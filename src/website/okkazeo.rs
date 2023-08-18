@@ -122,10 +122,6 @@ pub async fn get_okkazeo_game_image(url: &str) -> Result<String, Box<dyn std::er
         std::fs::create_dir("img").unwrap();
     }
     let output_path = Path::new("img").join(format!("{}{}", name, ".png"));
-    println!(
-        "trying to create {}",
-        output_path.to_str().unwrap().to_string()
-    );
     let mut output_file = File::create(&output_path).unwrap();
     output_file.write_all(&bytes).unwrap();
 

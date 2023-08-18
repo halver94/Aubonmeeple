@@ -48,14 +48,15 @@ pub struct Game {
 
 impl Ord for Game {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.okkazeo_announce
+        other
+            .okkazeo_announce
             .last_modification_date
-            .cmp(&other.okkazeo_announce.last_modification_date)
+            .cmp(&self.okkazeo_announce.last_modification_date)
     }
 }
 impl PartialOrd for Game {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
+        Some(other.cmp(self))
     }
 }
 
@@ -134,7 +135,7 @@ impl Games {
         table.push_str("<table>");
         table.push_str("<tr><th>Updated</th><th>Name</th><th>City</th><th>Seller</th><th>Deal</th><th>Okkazeo</th><th>Philibert</th><th>Agorajeux</th><th>Ultrajeux</th><th>Ludocortex</th><th>TricTrac Note</th><th>BGG Note</th></tr>");
 
-        for game in self.games.iter().rev() {
+        for game in self.games.iter() {
             table.push_str("<tr>");
             table.push_str(&format!(
                 "<td>{}</td>",

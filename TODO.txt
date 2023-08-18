@@ -20,7 +20,9 @@ Features:
 - add more website comparison
 - add if new product is available or not
 - proper logs
-- ajout si livraison ou pas
+- add shipping and shipping cost
+- add buy me a coffee option
+- make average of game review and make review score clickable to redirect to the site
 
 Bugfix:
 - on okkazeo, if same game announce id, update last modified and price

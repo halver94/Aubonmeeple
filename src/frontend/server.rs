@@ -21,7 +21,7 @@ pub async fn root(
     let filters = filters.unwrap_or_default().0;
 
     let games_filtered = filters.filter(games);
-    //let games_filtered = &games.lock().unwrap().games;
+
     let total_items = games_filtered.len();
     if total_items == 0 {
         return Html(Games::new().create_html_table());

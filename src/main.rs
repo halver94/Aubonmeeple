@@ -90,7 +90,6 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
         let re = Regex::new(r#"<img src="([^"]+)"#).unwrap();
         if let Some(captures) = re.captures(&entry.summary.unwrap().content) {
             if let Some(url) = captures.get(1) {
-                println!("image url {}", url.as_str().to_string());
                 game.okkazeo_announce.image = get_okkazeo_game_image(url.as_str()).await.unwrap();
             }
         }
