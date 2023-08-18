@@ -206,7 +206,7 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + 'static>> {
-    env_logger::init();
+    //env_logger::init();
     info!("starting program");
     let games = Arc::new(Mutex::new(Games::new()));
     let interval = Duration::from_secs(60 * 5); // Remplacez X par le nombre de minutes souhaité

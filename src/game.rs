@@ -135,8 +135,10 @@ impl Games {
                     .format("%d/%m/%Y %H:%M")
             ));
             table.push_str(&format!(
-                "<td>{}<br>({})</td>",
-                game.okkazeo_announce.name, game.okkazeo_announce.extension
+                "<td><img src=\"{}\" alt=\"fail\" width=\"150\" height=\"150\" />{}<br>({})</td>",
+                game.okkazeo_announce.image,
+                game.okkazeo_announce.name,
+                game.okkazeo_announce.extension
             ));
             table.push_str(&format!(
                 "<td>{}</td>",

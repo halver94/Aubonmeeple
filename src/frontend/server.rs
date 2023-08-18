@@ -1,8 +1,12 @@
 use axum::extract::Query;
-use axum::response::Html;
+use axum::response::{Html, Response};
 use axum::Extension;
 use axum::{routing::get, Router};
+use hyper::StatusCode;
 use log::debug;
+use reqwest::Body;
+use std::fs::File;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use crate::frontend::pagination::generate_pagination_links;
@@ -16,7 +20,7 @@ pub async fn root(
     filters: Option<Query<Filters>>,
     Extension(games): Extension<Arc<std::sync::Mutex<Games>>>,
 ) -> Html<String> {
-    debug!("pagination : {:#?}", pagination);
+    //debug!("pagination : {:#?}", pagination);
     let pagination = pagination.unwrap_or_default().0;
     let filters = filters.unwrap_or_default().0;
 
@@ -48,11 +52,28 @@ pub async fn root(
 }
 
 pub async fn set_server(games: Arc<std::sync::Mutex<Games>>) {
-    let app = Router::new().route("/", get(root)).layer(Extension(games));
+    let app = Router::new()
+        .route("/", get(root))
+        .route("/img/:filename", get(image_handler))
+        .layer(Extension(games));
 
     // run our app with hyper, listening globally on port 3000
     axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+async fn image_handler(
+    Extension(image_path): Extension<PathBuf>,
+) -> Result<Response<Body>, StatusCode> {
+    let full_path = Path::new("img").join(&image_path);
+
+    if full_path.exists() && full_path.is_file() {
+        let file = tokio::fs::File::open(full_path).await.unwrap();
+        let body = Body::from_reader(file, None);
+        Ok(Response::new(body))
+    } else {
+        Err(StatusCode::NOT_FOUND)
+    }
 }

@@ -1,4 +1,5 @@
 use std::{
+    env,
     fs::{self, File},
     io::{Cursor, Write},
     path::Path,
@@ -117,13 +118,16 @@ pub async fn get_okkazeo_game_image(url: &str) -> Result<String, Box<dyn std::er
     }
 
     // Enregistrez l'image convertie sur le disque
-    if !fs::metadata("./img").is_ok() {
-        // Créer le dossier "img" s'il n'existe pas
-        fs::create_dir("./img")?;
+    if !std::path::Path::new("img").exists() {
+        std::fs::create_dir("img").unwrap();
     }
-    let output_path = Path::new("./img/").join(name).join(".png");
-    let mut output_file = File::create(&output_path)?;
-    output_file.write_all(&bytes)?;
+    let output_path = Path::new("img").join(format!("{}{}", name, ".png"));
+    println!(
+        "trying to create {}",
+        output_path.to_str().unwrap().to_string()
+    );
+    let mut output_file = File::create(&output_path).unwrap();
+    output_file.write_all(&bytes).unwrap();
 
     Ok(output_path.to_str().unwrap().to_string())
 }

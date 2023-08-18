@@ -21,7 +21,7 @@ impl Default for Filters {
 
 impl Filters {
     pub fn filter(self, games: Arc<std::sync::Mutex<Games>>) -> Vec<Game> {
-        println!("filters : {:#?}", self);
+        //println!("filters : {:#?}", self);
 
         if self.city.is_none() && self.name.is_none() {
             return games.lock().unwrap().games.clone();
