@@ -1,0 +1,32 @@
+Parsing Bugfix
+- Okkazeo
+    - year at the end of game name (ex : 2022)
+
+- philibert
+    - remove "edition" at the end of game name
+
+- ultrajeux
+    - fix , check le nom dans les resultats
+
+- agorajeux
+    - remove - VF or - VO
+
+Features:
+- add vendor clickable and see their annonces
+- parse okkazeo to see if there is and extension or not (think about how this will influence the result)
+- do result pagination
+- filtre city (name and/or zipcode)
+- filtre game name
+- multithread requests
+- sort best deal
+- sort on best review
+- poc a levenstein distance heuristic when comparing names
+- scrap older annonces
+- add more website comparison
+
+Bugfix:
+- on okkazeo, if same game announce id, update last modified and price
+
+Refacto:
+- okkazeo should not be a Reference but should have it's own structure and be directly in Game attribute
+- Game should have a list of "Game review"

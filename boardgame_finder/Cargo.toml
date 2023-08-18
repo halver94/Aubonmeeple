@@ -1,0 +1,19 @@
+[package]
+name = "boardgame_finder"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+feed-rs = "1.3.0"
+reqwest = "*"
+rss = "2.0.4"
+regex = "*"
+tokio =  {version = "1.28.2", features = ["full"]}
+hyper = { version = "0.14", features = ["full"] }
+hyper-tls = "0.5.0"
+serde = { version = "1.0.164", features = ["derive"] }
+serde_json = "1.0.96"
+scraper = "0.17.1"
+chrono = {version = "*", features = ["serde"] }
