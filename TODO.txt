@@ -23,6 +23,7 @@ Features:
 - poc a levenstein distance heuristic when comparing names
 - scrap older annonces
 - add more website comparison
+- add if new product is available or not
 
 Bugfix:
 - on okkazeo, if same game announce id, update last modified and price
