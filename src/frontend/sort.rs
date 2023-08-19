@@ -16,7 +16,7 @@ impl Default for Sort {
 }
 
 impl Sort {
-    pub fn sort(&self, games: Vec<Game>) -> Vec<Game> {
+    pub fn sort(&self, games: Vec<Box<Game>>) -> Vec<Box<Game>> {
         //println!("filters : {:#?}", self);
 
         let mut games = games;

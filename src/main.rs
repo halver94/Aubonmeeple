@@ -10,7 +10,6 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tokio::time;
 use website::agorajeux::get_agorajeux_price_and_url_by_name;
-use website::bgg::get_bgg_note;
 use website::knapix::get_knapix_prices;
 use website::ludocortex::get_ludocortex_price_and_url;
 use website::okkazeo::{
@@ -18,7 +17,6 @@ use website::okkazeo::{
     get_okkazeo_seller,
 };
 use website::philibert::get_philibert_price_and_url;
-use website::trictrac::get_trictrac_note;
 use website::ultrajeux::get_ultrajeux_price_and_url;
 
 use log::{debug, error, info, warn};
@@ -35,15 +33,33 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
     'outer: for entry in feed.entries {
         //println!("entry: {:#?}", entry);
 
+        let price = entry
+            .summary
+            .as_ref()
+            .unwrap()
+            .content
+            .split('>')
+            .collect::<Vec<&str>>()
+            .last()
+            .unwrap()
+            .split('€')
+            .collect::<Vec<&str>>()
+            .first()
+            .unwrap()
+            .parse::<f32>()
+            .unwrap();
+
+        // if same id, then it is an update
         let id = entry.id.parse::<u32>().unwrap();
-        for g in games.lock().unwrap().games.iter() {
+        for g in games.lock().unwrap().games.iter_mut() {
             if g.okkazeo_announce.id == id {
+                g.okkazeo_announce.last_modification_date = entry.updated;
+                g.okkazeo_announce.price = price;
                 continue 'outer;
             }
         }
 
         let title = entry.title.unwrap();
-
         let mut vec_name = title.content.split('-').collect::<Vec<&str>>();
         let extension = vec_name.pop().unwrap().trim().to_string();
         let name = vec_name.join("-").trim().to_string();
@@ -59,33 +75,19 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
             }
         }
 
-        let mut game = Game {
+        let mut game = Box::new(Game {
             okkazeo_announce: OkkazeoAnnounce {
                 id,
                 name,
                 last_modification_date: entry.updated,
                 url: entry.links.first().cloned().unwrap().href,
                 extension,
-                price: entry
-                    .summary
-                    .as_ref()
-                    .unwrap()
-                    .content
-                    .split('>')
-                    .collect::<Vec<&str>>()
-                    .last()
-                    .unwrap()
-                    .split('€')
-                    .collect::<Vec<&str>>()
-                    .first()
-                    .unwrap()
-                    .parse::<f32>()
-                    .unwrap(),
+                price: price,
                 ..Default::default()
             },
             references: HashMap::<String, Reference>::new(),
             ..Default::default()
-        };
+        });
 
         let re = Regex::new(r#"<img src="([^"]+)"#).unwrap();
         if let Some(captures) = re.captures(&entry.summary.unwrap().content) {

@@ -9,7 +9,7 @@ use crate::{
 
 #[derive(Debug, Default, Clone)]
 pub struct Games {
-    pub games: Vec<Game>,
+    pub games: Vec<Box<Game>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -161,7 +161,7 @@ impl Game {
 impl Games {
     pub fn new() -> Games {
         Games {
-            games: Vec::<Game>::new(),
+            games: Vec::<Box<Game>>::new(),
         }
     }
 
@@ -333,7 +333,7 @@ impl Games {
                 table.push_str("<td>-</td>");
             } else {
                 table.push_str(&format!(
-                    "<td>Average note : {:.2}<br>",
+                    "<td>Average note : {:.2}<br><br>",
                     game.review.average_note,
                 ));
 

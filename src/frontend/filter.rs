@@ -13,14 +13,14 @@ pub struct Filters {
 }
 
 impl Filters {
-    pub fn filter(&self, games: Arc<std::sync::Mutex<Games>>) -> Vec<Game> {
+    pub fn filter(&self, games: Arc<std::sync::Mutex<Games>>) -> Vec<Box<Game>> {
         //println!("filters : {:#?}", self);
 
         if self.city.is_none() && self.name.is_none() {
             return games.lock().unwrap().games.clone();
         }
 
-        let filtered_games: Vec<Game> = games
+        let filtered_games: Vec<Box<Game>> = games
             .lock()
             .unwrap()
             .games

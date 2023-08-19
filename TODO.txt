@@ -20,9 +20,8 @@ Features:
 - proper logs
 - add shipping and shipping cost
 - periodically check all games to see if announce is still up
+- put all shops under the same banner
 
 Bugfix:
-- on okkazeo, if same game announce id, update last modified and price
 
 Refacto:
-- make vec of games a vec of index or a vec of box (or use a DB)
