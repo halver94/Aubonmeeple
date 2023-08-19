@@ -2,7 +2,10 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering, collections::HashMap};
 
-use crate::frontend::server::State;
+use crate::{
+    frontend::server::State,
+    website::{bgg::get_bgg_note, trictrac::get_trictrac_note},
+};
 
 #[derive(Debug, Default, Clone)]
 pub struct Games {
@@ -14,6 +17,20 @@ pub struct Reference {
     pub name: String,
     pub price: f32,
     pub url: String,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct Review {
+    pub reviews: HashMap<String, Reviewer>,
+    pub average_note: f32,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct Reviewer {
+    pub name: String,
+    pub url: String,
+    pub note: f32,
+    pub number: u32,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -41,11 +58,8 @@ pub struct OkkazeoAnnounce {
 pub struct Game {
     pub okkazeo_announce: OkkazeoAnnounce,
     pub references: HashMap<String, Reference>,
+    pub review: Review,
     pub deal: Deal,
-    pub note_trictrac: f32,
-    pub review_count_trictrac: u32,
-    pub note_bgg: f32,
-    pub review_count_bgg: u32,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -105,6 +119,43 @@ impl Game {
         self.deal.deal_price = economy;
         self.deal.deal_percentage = percent;
     }
+
+    pub async fn get_reviews(&mut self) {
+        println!("Getting review for {}", self.okkazeo_announce.name);
+        let reviewer = get_trictrac_note(&self.okkazeo_announce.name).await;
+        if reviewer.is_some() {
+            self.review
+                .reviews
+                .insert("trictrac".to_string(), reviewer.unwrap());
+        } else {
+            debug!(
+                "cannot get trictrac note for {}",
+                self.okkazeo_announce.name
+            );
+        }
+
+        let reviewer = get_bgg_note(&self.okkazeo_announce.name).await;
+        if reviewer.is_some() {
+            self.review
+                .reviews
+                .insert("bgg".to_string(), reviewer.unwrap());
+        } else {
+            debug!("cannot get bgg note for {}", self.okkazeo_announce.name);
+        }
+
+        let mut total_reviewer = 0;
+        let mut note = 0.0;
+        for val in self.review.reviews.values() {
+            total_reviewer += val.number;
+            note += val.note * val.number as f32
+        }
+
+        if total_reviewer == 0 || note == 0.0 {
+            self.review.average_note = 0.0;
+        } else {
+            self.review.average_note = note / total_reviewer as f32;
+        }
+    }
 }
 
 impl Games {
@@ -160,7 +211,7 @@ impl Games {
         table.push_str("<table>");
         table.push_str(
             format!(
-                "{}{}{}{}{}{}{}{}{}",
+                "{}{}{}{}{}{}{}",
                 r#"<tr>
             <th>Updated <button onclick="window.location.href='/?"#,
                 params,
@@ -176,12 +227,9 @@ impl Games {
             <th>Agorajeux</th>
             <th>Ultrajeux</th>
             <th>Ludocortex</th>
-            <th>TricTrac Note <button onclick="window.location.href='/?"#,
+            <th>Note <button onclick="window.location.href='/?"#,
                 params,
-                r#"&sort=trictrac';">Sort</button></th>
-            <th>BGG Note <button onclick="window.location.href='/?"#,
-                params,
-                r#"&sort=bgg';">Sort</button></th>
+                r#"&sort=note';">Sort</button></th>
         </tr>"#
             )
             .as_str(),
@@ -280,14 +328,23 @@ impl Games {
             } else {
                 table.push_str("<td>-</td>");
             }
-            table.push_str(&format!(
-                "<td>{} ({} reviews)</td>",
-                game.note_trictrac, game.review_count_trictrac
-            ));
-            table.push_str(&format!(
-                "<td>{} ({} reviews)</td>",
-                game.note_bgg, game.review_count_bgg
-            ));
+
+            if game.review.average_note == 0.0 {
+                table.push_str("<td>-</td>");
+            } else {
+                table.push_str(&format!(
+                    "<td>Average note : {:.2}<br>",
+                    game.review.average_note,
+                ));
+
+                for val in game.review.reviews.values() {
+                    table.push_str(&format!(
+                        "<a href=\"{}\">{}: {} ({} reviews)</a><br>",
+                        val.url, val.name, val.note, val.number
+                    ));
+                }
+                table.push_str("</td>");
+            }
             table.push_str("</tr>");
         }
 

@@ -19,12 +19,10 @@ Features:
 - add if new product is available or not
 - proper logs
 - add shipping and shipping cost
-- make average of game review and make review score clickable to redirect to the site
+- periodically check all games to see if announce is still up
 
 Bugfix:
 - on okkazeo, if same game announce id, update last modified and price
-- keep a consistent state for pagination, filter and sort
 
 Refacto:
-- Game should have a list of "Game review"
 - make vec of games a vec of index or a vec of box (or use a DB)

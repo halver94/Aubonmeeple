@@ -1,7 +1,9 @@
 use log::debug;
 use scraper::{Html, Selector};
 
-pub async fn get_bgg_note(name: &str) -> Option<(f32, u32)> {
+use crate::game::Reviewer;
+
+pub async fn get_bgg_note(name: &str) -> Option<Reviewer> {
     let search = format!(
         "https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q={}",
         name.replace(' ', "-")
@@ -9,7 +11,7 @@ pub async fn get_bgg_note(name: &str) -> Option<(f32, u32)> {
             .to_lowercase()
     );
     debug!("Getting bgg note: {}\n", &search);
-    let content = reqwest::get(search).await.unwrap().bytes().await.unwrap();
+    let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
 
     let primary_selector = Selector::parse("a.primary").unwrap();
@@ -35,7 +37,12 @@ pub async fn get_bgg_note(name: &str) -> Option<(f32, u32)> {
     if bggrating_values.len() == 2 && name.to_lowercase() == selected_name.to_lowercase() {
         let rating = bggrating_values[0].clone().parse::<f32>().unwrap_or(0.0);
         let review_cnt = bggrating_values[1].clone().parse::<u32>().unwrap_or(0);
-        return Some((rating, review_cnt));
+        return Some(Reviewer {
+            name: "bgg".to_string(),
+            note: rating,
+            number: review_cnt,
+            url: search,
+        });
     }
 
     None

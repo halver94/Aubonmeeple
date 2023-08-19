@@ -169,23 +169,7 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
             }
         }
 
-        let note = get_trictrac_note(&game.okkazeo_announce.name).await;
-        if note.is_some() {
-            (game.note_trictrac, game.review_count_trictrac) = note.unwrap();
-        } else {
-            debug!(
-                "cannot get trictrac note for {}",
-                game.okkazeo_announce.name
-            );
-        }
-
-        let note = get_bgg_note(&game.okkazeo_announce.name).await;
-        if note.is_some() {
-            (game.note_bgg, game.review_count_bgg) = note.unwrap();
-        } else {
-            debug!("cannot get bgg note for {}", game.okkazeo_announce.name);
-        }
-
+        game.get_reviews().await;
         game.get_deal_advantage();
 
         //println!("{:#?}", game);

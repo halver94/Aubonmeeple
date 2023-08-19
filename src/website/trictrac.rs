@@ -1,7 +1,9 @@
 use log::debug;
 use scraper::{Html, Selector};
 
-pub async fn get_trictrac_note(name: &str) -> Option<(f32, u32)> {
+use crate::game::{Review, Reviewer};
+
+pub async fn get_trictrac_note(name: &str) -> Option<Reviewer> {
     let search = format!(
         "https://www.trictrac.net/recherche?search={}",
         name.replace(' ', "-")
@@ -9,7 +11,7 @@ pub async fn get_trictrac_note(name: &str) -> Option<(f32, u32)> {
             .to_lowercase()
     );
     debug!("Getting tric trac note: {}\n", &search);
-    let content = reqwest::get(search).await.unwrap().bytes().await.unwrap();
+    let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
 
     let item_selector = Selector::parse("div.item").unwrap();
@@ -45,7 +47,12 @@ pub async fn get_trictrac_note(name: &str) -> Option<(f32, u32)> {
         }
 
         if title.unwrap().to_lowercase() == name.to_lowercase() {
-            return Some((rating_value.unwrap(), review_count.unwrap()));
+            return Some(Reviewer {
+                name: "trictrac".to_string(),
+                note: rating_value.unwrap(),
+                number: review_count.unwrap(),
+                url: search,
+            });
         }
     }
 

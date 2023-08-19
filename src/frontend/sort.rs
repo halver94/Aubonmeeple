@@ -26,10 +26,12 @@ impl Sort {
                     .last_modification_date
                     .cmp(&a.okkazeo_announce.last_modification_date)
             }),
-            "bgg" => games.sort_by(|a, b| b.note_bgg.partial_cmp(&a.note_bgg).unwrap()),
-            "trictrac" => {
-                games.sort_by(|a, b| b.note_trictrac.partial_cmp(&a.note_trictrac).unwrap())
-            }
+            "note" => games.sort_by(|a, b| {
+                b.review
+                    .average_note
+                    .partial_cmp(&a.review.average_note)
+                    .unwrap()
+            }),
             "deal" => {
                 games.sort_by(|a, b| a.deal.deal_price.partial_cmp(&b.deal.deal_price).unwrap())
             }
