@@ -223,10 +223,7 @@ impl Games {
                 params,
                 r#"&sort=deal';">Sort</button></th>
             <th>Okkazeo</th>
-            <th>Philibert</th>
-            <th>Agorajeux</th>
-            <th>Ultrajeux</th>
-            <th>Ludocortex</th>
+            <th>Shops</th>
             <th>Note <button onclick="window.location.href='/?"#,
                 params,
                 r#"&sort=note';">Sort</button></th>
@@ -292,42 +289,18 @@ impl Games {
                 game.okkazeo_announce.url, game.okkazeo_announce.price,
             ));
 
-            if game.references.get("philibert").is_some() {
-                table.push_str(&format!(
-                    "<td><a href=\"{}\">{} &euro;</a></td>",
-                    game.references.get("philibert").unwrap().url,
-                    game.references.get("philibert").unwrap().price,
-                ));
+            table.push_str("<td>");
+            if game.references.is_empty() {
+                table.push_str("-");
             } else {
-                table.push_str("<td>-</td>");
+                for val in game.references.values() {
+                    table.push_str(&format!(
+                        "<a href=\"{}\">{} : {} &euro;</a><br>",
+                        val.url, val.name, val.price,
+                    ));
+                }
             }
-            if game.references.get("agorajeux").is_some() {
-                table.push_str(&format!(
-                    "<td><a href=\"{}\">{} &euro;</a></td>",
-                    game.references.get("agorajeux").unwrap().url,
-                    game.references.get("agorajeux").unwrap().price,
-                ));
-            } else {
-                table.push_str("<td>-</td>");
-            }
-            if game.references.get("ultrajeux").is_some() {
-                table.push_str(&format!(
-                    "<td><a href=\"{}\">{} &euro;</a></td>",
-                    game.references.get("ultrajeux").unwrap().url,
-                    game.references.get("ultrajeux").unwrap().price,
-                ));
-            } else {
-                table.push_str("<td>-</td>");
-            }
-            if game.references.get("ludocortex").is_some() {
-                table.push_str(&format!(
-                    "<td><a href=\"{}\">{} &euro;</a></td>",
-                    game.references.get("ludocortex").unwrap().url,
-                    game.references.get("ludocortex").unwrap().price,
-                ));
-            } else {
-                table.push_str("<td>-</td>");
-            }
+            table.push_str("</td>");
 
             if game.review.average_note == 0.0 {
                 table.push_str("<td>-</td>");
