@@ -34,6 +34,12 @@ pub struct Reviewer {
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct Shipping {
+    pub handshake: bool,
+    pub ships: HashMap<String, f32>,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Seller {
     pub name: String,
     pub url: String,
@@ -48,6 +54,7 @@ pub struct OkkazeoAnnounce {
     pub price: f32,
     pub url: String,
     pub extension: String,
+    pub shipping: Shipping,
     pub seller: Seller,
     pub barcode: Option<u64>,
     pub city: Option<String>,
@@ -219,6 +226,7 @@ impl Games {
             <th>Name</th>
             <th>City</th>
             <th>Seller</th>
+            <th>Shipping</th>
             <th>Deal <button onclick="window.location.href='/?"#,
                 params,
                 r#"&sort=deal';">Sort</button></th>
@@ -262,6 +270,17 @@ impl Games {
                 game.okkazeo_announce.seller.name,
                 game.okkazeo_announce.seller.nb_announces
             ));
+
+            table.push_str("<td>");
+            if game.okkazeo_announce.shipping.handshake {
+                table.push_str("- Hand delivery <br>");
+            }
+
+            for (key, val) in game.okkazeo_announce.shipping.ships.iter() {
+                table.push_str(&format!("- {} : {}€<br>", key, val));
+            }
+
+            table.push_str("</td>");
 
             if game.deal.deal_price != 0 {
                 table.push_str(&format!(
