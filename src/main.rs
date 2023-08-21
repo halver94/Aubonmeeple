@@ -21,7 +21,7 @@ use website::ultrajeux::get_ultrajeux_price_and_url;
 
 use log::{debug, error, info, warn};
 
-use crate::website::okkazeo::get_okkazeo_game_image;
+use crate::website::okkazeo::{get_okkazeo_game_image, get_okkazeo_shipping};
 
 mod frontend;
 mod game;
@@ -100,6 +100,7 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
         game.okkazeo_announce.barcode = get_okkazeo_barcode(&document).await;
         game.okkazeo_announce.city = get_okkazeo_city(&document).await;
         game.okkazeo_announce.seller = get_okkazeo_seller(&document).await.unwrap();
+        game.okkazeo_announce.shipping = get_okkazeo_shipping(&document).await;
 
         get_knapix_prices(&mut game).await;
 

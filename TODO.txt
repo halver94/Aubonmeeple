@@ -18,8 +18,6 @@ Features:
 - add more website comparison
 - add if product in shop is available or not
 - add proper logs
-- add shipping and cost
-- periodically check all games to see if an announce is still up
 - add a DB for persistence
 - do a proper frontend with react/vue/node JS
 

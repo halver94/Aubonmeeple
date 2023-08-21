@@ -14,7 +14,7 @@ use regex::Regex;
 use reqwest::get;
 use scraper::{Html, Selector};
 
-use crate::game::Seller;
+use crate::game::{Seller, Shipping};
 
 pub async fn game_still_available(id: u32) -> bool {
     let page = get_okkazeo_announce_page(id).await;
@@ -30,6 +30,45 @@ pub async fn game_still_available(id: u32) -> bool {
         println!("The 'big info' element is not present.");
     }
     false
+}
+
+pub async fn get_okkazeo_shipping(document: &Html) -> Shipping {
+    println!("Getting shipping from okkazeo");
+
+    // Vérifier la présence de 'handshake'
+    let handshake_selector = Selector::parse("i.far.fa-fw.fa-handshake").unwrap();
+    let is_handshake_present = document.select(&handshake_selector).next().is_some();
+
+    let mut shipping = Shipping {
+        handshake: is_handshake_present,
+        ..Default::default()
+    };
+
+    // Extraire les modes d'expédition
+    let truck_selector = Selector::parse("div.cell.small-8.large-3").unwrap();
+    let price_selector = Selector::parse("div.cell.small-4.large-1.text-right").unwrap();
+
+    for (truck, price) in document
+        .select(&truck_selector)
+        .zip(document.select(&price_selector))
+    {
+        let truck_name = truck.text().collect::<Vec<_>>().join("").trim().to_string();
+        let truck_price = price
+            .text()
+            .collect::<Vec<_>>()
+            .join("")
+            .trim()
+            .to_string()
+            .replace(",", ".")
+            .replace(" €", "")
+            .parse::<f32>()
+            .unwrap();
+
+        shipping.ships.insert(truck_name, truck_price);
+    }
+
+    println!("shipping :{:#?}", shipping);
+    shipping
 }
 
 pub async fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
