@@ -16,6 +16,22 @@ use scraper::{Html, Selector};
 
 use crate::game::Seller;
 
+pub async fn game_still_available(id: u32) -> bool {
+    let page = get_okkazeo_announce_page(id).await;
+
+    let selector = Selector::parse("i.fas.fa-info.big.info").unwrap();
+
+    let is_big_info_present = page.select(&selector).next().is_some();
+
+    if is_big_info_present {
+        println!("The 'big info' element is present.");
+        return true;
+    } else {
+        println!("The 'big info' element is not present.");
+    }
+    false
+}
+
 pub async fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
     debug!("Getting seller from okkazeo");
 

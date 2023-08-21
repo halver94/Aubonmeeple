@@ -13,8 +13,8 @@ use website::agorajeux::get_agorajeux_price_and_url_by_name;
 use website::knapix::get_knapix_prices;
 use website::ludocortex::get_ludocortex_price_and_url;
 use website::okkazeo::{
-    get_atom_feed, get_okkazeo_announce_page, get_okkazeo_barcode, get_okkazeo_city,
-    get_okkazeo_seller,
+    game_still_available, get_atom_feed, get_okkazeo_announce_page, get_okkazeo_barcode,
+    get_okkazeo_city, get_okkazeo_seller,
 };
 use website::philibert::get_philibert_price_and_url;
 use website::ultrajeux::get_ultrajeux_price_and_url;
@@ -191,6 +191,39 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
     }
 }
 
+pub async fn check_list_available(games: Arc<Mutex<Games>>) {
+    let interval = Duration::from_secs(60 * 60); // every hour
+    loop {
+        let start = Instant::now();
+
+        // getting a list of all ID in order not to maintain a lock on the vec for too long
+        let mut ids = Vec::<u32>::new();
+
+        for game in &games.lock().unwrap().games {
+            ids.push(game.okkazeo_announce.id);
+        }
+
+        let mut ids_to_remove = Vec::<u32>::new();
+        for index in ids {
+            if !game_still_available(index).await {
+                ids_to_remove.push(index);
+            }
+        }
+
+        // effectively removing ids that need to be removed
+        {
+            let locked_games = &mut games.lock().unwrap().games;
+            locked_games.retain(|game| !ids_to_remove.contains(&game.okkazeo_announce.id));
+        }
+
+        let duration = start.elapsed();
+
+        if duration < interval {
+            tokio::time::sleep(interval - duration).await;
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + 'static>> {
     //env_logger::init();
@@ -200,7 +233,9 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
     info!("parsing game feed every {:#?} minutes", interval);
 
     let game_clone = games.clone();
+    let game_clone2 = games.clone();
     let _ = tokio::spawn(async move { server::set_server(game_clone).await });
+    let _ = tokio::spawn(async move { check_list_available(game_clone2).await });
 
     loop {
         let start = Instant::now();

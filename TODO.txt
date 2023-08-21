@@ -16,11 +16,12 @@ Features:
 - poc a levenstein distance heuristic when comparing names
 - scrap older annonces
 - add more website comparison
-- add if new product is available or not
-- proper logs
-- add shipping and shipping cost
-- periodically check all games to see if announce is still up
-- put all shops under the same banner
+- add if product in shop is available or not
+- add proper logs
+- add shipping and cost
+- periodically check all games to see if an announce is still up
+- add a DB for persistence
+- do a proper frontend with react/vue/node JS
 
 Bugfix:
 
