@@ -12,10 +12,10 @@ Parsing Bugfix
     - remove - VF or - VO
 
 Features:
-- multithread requests
 - poc a levenstein distance heuristic when comparing names
 - scrap older annonces
 - add more website comparison
+- add number of player
 - add if product in shop is available or not
 - add proper logs
 - add a DB for persistence
