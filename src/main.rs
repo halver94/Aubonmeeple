@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate log;
 
+use feed_rs::model::Entry;
 use frontend::server;
 use game::{Game, Games, OkkazeoAnnounce, Reference};
 use regex::Regex;
@@ -26,6 +27,137 @@ use crate::website::okkazeo::{get_okkazeo_game_image, get_okkazeo_shipping};
 mod frontend;
 mod game;
 mod website;
+
+pub async fn get_game_infos(entry: Entry) -> Box<Game> {
+    let price = entry
+        .summary
+        .as_ref()
+        .unwrap()
+        .content
+        .split('>')
+        .collect::<Vec<&str>>()
+        .last()
+        .unwrap()
+        .split('€')
+        .collect::<Vec<&str>>()
+        .first()
+        .unwrap()
+        .parse::<f32>()
+        .unwrap();
+
+    let id = entry.id.parse::<u32>().unwrap();
+    let title = entry.title.unwrap();
+    let mut vec_name = title.content.split('-').collect::<Vec<&str>>();
+    let extension = vec_name.pop().unwrap().trim().to_string();
+    let name = vec_name.join("-").trim().to_string();
+    let mut result = String::new();
+    let mut inside_parentheses = false;
+
+    for c in name.chars() {
+        match c {
+            '(' => inside_parentheses = true,
+            ')' => inside_parentheses = false,
+            _ if !inside_parentheses => result.push(c),
+            _ => (),
+        }
+    }
+
+    let mut game = Box::new(Game {
+        okkazeo_announce: OkkazeoAnnounce {
+            id,
+            name,
+            last_modification_date: entry.updated,
+            url: entry.links.first().cloned().unwrap().href,
+            extension,
+            price: price,
+            ..Default::default()
+        },
+        references: HashMap::<String, Reference>::new(),
+        ..Default::default()
+    });
+
+    let re = Regex::new(r#"<img src="([^"]+)"#).unwrap();
+    if let Some(captures) = re.captures(&entry.summary.unwrap().content) {
+        if let Some(url) = captures.get(1) {
+            game.okkazeo_announce.image = get_okkazeo_game_image(url.as_str()).await.unwrap();
+        }
+    }
+
+    let document = get_okkazeo_announce_page(game.okkazeo_announce.id).await;
+    game.okkazeo_announce.barcode = get_okkazeo_barcode(&document).await;
+    game.okkazeo_announce.city = get_okkazeo_city(&document).await;
+    game.okkazeo_announce.seller = get_okkazeo_seller(&document).await.unwrap();
+    game.okkazeo_announce.shipping = get_okkazeo_shipping(&document).await;
+
+    get_knapix_prices(&mut game).await;
+
+    if game.references.get("philibert").is_none() {
+        if let Some((price, url)) =
+            get_philibert_price_and_url(&game.okkazeo_announce.name, game.okkazeo_announce.barcode)
+                .await
+        {
+            game.references.insert(
+                "philibert".to_string(),
+                Reference {
+                    name: "philibert".to_string(),
+                    price,
+                    url,
+                },
+            );
+        }
+    }
+    if game.references.get("agorajeux").is_none() {
+        if let Some((price, url)) =
+            get_agorajeux_price_and_url_by_name(&game.okkazeo_announce.name).await
+        {
+            game.references.insert(
+                "agorajeux".to_string(),
+                Reference {
+                    name: "agorajeux".to_string(),
+                    price,
+                    url,
+                },
+            );
+        }
+    }
+
+    if game.references.get("ultrajeux").is_none() {
+        if let Some((price, url)) =
+            get_ultrajeux_price_and_url(&game.okkazeo_announce.name, game.okkazeo_announce.barcode)
+                .await
+        {
+            game.references.insert(
+                "ultrajeux".to_string(),
+                Reference {
+                    name: "ultrajeux".to_string(),
+                    price,
+                    url,
+                },
+            );
+        }
+    }
+
+    if game.references.get("ludocortex").is_none() {
+        if let Some((price, url)) =
+            get_ludocortex_price_and_url(&game.okkazeo_announce.name, game.okkazeo_announce.barcode)
+                .await
+        {
+            game.references.insert(
+                "ludocortex".to_string(),
+                Reference {
+                    name: "ludocortex".to_string(),
+                    price,
+                    url,
+                },
+            );
+        }
+    }
+
+    game.get_reviews().await;
+    game.get_deal_advantage();
+
+    game
+}
 
 async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
     debug!("parsing game feed");
@@ -59,134 +191,29 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
             }
         }
 
-        let title = entry.title.unwrap();
-        let mut vec_name = title.content.split('-').collect::<Vec<&str>>();
-        let extension = vec_name.pop().unwrap().trim().to_string();
-        let name = vec_name.join("-").trim().to_string();
-        let mut result = String::new();
-        let mut inside_parentheses = false;
-
-        for c in name.chars() {
-            match c {
-                '(' => inside_parentheses = true,
-                ')' => inside_parentheses = false,
-                _ if !inside_parentheses => result.push(c),
-                _ => (),
-            }
+        // This call will make them start running in the background
+        // immediately.
+        let mut tasks = Vec::new();
+        tasks.push(tokio::spawn(async move { get_game_infos(entry).await }));
+        let mut outputs = Vec::with_capacity(tasks.len());
+        for task in tasks {
+            outputs.push(task.await.unwrap());
         }
 
-        let mut game = Box::new(Game {
-            okkazeo_announce: OkkazeoAnnounce {
-                id,
-                name,
-                last_modification_date: entry.updated,
-                url: entry.links.first().cloned().unwrap().href,
-                extension,
-                price: price,
-                ..Default::default()
-            },
-            references: HashMap::<String, Reference>::new(),
-            ..Default::default()
-        });
-
-        let re = Regex::new(r#"<img src="([^"]+)"#).unwrap();
-        if let Some(captures) = re.captures(&entry.summary.unwrap().content) {
-            if let Some(url) = captures.get(1) {
-                game.okkazeo_announce.image = get_okkazeo_game_image(url.as_str()).await.unwrap();
-            }
-        }
-
-        let document = get_okkazeo_announce_page(game.okkazeo_announce.id).await;
-        game.okkazeo_announce.barcode = get_okkazeo_barcode(&document).await;
-        game.okkazeo_announce.city = get_okkazeo_city(&document).await;
-        game.okkazeo_announce.seller = get_okkazeo_seller(&document).await.unwrap();
-        game.okkazeo_announce.shipping = get_okkazeo_shipping(&document).await;
-
-        get_knapix_prices(&mut game).await;
-
-        if game.references.get("philibert").is_none() {
-            if let Some((price, url)) = get_philibert_price_and_url(
-                &game.okkazeo_announce.name,
-                game.okkazeo_announce.barcode,
-            )
-            .await
-            {
-                game.references.insert(
-                    "philibert".to_string(),
-                    Reference {
-                        name: "philibert".to_string(),
-                        price,
-                        url,
-                    },
-                );
-            }
-        }
-        if game.references.get("agorajeux").is_none() {
-            if let Some((price, url)) =
-                get_agorajeux_price_and_url_by_name(&game.okkazeo_announce.name).await
-            {
-                game.references.insert(
-                    "agorajeux".to_string(),
-                    Reference {
-                        name: "agorajeux".to_string(),
-                        price,
-                        url,
-                    },
-                );
-            }
-        }
-
-        if game.references.get("ultrajeux").is_none() {
-            if let Some((price, url)) = get_ultrajeux_price_and_url(
-                &game.okkazeo_announce.name,
-                game.okkazeo_announce.barcode,
-            )
-            .await
-            {
-                game.references.insert(
-                    "ultrajeux".to_string(),
-                    Reference {
-                        name: "ultrajeux".to_string(),
-                        price,
-                        url,
-                    },
-                );
-            }
-        }
-
-        if game.references.get("ludocortex").is_none() {
-            if let Some((price, url)) = get_ludocortex_price_and_url(
-                &game.okkazeo_announce.name,
-                game.okkazeo_announce.barcode,
-            )
-            .await
-            {
-                game.references.insert(
-                    "ludocortex".to_string(),
-                    Reference {
-                        name: "ludocortex".to_string(),
-                        price,
-                        url,
-                    },
-                );
-            }
-        }
-
-        game.get_reviews().await;
-        game.get_deal_advantage();
-
-        //println!("{:#?}", game);
         let mut locked_games = games.lock().unwrap();
-        match locked_games.games.binary_search(&game) {
-            Ok(_) => {
-                debug!(
-                    "game id {} already present in vec",
-                    game.okkazeo_announce.id
-                )
-            } // element already in vector @ `pos`
-            Err(pos) => {
-                debug!("inserting game into vec : {:?}", game);
-                locked_games.games.insert(pos, game)
+
+        for game in outputs {
+            match locked_games.games.binary_search(&game) {
+                Ok(_) => {
+                    debug!(
+                        "game id {} already present in vec",
+                        game.okkazeo_announce.id
+                    )
+                } // element already in vector @ `pos`
+                Err(pos) => {
+                    debug!("inserting game into vec : {:?}", game);
+                    locked_games.games.insert(pos, game)
+                }
             }
         }
     }

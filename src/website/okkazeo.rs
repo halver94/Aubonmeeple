@@ -16,6 +16,7 @@ use scraper::{Html, Selector};
 
 use crate::game::{Seller, Shipping};
 
+// this could be done by simply cheking http code which should be 303
 pub async fn game_still_available(id: u32) -> bool {
     let page = get_okkazeo_announce_page(id).await;
 
