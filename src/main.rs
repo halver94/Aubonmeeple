@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
+use tokio::task::JoinSet;
 use tokio::time;
 use website::agorajeux::get_agorajeux_price_and_url_by_name;
 use website::knapix::get_knapix_prices;
@@ -83,11 +84,13 @@ pub async fn get_game_infos(entry: Entry) -> Box<Game> {
         }
     }
 
-    let document = get_okkazeo_announce_page(game.okkazeo_announce.id).await;
-    game.okkazeo_announce.barcode = get_okkazeo_barcode(&document).await;
-    game.okkazeo_announce.city = get_okkazeo_city(&document).await;
-    game.okkazeo_announce.seller = get_okkazeo_seller(&document).await.unwrap();
-    game.okkazeo_announce.shipping = get_okkazeo_shipping(&document).await;
+    {
+        let document = get_okkazeo_announce_page(game.okkazeo_announce.id).await;
+        game.okkazeo_announce.barcode = get_okkazeo_barcode(&document);
+        game.okkazeo_announce.city = get_okkazeo_city(&document);
+        game.okkazeo_announce.seller = get_okkazeo_seller(&document).unwrap();
+        game.okkazeo_announce.shipping = get_okkazeo_shipping(&document);
+    }
 
     get_knapix_prices(&mut game).await;
 
@@ -162,6 +165,8 @@ pub async fn get_game_infos(entry: Entry) -> Box<Game> {
 async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
     debug!("parsing game feed");
     let feed = get_atom_feed().await.unwrap();
+
+    let mut tasks = JoinSet::new();
     'outer: for entry in feed.entries {
         //println!("entry: {:#?}", entry);
 
@@ -191,29 +196,23 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
             }
         }
 
-        // This call will make them start running in the background
-        // immediately.
-        let mut tasks = Vec::new();
-        tasks.push(tokio::spawn(async move { get_game_infos(entry).await }));
-        let mut outputs = Vec::with_capacity(tasks.len());
-        for task in tasks {
-            outputs.push(task.await.unwrap());
-        }
+        tasks.spawn(async move { get_game_infos(entry).await });
+    }
+
+    while let Some(res) = tasks.join_next().await {
+        let game = res.unwrap();
 
         let mut locked_games = games.lock().unwrap();
-
-        for game in outputs {
-            match locked_games.games.binary_search(&game) {
-                Ok(_) => {
-                    debug!(
-                        "game id {} already present in vec",
-                        game.okkazeo_announce.id
-                    )
-                } // element already in vector @ `pos`
-                Err(pos) => {
-                    debug!("inserting game into vec : {:?}", game);
-                    locked_games.games.insert(pos, game)
-                }
+        match locked_games.games.binary_search(&game) {
+            Ok(_) => {
+                debug!(
+                    "game id {} already present in vec",
+                    game.okkazeo_announce.id
+                )
+            } // element already in vector @ `pos`
+            Err(pos) => {
+                debug!("inserting game into vec : {:?}", game);
+                locked_games.games.insert(pos, game)
             }
         }
     }

@@ -33,7 +33,7 @@ pub async fn game_still_available(id: u32) -> bool {
     false
 }
 
-pub async fn get_okkazeo_shipping(document: &Html) -> Shipping {
+pub fn get_okkazeo_shipping(document: &Html) -> Shipping {
     println!("Getting shipping from okkazeo");
 
     // Vérifier la présence de 'handshake'
@@ -72,7 +72,7 @@ pub async fn get_okkazeo_shipping(document: &Html) -> Shipping {
     shipping
 }
 
-pub async fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
+pub fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
     debug!("Getting seller from okkazeo");
 
     let seller_selector = Selector::parse(".seller").unwrap();
@@ -108,7 +108,7 @@ pub async fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
     })
 }
 
-pub async fn get_okkazeo_barcode(document: &Html) -> Option<u64> {
+pub fn get_okkazeo_barcode(document: &Html) -> Option<u64> {
     debug!("Getting barcode from okkazeo");
 
     let barcode_selector = Selector::parse("i.fa-barcode").unwrap();
@@ -125,7 +125,7 @@ pub async fn get_okkazeo_barcode(document: &Html) -> Option<u64> {
     barcode
 }
 
-pub async fn get_okkazeo_city(document: &Html) -> Option<String> {
+pub fn get_okkazeo_city(document: &Html) -> Option<String> {
     debug!("Getting city from okkazeo");
 
     let city_selector = Selector::parse("div.gray div.grid-x div.cell").unwrap();
