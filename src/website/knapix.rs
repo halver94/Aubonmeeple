@@ -1,4 +1,3 @@
-use log::debug;
 use scraper::{Html, Selector};
 
 use crate::game::{Game, Reference};
@@ -10,7 +9,7 @@ pub async fn get_knapix_prices(game: &mut Game) {
         name
     );
 
-    debug!("Searching knapix {}", search);
+    log::debug!("[TASK] searching knapix {}", search);
     let content = reqwest::get(search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
 

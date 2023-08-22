@@ -7,3 +7,5 @@ deal or not.
 
 That project is kind of a POC for now and has mainly been developped
 on a laptop, in a hotel room, at late night, after few beers.
+
+export RUST_LOG=boardgame_finder=debug

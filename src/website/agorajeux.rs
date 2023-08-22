@@ -1,4 +1,3 @@
-use log::debug;
 use scraper::{Html, Selector};
 
 pub async fn get_agorajeux_price_and_url_by_name(name: &str) -> Option<(f32, String)> {
@@ -6,7 +5,7 @@ pub async fn get_agorajeux_price_and_url_by_name(name: &str) -> Option<(f32, Str
         "https://www.agorajeux.com/fr/recherche?controller=search&s={}",
         name.replace(' ', "+")
     );
-    debug!("Search on agorajeux: {}", &search);
+    log::debug!("[TASK] search on agorajeux: {}", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
 
@@ -33,9 +32,11 @@ pub async fn get_agorajeux_price_and_url_by_name(name: &str) -> Option<(f32, Str
                 if let Some(product_name) = product_name_element {
                     let product_name_text = product_name.text().collect::<String>();
                     let product_name_text = product_name_text.trim();
-                    debug!(
-                        "Product Name: {}, Price: {}, Href: {}",
-                        product_name_text, price_text, href_attr
+                    log::debug!(
+                        "[TASK] Product Name: {}, Price: {}, Href: {}",
+                        product_name_text,
+                        price_text,
+                        href_attr
                     );
                     if product_name_text.to_lowercase() == name.to_lowercase() {
                         return Some((price, href_attr.to_string()));
