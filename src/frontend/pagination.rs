@@ -34,9 +34,9 @@ pub fn generate_pagination_links(total_items: usize, state: &State) -> String {
     let total_pages = (total_items + state.pagination.per_page - 1) / state.pagination.per_page;
 
     let style = r#"<style>
-    .pagination {
-  display: inline-block;
-}
+                     .pagination {
+                      display: inline-block;
+                      }
 
 .pagination a {
   color: black;

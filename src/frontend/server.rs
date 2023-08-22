@@ -13,6 +13,7 @@ use super::footer::generate_footer_html;
 use super::pagination::Pagination;
 use super::sort::Sort;
 
+#[derive(Debug, Clone)]
 pub struct State {
     pub pagination: Pagination,
     pub filters: Filters,
@@ -64,6 +65,7 @@ pub async fn root(
         filters: filters_param,
     };
 
+    log::debug!("[SERVER] state {:#?}", state);
     let filter_html = Filters::create_html(&state);
     let response_html = part_games.create_html_table(&state);
     let pagination_html = generate_pagination_links(total_items, &state);
@@ -75,6 +77,7 @@ pub async fn root(
 }
 
 pub async fn set_server(games: Arc<std::sync::Mutex<Games>>) {
+    log::info!("[SERVER] starting server on 0.0.0.0:3000");
     let app = Router::new()
         .route("/", get(root))
         .nest_service("/img", ServeDir::new("img"))

@@ -6,7 +6,7 @@ pub async fn get_ultrajeux_price_and_url_by_barcode(barcode: u64) -> Option<(f32
         "https://www.ultrajeux.com/search3.php?text={}&submit=Ok",
         barcode
     );
-    debug!("Search on ultrajeux: {}", &search);
+    log::debug!("[TASK] search on ultrajeux by barcode: {}", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
     let re = Regex::new(r#"produit_prix.*?class="prix.*?([\d,]+) "#).unwrap();
     let content_str: &str = &String::from_utf8_lossy(&content);
@@ -24,7 +24,7 @@ pub async fn get_ultrajeux_price_and_url_by_name(name: &String) -> Option<(f32, 
         "https://www.ultrajeux.com/search3.php?text={}&submit=Ok",
         name
     );
-    debug!("Search on ultrajeux: {}", &search);
+    log::debug!("[TASK] search on ultrajeux by name: {}", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
     let re = Regex::new(r#"produit_prix.*?class="prix.*?([\d,]+) "#).unwrap();
     let content_str: &str = &String::from_utf8_lossy(&content);

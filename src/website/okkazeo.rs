@@ -9,7 +9,6 @@ use feed_rs::{
     parser::{self, ParseFeedError},
 };
 use image::io::Reader as ImageReader;
-use log::debug;
 use regex::Regex;
 use reqwest::get;
 use scraper::{Html, Selector};
@@ -18,6 +17,7 @@ use crate::game::{Seller, Shipping};
 
 // this could be done by simply cheking http code which should be 303
 pub async fn game_still_available(id: u32) -> bool {
+    log::debug!("[TASK] checking if game with id {} is still available", id);
     let page = get_okkazeo_announce_page(id).await;
 
     let selector = Selector::parse("i.fas.fa-info.big.info").unwrap();
@@ -25,16 +25,16 @@ pub async fn game_still_available(id: u32) -> bool {
     let is_big_info_present = page.select(&selector).next().is_some();
 
     if is_big_info_present {
-        println!("The 'big info' element is present.");
+        log::debug!("[TASK] the 'big info' element is present.");
         return true;
     } else {
-        println!("The 'big info' element is not present.");
+        log::debug!("[TASK] the 'big info' element is not present.");
     }
     false
 }
 
 pub fn get_okkazeo_shipping(document: &Html) -> Shipping {
-    println!("Getting shipping from okkazeo");
+    log::debug!("[TASK] getting shipping from okkazeo");
 
     // Vérifier la présence de 'handshake'
     let handshake_selector = Selector::parse("i.far.fa-fw.fa-handshake").unwrap();
@@ -68,12 +68,12 @@ pub fn get_okkazeo_shipping(document: &Html) -> Shipping {
         shipping.ships.insert(truck_name, truck_price);
     }
 
-    println!("shipping :{:#?}", shipping);
+    log::debug!("[TASK] shipping :{:#?}", shipping);
     shipping
 }
 
 pub fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
-    debug!("Getting seller from okkazeo");
+    log::debug!("[TASK] getting seller from okkazeo");
 
     let seller_selector = Selector::parse(".seller").unwrap();
     let href_selector = Selector::parse(".div-seller").unwrap();
@@ -94,9 +94,11 @@ pub fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
         .parse::<u32>()
         .unwrap();
 
-    debug!(
-        "Seller: {}, Href: {}, Nb Annonces: {}",
-        seller_name, href_attr, nb_annonces_text
+    log::debug!(
+        "[TASK] seller: {}, href: {}, nb Annonces: {}",
+        seller_name,
+        href_attr,
+        nb_annonces_text
     );
     Some(Seller {
         name: seller_name.to_string(),
@@ -109,7 +111,7 @@ pub fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
 }
 
 pub fn get_okkazeo_barcode(document: &Html) -> Option<u64> {
-    debug!("Getting barcode from okkazeo");
+    log::debug!("[TASK] getting barcode from okkazeo");
 
     let barcode_selector = Selector::parse("i.fa-barcode").unwrap();
     let barcode = if let Some(barcode) = document.select(&barcode_selector).next() {
@@ -126,7 +128,7 @@ pub fn get_okkazeo_barcode(document: &Html) -> Option<u64> {
 }
 
 pub fn get_okkazeo_city(document: &Html) -> Option<String> {
-    debug!("Getting city from okkazeo");
+    log::debug!("[TASK] getting city from okkazeo");
 
     let city_selector = Selector::parse("div.gray div.grid-x div.cell").unwrap();
 
@@ -140,14 +142,14 @@ pub fn get_okkazeo_city(document: &Html) -> Option<String> {
 
 pub async fn get_okkazeo_announce_page(id: u32) -> Html {
     let search = format!("https://www.okkazeo.com/annonces/view/{}", id);
-    debug!("Getting city and barcode from okkazeo : {}", &search);
+    log::debug!("[TASK] getting city and barcode from okkazeo : {}", &search);
     let content = reqwest::get(search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
     document
 }
 
 pub async fn get_okkazeo_game_image(url: &str) -> Result<String, Box<dyn std::error::Error>> {
-    println!("Getting image from {}", url);
+    log::debug!("[TASK] getting image from {}", url);
     let response = get(url).await?;
     let image_bytes = response.bytes().await?;
 
@@ -183,6 +185,7 @@ pub async fn get_okkazeo_game_image(url: &str) -> Result<String, Box<dyn std::er
 }
 
 pub async fn get_atom_feed() -> Result<Feed, ParseFeedError> {
+    log::debug!("[TASK] getting atom feed");
     let content = reqwest::get("https://www.okkazeo.com/annonces/atom/0/50")
         .await
         .unwrap()

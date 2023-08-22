@@ -17,9 +17,9 @@ Features:
 - add more website comparison
 - add number of player
 - add if product in shop is available or not
-- add proper logs
 - add a DB for persistence
 - do a proper frontend with react/vue/node JS
+- change pagination for +5/-5 pages
 
 Bugfix:
 

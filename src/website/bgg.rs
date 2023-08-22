@@ -1,4 +1,3 @@
-use log::debug;
 use scraper::{Html, Selector};
 
 use crate::game::Reviewer;
@@ -10,7 +9,7 @@ pub async fn get_bgg_note(name: &str) -> Option<Reviewer> {
             .replace([':', '\''], "")
             .to_lowercase()
     );
-    debug!("Getting bgg note: {}\n", &search);
+    log::debug!("[TASK] getting bgg note: {}\n", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
 
@@ -33,7 +32,7 @@ pub async fn get_bgg_note(name: &str) -> Option<Reviewer> {
         bggrating_values.push(ratings.to_string());
     }
 
-    debug!("Name: {}, rattings : {:#?}", name, bggrating_values);
+    log::debug!("[TASK] Name: {}, rattings : {:#?}", name, bggrating_values);
     if bggrating_values.len() == 2 && name.to_lowercase() == selected_name.to_lowercase() {
         let rating = bggrating_values[0].clone().parse::<f32>().unwrap_or(0.0);
         let review_cnt = bggrating_values[1].clone().parse::<u32>().unwrap_or(0);
