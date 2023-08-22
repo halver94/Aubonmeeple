@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate log;
-
 use feed_rs::model::Entry;
 use frontend::server;
 use game::{Game, Games, OkkazeoAnnounce, Reference};
@@ -21,7 +18,7 @@ use website::okkazeo::{
 use website::philibert::get_philibert_price_and_url;
 use website::ultrajeux::get_ultrajeux_price_and_url;
 
-use log::{debug, error, info, warn};
+use log::Level;
 
 use crate::website::okkazeo::{get_okkazeo_game_image, get_okkazeo_shipping};
 
@@ -30,6 +27,10 @@ mod game;
 mod website;
 
 pub async fn get_game_infos(entry: Entry) -> Box<Game> {
+    log::debug!(
+        "[TASK] fetching game infos for {:#?}",
+        entry.title.as_ref().unwrap()
+    );
     let price = entry
         .summary
         .as_ref()
@@ -159,16 +160,17 @@ pub async fn get_game_infos(entry: Entry) -> Box<Game> {
     game.get_reviews().await;
     game.get_deal_advantage();
 
+    log::debug!("[TASK] returning game {:#?}", game);
     game
 }
 
 async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
-    debug!("parsing game feed");
+    log::debug!("[MAIN] parsing game feed");
     let feed = get_atom_feed().await.unwrap();
 
     let mut tasks = JoinSet::new();
     'outer: for entry in feed.entries {
-        //println!("entry: {:#?}", entry);
+        log::trace!("[MAIN] entry : {:#?}", entry);
 
         let price = entry
             .summary
@@ -190,6 +192,7 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
         let id = entry.id.parse::<u32>().unwrap();
         for g in games.lock().unwrap().games.iter_mut() {
             if g.okkazeo_announce.id == id {
+                log::debug!("[MAIN] updating game {}", g.okkazeo_announce.name);
                 g.okkazeo_announce.last_modification_date = entry.updated;
                 g.okkazeo_announce.price = price;
                 continue 'outer;
@@ -205,13 +208,13 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
         let mut locked_games = games.lock().unwrap();
         match locked_games.games.binary_search(&game) {
             Ok(_) => {
-                debug!(
-                    "game id {} already present in vec",
+                log::debug!(
+                    "[MAIN] game id {} already present in vec",
                     game.okkazeo_announce.id
                 )
             } // element already in vector @ `pos`
             Err(pos) => {
-                debug!("inserting game into vec : {:?}", game);
+                log::debug!("[MAIN] inserting game into vec : {:?}", game);
                 locked_games.games.insert(pos, game)
             }
         }
@@ -219,8 +222,14 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
 }
 
 pub async fn check_list_available(games: Arc<Mutex<Games>>) {
+    log::info!("[GAMECHECKER] starting game checker thread");
     let interval = Duration::from_secs(60 * 60); // every hour
+    log::info!(
+        "[GAMECHECKER] checking game availability every {:#?}",
+        interval
+    );
     loop {
+        log::debug!("[GAMECHECKER] checking game availability");
         let start = Instant::now();
 
         // getting a list of all ID in order not to maintain a lock on the vec for too long
@@ -230,6 +239,10 @@ pub async fn check_list_available(games: Arc<Mutex<Games>>) {
             ids.push(game.okkazeo_announce.id);
         }
 
+        log::debug!(
+            "[GAMECHECKER] checking availability for {} games",
+            ids.len()
+        );
         let mut ids_to_remove = Vec::<u32>::new();
         for index in ids {
             if !game_still_available(index).await {
@@ -238,6 +251,7 @@ pub async fn check_list_available(games: Arc<Mutex<Games>>) {
         }
 
         // effectively removing ids that need to be removed
+        log::debug!("[GAMECHECKER] removing {} games", ids_to_remove.len(),);
         {
             let locked_games = &mut games.lock().unwrap().games;
             locked_games.retain(|game| !ids_to_remove.contains(&game.okkazeo_announce.id));
@@ -253,11 +267,19 @@ pub async fn check_list_available(games: Arc<Mutex<Games>>) {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + 'static>> {
-    //env_logger::init();
-    info!("starting program");
+    log_panics::init();
+    env_logger::Builder::from_env(
+        env_logger::Env::default().default_filter_or(Level::Debug.as_str()),
+    )
+    .init();
+
+    log::info!("[MAIN] starting program");
     let games = Arc::new(Mutex::new(Games::new()));
     let interval = Duration::from_secs(60 * 5); // Remplacez X par le nombre de minutes souhaité
-    info!("parsing game feed every {:#?} minutes", interval);
+    log::info!(
+        "[MAIN] parsing game feed every {} seconds",
+        interval.as_secs()
+    );
 
     let game_clone = games.clone();
     let game_clone2 = games.clone();
@@ -266,7 +288,7 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
 
     loop {
         let start = Instant::now();
-        info!("scraping time : {:#?}", start);
+        log::debug!("[MAIN] scraping time : {:#?}", start);
         parse_game_feed(&mut games.clone()).await;
         let duration = start.elapsed();
 

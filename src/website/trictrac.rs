@@ -1,7 +1,7 @@
 use log::debug;
 use scraper::{Html, Selector};
 
-use crate::game::{Review, Reviewer};
+use crate::game::Reviewer;
 
 pub async fn get_trictrac_note(name: &str) -> Option<Reviewer> {
     let search = format!(

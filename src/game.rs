@@ -100,8 +100,13 @@ impl Eq for Game {}
 
 impl Game {
     pub fn get_deal_advantage(&mut self) {
+        log::debug!(
+            "[TASK] calculating deal advantage for {}",
+            self.okkazeo_announce.name
+        );
         // okkazeo is counted as a ref, so we need at least 2 refs
         if self.references.is_empty() {
+            log::debug!("[TASK] no references for {}", self.okkazeo_announce.name);
             return;
         }
 
@@ -128,15 +133,15 @@ impl Game {
     }
 
     pub async fn get_reviews(&mut self) {
-        println!("Getting review for {}", self.okkazeo_announce.name);
+        log::debug!("[TASK] getting reviews for {}", self.okkazeo_announce.name);
         let reviewer = get_trictrac_note(&self.okkazeo_announce.name).await;
         if reviewer.is_some() {
             self.review
                 .reviews
                 .insert("trictrac".to_string(), reviewer.unwrap());
         } else {
-            debug!(
-                "cannot get trictrac note for {}",
+            log::debug!(
+                "[TASK] cannot get trictrac note for {}",
                 self.okkazeo_announce.name
             );
         }
@@ -147,7 +152,10 @@ impl Game {
                 .reviews
                 .insert("bgg".to_string(), reviewer.unwrap());
         } else {
-            debug!("cannot get bgg note for {}", self.okkazeo_announce.name);
+            log::debug!(
+                "[TASK] cannot get bgg note for {}",
+                self.okkazeo_announce.name
+            );
         }
 
         let mut total_reviewer = 0;
