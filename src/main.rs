@@ -9,6 +9,7 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tokio::task::JoinSet;
 use tokio::time;
+use tokio_postgres::Client;
 use website::agorajeux::get_agorajeux_price_and_url_by_name;
 use website::knapix::get_knapix_prices;
 use website::ludocortex::get_ludocortex_price_and_url;
@@ -21,10 +22,14 @@ use website::ultrajeux::get_ultrajeux_price_and_url;
 
 use log::Level;
 
+use crate::db::{
+    connect_db, insert_announce_into_db, select_game_with_id_from_db, update_game_from_db,
+};
 use crate::website::okkazeo::{
     get_okkazeo_game_image, get_okkazeo_shipping, okkazeo_is_pro_seller,
 };
 
+mod db;
 mod frontend;
 mod game;
 mod website;
@@ -168,7 +173,7 @@ pub async fn get_game_infos(entry: Entry) -> Box<Game> {
     game
 }
 
-async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
+async fn parse_game_feed(db_client: &Client) {
     log::debug!("[MAIN] parsing game feed");
     let feed = get_atom_feed().await.unwrap();
 
@@ -194,13 +199,24 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
 
         // if same id, then it is an update
         let id = entry.id.parse::<u32>().unwrap();
-        for g in games.lock().unwrap().games.iter_mut() {
-            if g.okkazeo_announce.id == id {
-                log::debug!("[MAIN] updating game {}", g.okkazeo_announce.name);
-                g.okkazeo_announce.last_modification_date = entry.updated;
-                g.okkazeo_announce.price = price;
-                continue 'outer;
+
+        let fetched_game = select_game_with_id_from_db(db_client, id).await;
+        if fetched_game.is_some() {
+            let mut fetched_game = fetched_game.clone().unwrap();
+            log::debug!(
+                "[MAIN] updating game {}",
+                fetched_game.okkazeo_announce.name
+            );
+            fetched_game.okkazeo_announce.last_modification_date = entry.updated;
+            fetched_game.okkazeo_announce.price = price;
+            if let Err(e) = update_game_from_db(db_client, &fetched_game).await {
+                log::error!(
+                    "erreur db, cannot update game {} : {}",
+                    fetched_game.okkazeo_announce.name,
+                    e
+                );
             }
+            continue 'outer;
         }
 
         tasks.spawn(async move { get_game_infos(entry).await });
@@ -208,19 +224,14 @@ async fn parse_game_feed(games: &mut Arc<std::sync::Mutex<Games>>) {
 
     while let Some(res) = tasks.join_next().await {
         let game = res.unwrap();
+        log::debug!("[MAIN] got result for game {}", game.okkazeo_announce.name);
 
-        let mut locked_games = games.lock().unwrap();
-        match locked_games.games.binary_search(&game) {
-            Ok(_) => {
-                log::debug!(
-                    "[MAIN] game id {} already present in vec",
-                    game.okkazeo_announce.id
-                )
-            } // element already in vector @ `pos`
-            Err(pos) => {
-                log::debug!("[MAIN] inserting game into vec : {:?}", game);
-                locked_games.games.insert(pos, game)
-            }
+        if let Err(e) = insert_announce_into_db(db_client, &game).await {
+            log::error!(
+                "erreur db, cannot insert game {} : {}",
+                game.okkazeo_announce.name,
+                e
+            );
         }
     }
 }
@@ -250,6 +261,7 @@ pub async fn check_list_available(games: Arc<Mutex<Games>>) {
         let mut ids_to_remove = Vec::<u32>::new();
         for index in ids {
             if !game_still_available(index).await {
+                log::debug!("[GAMECHECKER] pushing game id {} to remove", index);
                 ids_to_remove.push(index);
             }
         }
@@ -279,23 +291,22 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
     )
     .init();
 
+    let client = connect_db().await?;
+
     log::info!("[MAIN] starting program");
-    let games = Arc::new(Mutex::new(Games::new()));
     let interval = Duration::from_secs(60 * 5); // Remplacez X par le nombre de minutes souhaité
     log::info!(
         "[MAIN] parsing game feed every {} seconds",
         interval.as_secs()
     );
 
-    let game_clone = games.clone();
-    let game_clone2 = games.clone();
-    let _ = tokio::spawn(async move { server::set_server(game_clone).await });
-    let _ = tokio::spawn(async move { check_list_available(game_clone2).await });
+    let _ = tokio::spawn(async move { server::set_server().await });
+    // let _ = tokio::spawn(async move { check_list_available().await });
 
     loop {
         let start = Instant::now();
         log::debug!("[MAIN] scraping time : {:#?}", start);
-        parse_game_feed(&mut games.clone()).await;
+        parse_game_feed(&client).await;
         let duration = start.elapsed();
 
         if duration < interval {

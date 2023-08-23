@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     fs::File,
     io::{Cursor, Write},
     path::Path,
@@ -14,7 +15,7 @@ use regex::Regex;
 use reqwest::get;
 use scraper::{Html, Selector};
 
-use crate::game::{Seller, Shipping};
+use crate::game::Seller;
 
 pub async fn game_still_available(id: u32) -> bool {
     log::debug!("[TASK] checking if game with id {} is still available", id);
@@ -40,17 +41,17 @@ pub fn okkazeo_is_pro_seller(document: &Html) -> bool {
     is_pro_present
 }
 
-pub fn get_okkazeo_shipping(document: &Html) -> Shipping {
+pub fn get_okkazeo_shipping(document: &Html) -> HashMap<String, f32> {
     log::debug!("[TASK] getting shipping from okkazeo");
 
+    let mut ships = HashMap::<String, f32>::new();
     // Vérifier la présence de 'handshake'
     let handshake_selector = Selector::parse("i.far.fa-fw.fa-handshake").unwrap();
     let is_handshake_present = document.select(&handshake_selector).next().is_some();
 
-    let mut shipping = Shipping {
-        handshake: is_handshake_present,
-        ..Default::default()
-    };
+    if is_handshake_present {
+        ships.insert("hand_delivery".to_string(), 0.0);
+    }
 
     // Extraire les modes d'expédition
     let truck_selector = Selector::parse("div.cell.small-8.large-3").unwrap();
@@ -72,11 +73,11 @@ pub fn get_okkazeo_shipping(document: &Html) -> Shipping {
             .parse::<f32>()
             .unwrap_or_default();
 
-        shipping.ships.insert(truck_name, truck_price);
+        ships.insert(truck_name, truck_price);
     }
 
-    log::debug!("[TASK] shipping :{:#?}", shipping);
-    shipping
+    log::debug!("[TASK] shipping :{:#?}", ships);
+    ships
 }
 
 pub fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
