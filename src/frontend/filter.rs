@@ -10,12 +10,11 @@ use super::server::State;
 pub struct Filters {
     pub city: Option<String>,
     pub name: Option<String>,
+    pub pro: bool,
 }
 
 impl Filters {
     pub fn filter(&self, games: Arc<std::sync::Mutex<Games>>) -> Vec<Box<Game>> {
-        //println!("filters : {:#?}", self);
-
         if self.city.is_none() && self.name.is_none() {
             return games.lock().unwrap().games.clone();
         }
@@ -45,8 +44,9 @@ impl Filters {
                             .to_lowercase()
                             .contains(self.city.as_ref().unwrap()))
             })
+            .filter(|game| !(self.pro && game.okkazeo_announce.seller.is_pro))
             .collect();
-        println!("len of filtered games : {}", filtered_games.len());
+        log::debug!("len of filtered games : {}", filtered_games.len());
         filtered_games
     }
 
@@ -62,6 +62,7 @@ impl Filters {
         <form id="filters">
         <input type="text" id="city" name="city" placeholder="Filter on city" ><br><br>
         <input type="text" id="name" name="name" placeholder="Filter on game name" ><br><br>
+        <input type="checkbox" id="pro" name="pro"/><label for="pro">Exclude Pro sellers</label><br><br>
         <button type="button" onclick="submitForm()">Filter</button>
     </form>
 
@@ -69,6 +70,7 @@ impl Filters {
         function submitForm() {
             const city = document.getElementById("city").value;
             const name = document.getElementById("name").value;
+            const pro = document.getElementById("pro").checked;
             
             const queryParams = [];
             
@@ -80,6 +82,8 @@ impl Filters {
                 queryParams.push(`name=${encodeURIComponent(name)}`);
             }
             
+            queryParams.push(`pro=${encodeURIComponent(pro)}`);
+
             const queryString = queryParams.join("&");
             const urlWithParams = `/?"#,
             params,

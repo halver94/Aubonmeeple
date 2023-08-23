@@ -1,4 +1,3 @@
-use log::debug;
 use regex::Regex;
 
 pub async fn get_ultrajeux_price_and_url_by_barcode(barcode: u64) -> Option<(f32, String)> {

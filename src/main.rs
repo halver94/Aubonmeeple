@@ -3,6 +3,7 @@ use frontend::server;
 use game::{Game, Games, OkkazeoAnnounce, Reference};
 use regex::Regex;
 use std::collections::HashMap;
+use std::env;
 use std::error::Error;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -20,7 +21,9 @@ use website::ultrajeux::get_ultrajeux_price_and_url;
 
 use log::Level;
 
-use crate::website::okkazeo::{get_okkazeo_game_image, get_okkazeo_shipping};
+use crate::website::okkazeo::{
+    get_okkazeo_game_image, get_okkazeo_shipping, okkazeo_is_pro_seller,
+};
 
 mod frontend;
 mod game;
@@ -86,11 +89,12 @@ pub async fn get_game_infos(entry: Entry) -> Box<Game> {
     }
 
     {
-        let document = get_okkazeo_announce_page(game.okkazeo_announce.id).await;
+        let (document, _) = get_okkazeo_announce_page(game.okkazeo_announce.id).await;
         game.okkazeo_announce.barcode = get_okkazeo_barcode(&document);
         game.okkazeo_announce.city = get_okkazeo_city(&document);
         game.okkazeo_announce.seller = get_okkazeo_seller(&document).unwrap();
         game.okkazeo_announce.shipping = get_okkazeo_shipping(&document);
+        game.okkazeo_announce.seller.is_pro = okkazeo_is_pro_seller(&document);
     }
 
     get_knapix_prices(&mut game).await;
@@ -268,6 +272,8 @@ pub async fn check_list_available(games: Arc<Mutex<Games>>) {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + 'static>> {
     log_panics::init();
+    //this one is for vscode
+    env::set_var("RUST_LOG", "boardgame_finder=debug");
     env_logger::Builder::from_env(
         env_logger::Env::default().default_filter_or(Level::Debug.as_str()),
     )
