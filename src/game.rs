@@ -2,10 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering, collections::HashMap};
 
-use crate::{
-    frontend::server::State,
-    website::{bgg::get_bgg_note, trictrac::get_trictrac_note},
-};
+use crate::website::{bgg::get_bgg_note, trictrac::get_trictrac_note};
 
 #[derive(Debug, Default, Clone)]
 pub struct Games {
@@ -34,12 +31,6 @@ pub struct Reviewer {
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
-pub struct Shipping {
-    pub handshake: bool,
-    pub ships: HashMap<String, f32>,
-}
-
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Seller {
     pub name: String,
     pub url: String,
@@ -55,7 +46,7 @@ pub struct OkkazeoAnnounce {
     pub price: f32,
     pub url: String,
     pub extension: String,
-    pub shipping: Shipping,
+    pub shipping: HashMap<String, f32>,
     pub seller: Seller,
     pub barcode: Option<u64>,
     pub city: Option<String>,
@@ -159,18 +150,7 @@ impl Game {
             );
         }
 
-        let mut total_reviewer = 0;
-        let mut note = 0.0;
-        for val in self.review.reviews.values() {
-            total_reviewer += val.number;
-            note += val.note * val.number as f32
-        }
-
-        if total_reviewer == 0 || note == 0.0 {
-            self.review.average_note = 0.0;
-        } else {
-            self.review.average_note = note / total_reviewer as f32;
-        }
+        self.review.compute_average_note();
     }
 }
 
@@ -180,181 +160,21 @@ impl Games {
             games: Vec::<Box<Game>>::new(),
         }
     }
+}
 
-    pub fn create_html_table(&self, state: &State) -> String {
-        let params = format!(
-            "page={}&per_page={}{}{}",
-            state.pagination.page,
-            state.pagination.per_page,
-            if state.filters.city.is_some() {
-                format!("&city={}", state.filters.city.as_ref().unwrap())
-            } else {
-                String::new()
-            },
-            if state.filters.name.is_some() {
-                format!("&name={}", state.filters.name.as_ref().unwrap())
-            } else {
-                String::new()
-            },
-        );
-
-        let mut table = String::new();
-        table.push_str(
-            "<style>
-                    table {
-                        border-collapse: collapse;
-                        width: 100%;
-                    }
-                    th, td {
-                        border: 1px solid black;
-                        padding: 8px;
-                        text-align: center;
-                    }
-                    th {
-                        background-color: lightgray;
-                    }
-                   
-                    .flex-container {
-                        display: flex;
-                        align-items: center; /* Alignement vertical */
-                    }
-                    .flex-container img {
-                        margin-right: 10px; /* Espacement entre l'image et le texte */
-                    }
-
-                    </style>",
-        );
-        table.push_str("<table>");
-        table.push_str(
-            format!(
-                "{}{}{}{}{}{}{}",
-                r#"<tr>
-            <th>Updated <button onclick="window.location.href='/?"#,
-                params,
-                r#"&sort=updated';">Sort</button></th>
-            <th>Name</th>
-            <th>City</th>
-            <th>Seller</th>
-            <th>Shipping</th>
-            <th>Deal <button onclick="window.location.href='/?"#,
-                params,
-                r#"&sort=deal';">Sort</button></th>
-            <th>Okkazeo</th>
-            <th>Shops</th>
-            <th>Note <button onclick="window.location.href='/?"#,
-                params,
-                r#"&sort=note';">Sort</button></th>
-        </tr>"#
-            )
-            .as_str(),
-        );
-
-        for game in self.games.iter() {
-            table.push_str("<tr>");
-            table.push_str(&format!(
-                "<td>{}</td>",
-                game.okkazeo_announce
-                    .last_modification_date
-                    .unwrap()
-                    .format("%d/%m/%Y %H:%M")
-            ));
-            table.push_str(&format!(
-                "<td>
-                    <div class=\"flex-container\">
-                        <img src=\"{}\" alt=\"fail\" width=\"100\" height=\"100\" />
-                        {}<br>({})
-                    </div>
-                </td>",
-                game.okkazeo_announce.image,
-                game.okkazeo_announce.name,
-                game.okkazeo_announce.extension
-            ));
-            table.push_str(&format!(
-                "<td>{}</td>",
-                game.okkazeo_announce.city.clone().unwrap_or(String::new())
-            ));
-            table.push_str(&format!(
-                "<td><a href=\"{}\">{} {}<br>({} announces)</a></td>",
-                game.okkazeo_announce.seller.url,
-                game.okkazeo_announce.seller.name,
-                if game.okkazeo_announce.seller.is_pro {
-                    "- PRO"
-                } else {
-                    ""
-                },
-                game.okkazeo_announce.seller.nb_announces
-            ));
-
-            table.push_str("<td>");
-            if game.okkazeo_announce.shipping.handshake {
-                table.push_str("- Hand delivery <br>");
-            }
-
-            for (key, val) in game.okkazeo_announce.shipping.ships.iter() {
-                table.push_str(&format!("- {} : {}€<br>", key, val));
-            }
-
-            table.push_str("</td>");
-
-            if game.deal.deal_price != 0 {
-                table.push_str(&format!(
-                    "<td style=\"color: {}\">{}{}€ ({}{}%)</td>",
-                    if game.deal.deal_price < 0 {
-                        "green"
-                    } else {
-                        "red"
-                    },
-                    if game.deal.deal_price >= 0 { "+" } else { "" },
-                    game.deal.deal_price,
-                    if game.deal.deal_percentage > 0 {
-                        "+"
-                    } else {
-                        ""
-                    },
-                    game.deal.deal_percentage,
-                ));
-            } else {
-                table.push_str("<td>-</td>");
-            }
-
-            table.push_str(&format!(
-                "<td><a href=\"{}\">{} &euro;</a></td>",
-                game.okkazeo_announce.url, game.okkazeo_announce.price,
-            ));
-
-            table.push_str("<td>");
-            if game.references.is_empty() {
-                table.push_str("-");
-            } else {
-                for val in game.references.values() {
-                    table.push_str(&format!(
-                        "<a href=\"{}\">{} : {} &euro;</a><br>",
-                        val.url, val.name, val.price,
-                    ));
-                }
-            }
-            table.push_str("</td>");
-
-            if game.review.average_note == 0.0 {
-                table.push_str("<td>-</td>");
-            } else {
-                table.push_str(&format!(
-                    "<td>Average note : {:.2}<br><br>",
-                    game.review.average_note,
-                ));
-
-                for val in game.review.reviews.values() {
-                    table.push_str(&format!(
-                        "<a href=\"{}\">{}: {} ({} reviews)</a><br>",
-                        val.url, val.name, val.note, val.number
-                    ));
-                }
-                table.push_str("</td>");
-            }
-            table.push_str("</tr>");
+impl Review {
+    pub fn compute_average_note(&mut self) {
+        let mut total_reviewer = 0;
+        let mut note = 0.0;
+        for val in self.reviews.values() {
+            total_reviewer += val.number;
+            note += val.note * val.number as f32
         }
 
-        table.push_str("</table>");
-        table
+        if total_reviewer == 0 || note == 0.0 {
+            self.average_note = 0.0;
+        } else {
+            self.average_note = note / total_reviewer as f32;
+        }
     }
 }

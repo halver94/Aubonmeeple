@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use super::server::State;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Pagination {
     pub per_page: usize,
     pub page: usize,

@@ -1,8 +1,4 @@
-use std::sync::Arc;
-
 use serde::{Deserialize, Serialize};
-
-use crate::game::{Game, Games};
 
 use super::server::State;
 
@@ -14,42 +10,6 @@ pub struct Filters {
 }
 
 impl Filters {
-    pub fn filter(&self, games: Arc<std::sync::Mutex<Games>>) -> Vec<Box<Game>> {
-        if self.city.is_none() && self.name.is_none() {
-            return games.lock().unwrap().games.clone();
-        }
-
-        let filtered_games: Vec<Box<Game>> = games
-            .lock()
-            .unwrap()
-            .games
-            .clone()
-            .into_iter()
-            .filter(|game| {
-                self.name.is_none()
-                    || game
-                        .okkazeo_announce
-                        .name
-                        .to_lowercase()
-                        .contains(self.name.as_ref().unwrap())
-            })
-            .filter(|game| {
-                self.city.is_none()
-                    || (game.okkazeo_announce.city.is_some()
-                        && game
-                            .okkazeo_announce
-                            .city
-                            .as_ref()
-                            .unwrap()
-                            .to_lowercase()
-                            .contains(self.city.as_ref().unwrap()))
-            })
-            .filter(|game| !(self.pro && game.okkazeo_announce.seller.is_pro))
-            .collect();
-        log::debug!("len of filtered games : {}", filtered_games.len());
-        filtered_games
-    }
-
     pub fn create_html(state: &State) -> String {
         let params = format!(
             "sort={}&page={}&per_page={}",
