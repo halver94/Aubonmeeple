@@ -18,7 +18,7 @@ impl Default for Pagination {
 
 pub fn generate_pagination_links(total_items: usize, state: &State) -> String {
     let params = format!(
-        "sort={}{}{}",
+        "sort={}{}{}{}",
         state.sort.sort,
         if state.filters.city.is_some() {
             format!("&city={}", state.filters.city.as_ref().unwrap())
@@ -29,6 +29,11 @@ pub fn generate_pagination_links(total_items: usize, state: &State) -> String {
             format!("&name={}", state.filters.name.as_ref().unwrap())
         } else {
             String::new()
+        },
+        if state.filters.pro {
+            String::from("&pro=true")
+        } else {
+            String::from("&pro=false")
         },
     );
     let total_pages = (total_items + state.pagination.per_page - 1) / state.pagination.per_page;

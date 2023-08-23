@@ -27,7 +27,6 @@ pub async fn root(
 
     Extension(games): Extension<Arc<std::sync::Mutex<Games>>>,
 ) -> Html<String> {
-    //debug!("pagination : {:#?}", pagination);
     let mut pagination_param = pagination.unwrap_or_default().0;
     let filters_param = filters.unwrap_or_default().0;
     let sort_param = sort.unwrap_or_default().0;

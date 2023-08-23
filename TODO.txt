@@ -19,8 +19,8 @@ Features:
 - add if product in shop is available or not
 - add a DB for persistence
 - do a proper frontend with react/vue/node JS
-- change pagination for +5/-5 pages
 
 Bugfix:
 
 Refacto:
+- check and replace all unwrap

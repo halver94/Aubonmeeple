@@ -44,6 +44,7 @@ pub struct Seller {
     pub name: String,
     pub url: String,
     pub nb_announces: u32,
+    pub is_pro: bool,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -273,9 +274,14 @@ impl Games {
                 game.okkazeo_announce.city.clone().unwrap_or(String::new())
             ));
             table.push_str(&format!(
-                "<td><a href=\"{}\">{} <br>({} announces)</a></td>",
+                "<td><a href=\"{}\">{} {}<br>({} announces)</a></td>",
                 game.okkazeo_announce.seller.url,
                 game.okkazeo_announce.seller.name,
+                if game.okkazeo_announce.seller.is_pro {
+                    "- PRO"
+                } else {
+                    ""
+                },
                 game.okkazeo_announce.seller.nb_announces
             ));
 

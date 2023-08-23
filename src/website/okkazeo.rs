@@ -8,6 +8,7 @@ use feed_rs::{
     model::Feed,
     parser::{self, ParseFeedError},
 };
+use hyper::StatusCode;
 use image::io::Reader as ImageReader;
 use regex::Regex;
 use reqwest::get;
@@ -15,22 +16,28 @@ use scraper::{Html, Selector};
 
 use crate::game::{Seller, Shipping};
 
-// this could be done by simply cheking http code which should be 303
 pub async fn game_still_available(id: u32) -> bool {
     log::debug!("[TASK] checking if game with id {} is still available", id);
-    let page = get_okkazeo_announce_page(id).await;
+    let (_, code) = get_okkazeo_announce_page(id).await;
 
-    let selector = Selector::parse("i.fas.fa-info.big.info").unwrap();
+    log::debug!("[TASK] game still available {}", code.is_redirection());
+    !code.is_redirection()
+}
 
-    let is_big_info_present = page.select(&selector).next().is_some();
+pub fn okkazeo_is_pro_seller(document: &Html) -> bool {
+    log::debug!("[TASK] checking if seller is pro");
 
-    if is_big_info_present {
-        log::debug!("[TASK] the 'big info' element is present.");
-        return true;
+    let class_selector = Selector::parse("i.fas.fa-fw.fa-user-tie.big").unwrap();
+
+    let is_pro_present = document.select(&class_selector).next().is_some();
+
+    if is_pro_present {
+        log::debug!("[TASK] The 'PRO' tag is present.");
     } else {
-        log::debug!("[TASK] the 'big info' element is not present.");
+        log::debug!("[TASK] The 'PRO' tag is not present.");
     }
-    false
+
+    is_pro_present
 }
 
 pub fn get_okkazeo_shipping(document: &Html) -> Shipping {
@@ -63,7 +70,7 @@ pub fn get_okkazeo_shipping(document: &Html) -> Shipping {
             .replace(",", ".")
             .replace(" €", "")
             .parse::<f32>()
-            .unwrap();
+            .unwrap_or_default();
 
         shipping.ships.insert(truck_name, truck_price);
     }
@@ -107,6 +114,7 @@ pub fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
             href_attr.to_string().replace("viewProfil", "stock")
         ),
         nb_announces: nb_annonces_text,
+        is_pro: false,
     })
 }
 
@@ -140,12 +148,14 @@ pub fn get_okkazeo_city(document: &Html) -> Option<String> {
     None
 }
 
-pub async fn get_okkazeo_announce_page(id: u32) -> Html {
+pub async fn get_okkazeo_announce_page(id: u32) -> (Html, StatusCode) {
     let search = format!("https://www.okkazeo.com/annonces/view/{}", id);
-    log::debug!("[TASK] getting city and barcode from okkazeo : {}", &search);
-    let content = reqwest::get(search).await.unwrap().bytes().await.unwrap();
+    log::debug!("[TASK] getting announce page from okkazeo : {}", &search);
+    let response = reqwest::get(search).await.unwrap();
+    let http_code = response.status();
+    let content = response.bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
-    document
+    (document, http_code)
 }
 
 pub async fn get_okkazeo_game_image(url: &str) -> Result<String, Box<dyn std::error::Error>> {
