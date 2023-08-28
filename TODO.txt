@@ -22,7 +22,6 @@ Features:
 Bugfix:
 - if announce updated, deal should be updated as well 
 - if announce updated, shipping cost should be updated
-- following DB update, note sorting is broken and game checker is broken
 
 Refacto:
 - check and replace all unwrap

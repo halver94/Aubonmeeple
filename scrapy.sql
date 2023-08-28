@@ -29,7 +29,8 @@ CREATE TABLE "okkazeo_announce" (
   "oa_url" text NOT NULL,
   "oa_extension" text,
   "oa_barcode" bigint,
-  "oa_city" text
+  "oa_city" text,
+  "oa_nbr_player" integer
 );
 
 CREATE TABLE "deal" (
@@ -45,7 +46,8 @@ CREATE TABLE "reference" (
   "ref_oa_id" integer REFERENCES okkazeo_announce("oa_id"),
   "ref_name" text,
   "ref_price" real,
-  "ref_url" text
+  "ref_url" text,
+  "ref_available" boolean
 );
 
 CREATE TABLE "reviewer" (

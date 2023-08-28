@@ -12,7 +12,7 @@ use feed_rs::{
 use hyper::StatusCode;
 use image::io::Reader as ImageReader;
 use regex::Regex;
-use reqwest::get;
+use reqwest::{get, Client, ClientBuilder};
 use scraper::{Html, Selector};
 
 use crate::game::Seller;
@@ -21,7 +21,12 @@ pub async fn game_still_available(id: u32) -> bool {
     log::debug!("[TASK] checking if game with id {} is still available", id);
     let (_, code) = get_okkazeo_announce_page(id).await;
 
-    log::debug!("[TASK] game still available {}", code.is_redirection());
+    log::debug!(
+        "[TASK] game {} still available, is redirection: {} : code http {}",
+        id,
+        code.is_redirection(),
+        code
+    );
     !code.is_redirection()
 }
 
@@ -152,7 +157,13 @@ pub fn get_okkazeo_city(document: &Html) -> Option<String> {
 pub async fn get_okkazeo_announce_page(id: u32) -> (Html, StatusCode) {
     let search = format!("https://www.okkazeo.com/annonces/view/{}", id);
     log::debug!("[TASK] getting announce page from okkazeo : {}", &search);
-    let response = reqwest::get(search).await.unwrap();
+
+    let client = ClientBuilder::new()
+        .redirect(reqwest::redirect::Policy::none())
+        .build()
+        .unwrap();
+    let response = client.get(search).send().await.unwrap();
+
     let http_code = response.status();
     let content = response.bytes().await.unwrap();
     let document = Html::parse_document(std::str::from_utf8(&content).unwrap());

@@ -23,7 +23,8 @@ use website::ultrajeux::get_ultrajeux_price_and_url;
 use log::Level;
 
 use crate::db::{
-    connect_db, insert_announce_into_db, select_game_with_id_from_db, update_game_from_db,
+    connect_db, delete_from_all_table_with_id, insert_announce_into_db,
+    select_all_ids_from_oa_table_from_db, select_game_with_id_from_db, update_game_from_db,
 };
 use crate::website::okkazeo::{
     get_okkazeo_game_image, get_okkazeo_shipping, okkazeo_is_pro_seller,
@@ -236,41 +237,39 @@ async fn parse_game_feed(db_client: &Client) {
     }
 }
 
-pub async fn check_list_available(games: Arc<Mutex<Games>>) {
+pub async fn check_list_available() {
     log::info!("[GAMECHECKER] starting game checker thread");
-    let interval = Duration::from_secs(60 * 60); // every hour
+    let interval = Duration::from_secs(120 * 60); // every 2 hour
     log::info!(
         "[GAMECHECKER] checking game availability every {:#?}",
         interval
     );
+
+    let db_client = connect_db().await.unwrap();
+
     loop {
         log::debug!("[GAMECHECKER] checking game availability");
         let start = Instant::now();
 
         // getting a list of all ID in order not to maintain a lock on the vec for too long
-        let mut ids = Vec::<u32>::new();
 
-        for game in &games.lock().unwrap().games {
-            ids.push(game.okkazeo_announce.id);
-        }
+        let ids = select_all_ids_from_oa_table_from_db(&db_client)
+            .await
+            .unwrap();
 
         log::debug!(
             "[GAMECHECKER] checking availability for {} games",
             ids.len()
         );
-        let mut ids_to_remove = Vec::<u32>::new();
-        for index in ids {
-            if !game_still_available(index).await {
-                log::debug!("[GAMECHECKER] pushing game id {} to remove", index);
-                ids_to_remove.push(index);
-            }
-        }
 
-        // effectively removing ids that need to be removed
-        log::debug!("[GAMECHECKER] removing {} games", ids_to_remove.len(),);
-        {
-            let locked_games = &mut games.lock().unwrap().games;
-            locked_games.retain(|game| !ids_to_remove.contains(&game.okkazeo_announce.id));
+        for id in ids {
+            if !game_still_available(id as u32).await {
+                // effectively removing ids that need to be removed
+                log::debug!("[GAMECHECKER] removing games with id {}", id);
+                if let Err(e) = delete_from_all_table_with_id(&db_client, id as i32).await {
+                    log::error!("[GAMECHECKER] error deleting from db : {}", e);
+                }
+            }
         }
 
         let duration = start.elapsed();
@@ -301,7 +300,7 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
     );
 
     let _ = tokio::spawn(async move { server::set_server().await });
-    // let _ = tokio::spawn(async move { check_list_available().await });
+    let _ = tokio::spawn(async move { check_list_available().await });
 
     loop {
         let start = Instant::now();
