@@ -22,6 +22,34 @@ pub async fn connect_db() -> Result<Client, Error> {
     Ok(client)
 }
 
+pub async fn delete_from_all_table_with_id(db_client: &Client, id: i32) -> Result<(), Error> {
+    db_client
+        .execute("DELETE FROM deal WHERE deal_oa_id = $1", &[&id])
+        .await?;
+
+    db_client
+        .execute("DELETE FROM seller WHERE seller_oa_id = $1", &[&id])
+        .await?;
+
+    db_client
+        .execute("DELETE FROM shipping WHERE ship_oa_id = $1", &[&id])
+        .await?;
+
+    db_client
+        .execute("DELETE FROM reference WHERE ref_oa_id = $1", &[&id])
+        .await?;
+
+    db_client
+        .execute("DELETE FROM reviewer WHERE reviewer_oa_id = $1", &[&id])
+        .await?;
+
+    db_client
+        .execute("DELETE FROM okkazeo_announce WHERE oa_id = $1", &[&id])
+        .await?;
+
+    Ok(())
+}
+
 pub async fn insert_into_okkazeo_announce_table(
     db_client: &Client,
     game: &Box<Game>,
@@ -364,6 +392,17 @@ pub async fn select_shipping_from_db(
     }
 
     Ok(ships)
+}
+
+pub async fn select_all_ids_from_oa_table_from_db(db_client: &Client) -> Result<Vec<i32>, Error> {
+    let select_req = format!(
+        "SELECT oa_id
+                FROM okkazeo_announce"
+    );
+
+    let res = db_client.query(&select_req, &[]).await?;
+
+    res.into_iter().map(|row| row.try_get("oa_id")).collect()
 }
 
 pub async fn select_references_from_db(
