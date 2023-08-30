@@ -68,7 +68,7 @@ pub fn create_html_table(games: Games, state: &State) -> String {
     table.push_str("<table>");
     table.push_str(
         format!(
-            "{}{}{}{}{}",
+            "{}{}{}{}{}{}{}",
             r#"<tr>
             <th>Updated <button onclick="window.location.href='/?"#,
             params,
@@ -79,7 +79,10 @@ pub fn create_html_table(games: Games, state: &State) -> String {
             <th>Shipping</th>
             <th>Deal <button onclick="window.location.href='/?"#,
             params,
-            r#"&sort=deal';">Sort</button></th>
+            r#"&sort=price';">Sort €</button>
+            <button onclick="window.location.href='/?"#,
+            params,
+            r#"&sort=percent';">Sort %</button></th>
             <th>Okkazeo</th>
             <th>Shops</th>
             <th>Note</th>
