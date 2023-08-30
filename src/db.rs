@@ -294,7 +294,8 @@ ORDER BY avg_review_note DESC;*/
 
 pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<Games, Error> {
     let order_by = match state.sort.sort.as_str() {
-        "deal" => "d.deal_price ASC",
+        "price" => "d.deal_price ASC",
+        "percent" => "d.deal_percentage ASC",
         _ => "oa.oa_last_modification_date DESC",
     };
 
