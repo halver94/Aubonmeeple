@@ -15,9 +15,9 @@ Features:
 - poc a levenstein distance heuristic when comparing names
 - scrap older annonces
 - add more website comparison
-- add number of player
 - add if product in shop is available or not
 - do a proper frontend with react/vue/node JS
+- rewor scrapping of old games not to spam okkazeo
 
 Bugfix:
 - if announce updated, deal should be updated as well 
