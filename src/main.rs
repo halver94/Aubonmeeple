@@ -1,11 +1,10 @@
 use feed_rs::model::Entry;
 use frontend::server;
-use game::{Game, Games, OkkazeoAnnounce, Reference};
+use game::{Game, OkkazeoAnnounce, Reference};
 use regex::Regex;
 use std::collections::HashMap;
 use std::env;
 use std::error::Error;
-use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tokio::task::JoinSet;
 use tokio::time;
@@ -14,8 +13,8 @@ use website::agorajeux::get_agorajeux_price_and_url_by_name;
 use website::knapix::get_knapix_prices;
 use website::ludocortex::get_ludocortex_price_and_url;
 use website::okkazeo::{
-    game_still_available, get_atom_feed, get_okkazeo_announce_page, get_okkazeo_barcode,
-    get_okkazeo_city, get_okkazeo_seller,
+    get_atom_feed, get_okkazeo_announce_page, get_okkazeo_barcode, get_okkazeo_city,
+    get_okkazeo_seller,
 };
 use website::philibert::get_philibert_price_and_url;
 use website::ultrajeux::get_ultrajeux_price_and_url;
@@ -23,9 +22,9 @@ use website::ultrajeux::get_ultrajeux_price_and_url;
 use log::Level;
 
 use crate::db::{
-    connect_db, delete_from_all_table_with_id, insert_announce_into_db,
-    select_all_ids_from_oa_table_from_db, select_game_with_id_from_db, update_game_from_db,
+    connect_db, insert_announce_into_db, select_game_with_id_from_db, update_game_from_db,
 };
+use crate::gamechecker::start_game_checker;
 use crate::website::okkazeo::{
     get_okkazeo_game_image, get_okkazeo_shipping, okkazeo_is_pro_seller,
 };
@@ -33,6 +32,7 @@ use crate::website::okkazeo::{
 mod db;
 mod frontend;
 mod game;
+mod gamechecker;
 mod website;
 
 pub async fn get_game_infos(entry: Entry) -> Box<Game> {
@@ -237,49 +237,6 @@ async fn parse_game_feed(db_client: &Client) {
     }
 }
 
-pub async fn check_list_available() {
-    log::info!("[GAMECHECKER] starting game checker thread");
-    let interval = Duration::from_secs(120 * 60); // every 2 hour
-    log::info!(
-        "[GAMECHECKER] checking game availability every {:#?}",
-        interval
-    );
-
-    let db_client = connect_db().await.unwrap();
-
-    loop {
-        log::debug!("[GAMECHECKER] checking game availability");
-        let start = Instant::now();
-
-        // getting a list of all ID in order not to maintain a lock on the vec for too long
-
-        let ids = select_all_ids_from_oa_table_from_db(&db_client)
-            .await
-            .unwrap();
-
-        log::debug!(
-            "[GAMECHECKER] checking availability for {} games",
-            ids.len()
-        );
-
-        for id in ids {
-            if !game_still_available(id as u32).await {
-                // effectively removing ids that need to be removed
-                log::debug!("[GAMECHECKER] removing games with id {}", id);
-                if let Err(e) = delete_from_all_table_with_id(&db_client, id as i32).await {
-                    log::error!("[GAMECHECKER] error deleting from db : {}", e);
-                }
-            }
-        }
-
-        let duration = start.elapsed();
-
-        if duration < interval {
-            tokio::time::sleep(interval - duration).await;
-        }
-    }
-}
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + 'static>> {
     log_panics::init();
@@ -300,7 +257,7 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
     );
 
     let _ = tokio::spawn(async move { server::set_server().await });
-    let _ = tokio::spawn(async move { check_list_available().await });
+    let _ = start_game_checker().await;
 
     loop {
         let start = Instant::now();

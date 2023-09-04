@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use chrono::{DateTime, Utc};
 use tokio_postgres::{Client, Error, NoTls, Row};
 
 use crate::{
@@ -274,10 +275,7 @@ pub async fn select_game_with_id_from_db(db_client: &Client, id: u32) -> Option<
     let row = res.into_iter().next()?;
 
     match craft_game_from_row(db_client, row).await {
-        Ok(game) => {
-            log::debug!("[DB] game crafted from DB: {:#?}", game);
-            Some(game)
-        }
+        Ok(game) => Some(game),
         Err(e) => {
             log::error!("[DB] craft game from row error for id {} : {}", id, e);
             None
@@ -393,6 +391,23 @@ pub async fn select_shipping_from_db(
     }
 
     Ok(ships)
+}
+
+pub async fn select_intervalled_ids_from_oa_table_from_db(
+    db_client: &Client,
+    start_date: DateTime<Utc>,
+    end_date: DateTime<Utc>,
+) -> Result<Vec<i32>, Error> {
+    let select_req = format!(
+        "SELECT oa_id
+                FROM okkazeo_announce oa WHERE oa_last_modification_date > $1 AND oa_last_modification_date < $2"
+    );
+
+    let res = db_client
+        .query(&select_req, &[&start_date, &end_date])
+        .await?;
+
+    res.into_iter().map(|row| row.try_get("oa_id")).collect()
 }
 
 pub async fn select_all_ids_from_oa_table_from_db(db_client: &Client) -> Result<Vec<i32>, Error> {
