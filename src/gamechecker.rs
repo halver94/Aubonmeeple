@@ -5,22 +5,18 @@ use crate::{
     website::okkazeo::game_still_available,
 };
 
-pub async fn task(
-    scrap_interval: tokio::time::Duration,
-    start_date_offset: Duration,
-    duration: Duration,
-) {
+pub async fn task(start_date_offset: Duration, duration: Duration) {
     let db_client = connect_db().await.unwrap();
     loop {
-        let start_date = chrono::Utc::now() + start_date_offset;
-        let end_date = start_date + duration;
+        let start_date = chrono::Utc::now() - start_date_offset;
+        let end_date = start_date - duration;
         log::debug!(
-            "[GAMECHECKER] new loop start : {}, end : {:#?}",
+            "[GAMECHECKER] new loop start : {:#?}, end : {:#?}",
             start_date_offset,
             duration
         );
         let ids =
-            match select_intervalled_ids_from_oa_table_from_db(&db_client, start_date, end_date)
+            match select_intervalled_ids_from_oa_table_from_db(&db_client, end_date, start_date)
                 .await
             {
                 Ok(v) => v,
@@ -30,14 +26,28 @@ pub async fn task(
                 }
             };
 
+        let loop_delay = match start_date_offset.num_days() {
+            0 => Duration::hours(24),
+            7 => Duration::days(7),
+            _ => Duration::days(30),
+        };
+
+        let scrap_interval = if ids.len() != 0 {
+            loop_delay / ids.len() as i32
+        } else {
+            loop_delay
+        };
+
         println!(
-            "[GAMECHECKER] checking {} games for interval (duration {:#?}",
+            "[GAMECHECKER] checking {} games for interval (duration {:#?})",
             ids.len(),
             scrap_interval
         );
+
+        let now = chrono::Utc::now();
         for id in ids {
             log::debug!(
-                "[GAMECHECKER] checking game with id {} (duration {:#?}",
+                "[GAMECHECKER] checking game with id {} (duration {:#?})",
                 id,
                 scrap_interval
             );
@@ -48,7 +58,18 @@ pub async fn task(
                     log::error!("[GAMECHECKER] error deleting from db : {}", e);
                 }
             }
-            tokio::time::sleep(scrap_interval).await;
+            tokio::time::sleep(scrap_interval.to_std().unwrap()).await;
+        }
+
+        let elapsed = chrono::Utc::now() - now;
+        if elapsed < loop_delay {
+            log::debug!(
+                "[GAMECHECKER] elapsed ({:#?}) < loop_delay ({:#?}), sleeping for {:#?}",
+                elapsed,
+                loop_delay,
+                loop_delay - elapsed
+            );
+            tokio::time::sleep((loop_delay - elapsed).to_std().unwrap()).await;
         }
     }
 }
@@ -56,19 +77,8 @@ pub async fn task(
 pub async fn start_game_checker() {
     log::info!("[GAMECHECKER] starting game checker thread");
 
-    let small_interval = tokio::time::Duration::from_secs(20); // for game < 1 week
-    let medium_interval = tokio::time::Duration::from_secs(30); // for 1 week < game < 1 month
-    let big_interval = tokio::time::Duration::from_secs(60); // for game > 1 month
-
-    let _ = tokio::spawn(
-        async move { task(small_interval, Duration::zero(), Duration::days(7)).await },
-    );
-    let _ =
-        tokio::spawn(
-            async move { task(medium_interval, Duration::days(7), Duration::days(30)).await },
-        );
-    let _ =
-        tokio::spawn(
-            async move { task(big_interval, Duration::days(30), Duration::max_value()).await },
-        );
+    let _ = tokio::spawn(async move { task(Duration::zero(), Duration::days(7)).await });
+    let _ = tokio::spawn(async move { task(Duration::days(7), Duration::days(30)).await });
+    let _ = tokio::spawn(async move { task(Duration::days(30), Duration::weeks(52 * 100)).await });
+    // ugly but it works..
 }
