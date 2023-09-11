@@ -1,16 +1,16 @@
 use axum::extract::Query;
 use axum::response::Html;
 use axum::Extension;
-use axum::{routing::get, Router};
+use axum::{extract::Form, routing::get, Router};
 use std::sync::Arc;
 use tokio_postgres::Client;
 use tower_http::services::ServeDir;
 
 use crate::db::{connect_db, select_count_filtered_games_from_db, select_games_from_db};
+use crate::frontend::frontpage::create_html_table;
 use crate::frontend::pagination::generate_pagination_links;
-use crate::game::Games;
 
-use super::filter::Filters;
+use super::filter::{Filters, FiltersForm};
 use super::footer::generate_footer_html;
 use super::pagination::Pagination;
 use super::sort::Sort;
@@ -22,11 +22,11 @@ pub struct State {
     pub sort: Sort,
 }
 
-pub fn create_html_table(games: Games, state: &State) -> String {
-    let params = format!(
-        "page={}&per_page={}{}{}",
-        state.pagination.page,
-        state.pagination.per_page,
+pub fn format_url_params(state: &State) -> String {
+    format!(
+        "?{}{}{}{}{}{}{}{}{}",
+        format!("page={}", state.pagination.page),
+        format!("&per_page={}", state.pagination.per_page),
         if state.filters.city.is_some() {
             format!("&city={}", state.filters.city.as_ref().unwrap())
         } else {
@@ -37,174 +37,86 @@ pub fn create_html_table(games: Games, state: &State) -> String {
         } else {
             String::new()
         },
-    );
-
-    let mut table = String::new();
-    table.push_str(
-        "<style>
-                    table {
-                        border-collapse: collapse;
-                        width: 100%;
-                    }
-                    th, td {
-                        border: 1px solid black;
-                        padding: 8px;
-                        text-align: center;
-                    }
-                    th {
-                        background-color: lightgray;
-                    }
-                   
-                    .flex-container {
-                        display: flex;
-                        align-items: center; /* Alignement vertical */
-                    }
-                    .flex-container img {
-                        margin-right: 10px; /* Espacement entre l'image et le texte */
-                    }
-
-                    </style>",
-    );
-    table.push_str("<table>");
-    table.push_str(
-        format!(
-            "{}{}{}{}{}{}{}",
-            r#"<tr>
-            <th>Updated <button onclick="window.location.href='/?"#,
-            params,
-            r#"&sort=updated';">Sort</button></th>
-            <th>Name</th>
-            <th>City</th>
-            <th>Seller</th>
-            <th>Shipping</th>
-            <th>Deal <button onclick="window.location.href='/?"#,
-            params,
-            r#"&sort=price';">Sort €</button>
-            <button onclick="window.location.href='/?"#,
-            params,
-            r#"&sort=percent';">Sort %</button></th>
-            <th>Okkazeo</th>
-            <th>Shops</th>
-            <th>Note</th>
-        </tr>"#
-        )
-        .as_str(),
-    );
-
-    for game in games.games.iter() {
-        table.push_str("<tr>");
-        table.push_str(&format!(
-            "<td>{}</td>",
-            game.okkazeo_announce
-                .last_modification_date
-                .unwrap()
-                .format("%d/%m/%Y %H:%M")
-        ));
-        table.push_str(&format!(
-            "<td>
-                    <div class=\"flex-container\">
-                        <img src=\"{}\" alt=\"fail\" width=\"100\" height=\"100\" />
-                        {}<br>({})
-                    </div>
-                </td>",
-            game.okkazeo_announce.image,
-            game.okkazeo_announce.name,
-            game.okkazeo_announce.extension
-        ));
-        table.push_str(&format!(
-            "<td>{}</td>",
-            game.okkazeo_announce.city.clone().unwrap_or(String::new())
-        ));
-        table.push_str(&format!(
-            "<td><a href=\"{}\">{} {}<br>({} announces)</a></td>",
-            game.okkazeo_announce.seller.url,
-            game.okkazeo_announce.seller.name,
-            if game.okkazeo_announce.seller.is_pro {
-                "- PRO"
-            } else {
-                ""
-            },
-            game.okkazeo_announce.seller.nb_announces
-        ));
-
-        table.push_str("<td>");
-        for (key, val) in game.okkazeo_announce.shipping.iter() {
-            table.push_str(&format!("- {} : {}€<br>", key, val));
-        }
-        table.push_str("</td>");
-
-        if game.deal.deal_price != 0 {
-            table.push_str(&format!(
-                "<td style=\"color: {}\">{}{}€ ({}{}%)</td>",
-                if game.deal.deal_price < 0 {
-                    "green"
-                } else {
-                    "red"
-                },
-                if game.deal.deal_price >= 0 { "+" } else { "" },
-                game.deal.deal_price,
-                if game.deal.deal_percentage > 0 {
-                    "+"
-                } else {
-                    ""
-                },
-                game.deal.deal_percentage,
-            ));
+        if state.filters.pro.is_some() {
+            format!("&pro={}", state.filters.pro.as_ref().unwrap())
         } else {
-            table.push_str("<td>-</td>");
-        }
-
-        table.push_str(&format!(
-            "<td><a href=\"{}\">{} &euro;</a></td>",
-            game.okkazeo_announce.url, game.okkazeo_announce.price,
-        ));
-
-        table.push_str("<td>");
-        if game.references.is_empty() {
-            table.push_str("-");
+            String::new()
+        },
+        if state.filters.note.is_some() {
+            format!("&note={}", state.filters.note.as_ref().unwrap())
         } else {
-            for val in game.references.values() {
-                table.push_str(&format!(
-                    "<a href=\"{}\">{} : {} &euro;</a><br>",
-                    val.url, val.name, val.price,
-                ));
-            }
-        }
-        table.push_str("</td>");
-
-        if game.review.average_note == 0.0 {
-            table.push_str("<td>-</td>");
+            String::new()
+        },
+        if state.filters.max_price.is_some() {
+            format!("&max_price={}", state.filters.max_price.as_ref().unwrap())
         } else {
-            table.push_str(&format!(
-                "<td>Average note : {:.2}<br><br>",
-                game.review.average_note,
-            ));
-
-            for val in game.review.reviews.values() {
-                table.push_str(&format!(
-                    "<a href=\"{}\">{}: {} ({} reviews)</a><br>",
-                    val.url, val.name, val.note, val.number
-                ));
-            }
-            table.push_str("</td>");
-        }
-        table.push_str("</tr>");
-    }
-
-    table.push_str("</table>");
-    table
+            String::new()
+        },
+        if state.filters.min_price.is_some() {
+            format!("&min_price={}", state.filters.min_price.as_ref().unwrap())
+        } else {
+            String::new()
+        },
+        format!("&sort={}", state.sort.sort),
+    )
 }
 
 pub async fn root(
     pagination: Option<Query<Pagination>>,
-    filters: Option<Query<Filters>>,
     sort: Option<Query<Sort>>,
-
+    filters: Option<Query<Filters>>,
     Extension(db_client): Extension<Arc<Client>>,
+    filters_form: Form<FiltersForm>,
 ) -> Html<String> {
     let mut pagination_param = pagination.unwrap_or_default().0;
-    let filters_param = filters.unwrap_or_default().0;
+    log::debug!("FILTER FORM : {:?}", &filters_form);
+    log::debug!("FILTER PARAM : {:?}", &filters);
+    let mut filters_param = filters.unwrap_or_default().0;
     let sort_param = sort.unwrap_or_default().0;
+
+    if filters_form.0.city_form.is_some() {
+        let note = filters_form
+            .0
+            .note_form
+            .unwrap()
+            .parse::<i32>()
+            .map_or_else(|e| None, |n| Some(n));
+        let max_price = filters_form
+            .0
+            .max_price_form
+            .unwrap()
+            .parse::<i32>()
+            .map_or_else(|e| None, |n| Some(n));
+        let min_price = filters_form
+            .0
+            .min_price_form
+            .unwrap()
+            .parse::<i32>()
+            .map_or_else(|e| None, |n| Some(n));
+        let pro = if filters_form.0.pro_form == Some("off".to_string()) {
+            None
+        } else {
+            Some(true)
+        };
+        let city = if filters_form.0.city_form.as_ref().unwrap().is_empty() {
+            None
+        } else {
+            filters_form.0.city_form
+        };
+        let name = if filters_form.0.name_form.as_ref().unwrap().is_empty() {
+            None
+        } else {
+            filters_form.0.name_form
+        };
+        filters_param = Filters {
+            city: city,
+            name: name,
+            pro: pro,
+            note: note,
+            max_price: max_price,
+            min_price: min_price,
+        }
+    }
 
     let total_items =
         match select_count_filtered_games_from_db(&db_client, filters_param.clone()).await {
@@ -226,10 +138,10 @@ pub async fn root(
         pagination_param.page = 0;
     }
 
-    let state = State {
+    let mut state = State {
         pagination: pagination_param,
         sort: sort_param,
-        filters: filters_param.clone(),
+        filters: filters_param,
     };
 
     let part_games = match select_games_from_db(&db_client, &state).await {
@@ -241,13 +153,13 @@ pub async fn root(
     };
 
     log::debug!(
-        "[SERVER] state {:#?}, len of vec : {}",
+        "[SERVER] state {:?}, len of vec : {}",
         &state,
         part_games.games.len()
     );
     let filter_html = Filters::create_html(&state);
-    let response_html = create_html_table(part_games, &state);
-    let pagination_html = generate_pagination_links(total_items, &state);
+    let response_html = create_html_table(part_games, &mut state);
+    let pagination_html = generate_pagination_links(total_items, &mut state);
     let footer_html = generate_footer_html();
     Html(format!(
         "{}{}{}{}",
@@ -262,7 +174,7 @@ pub async fn set_server() {
     log::info!("[SERVER] connected with DB");
 
     let app = Router::new()
-        .route("/", get(root))
+        .route("/", get(root).post(root))
         .nest_service("/img", ServeDir::new("img"))
         .nest_service("/assets", ServeDir::new("assets"))
         .layer(Extension(client));

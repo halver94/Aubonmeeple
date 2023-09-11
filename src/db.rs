@@ -283,13 +283,6 @@ pub async fn select_game_with_id_from_db(db_client: &Client, id: u32) -> Option<
     }
 }
 
-/*FROM okkazeo_announce oa
-JOIN deal d on d.deal_oa_id = oa.oa_id
-JOIN seller s on s.seller_oa_id = oa.oa_id
-JOIN reviewer r on r.reviewer_oa_id = oa.oa_id
-GROUP BY oa.oa_id, oa.oa_last_modification_date, oa.oa_name, oa.oa_image, oa.oa_price, oa.oa_url, oa.oa_extension, oa.oa_barcode, oa.oa_city
-ORDER BY avg_review_note DESC;*/
-
 pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<Games, Error> {
     let order_by = match state.sort.sort.as_str() {
         "price" => "d.deal_price ASC",
@@ -298,12 +291,68 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
     };
 
     let select_req = format!(
-        "SELECT * 
-                FROM okkazeo_announce oa 
+        "SELECT 
+            oa.oa_name,
+            oa.oa_last_modification_date,
+            oa.oa_id,
+            oa.oa_price,
+            oa.oa_url,
+            oa.oa_extension,
+            oa.oa_image,
+            oa.oa_city,
+            s.seller_name,
+            s.seller_url,
+            s.seller_is_pro,
+            s.seller_nb_announces,
+            d.deal_price,
+            d.deal_percentage
+         FROM okkazeo_announce oa
                 JOIN deal d on d.deal_oa_id = oa.oa_id
+                LEFT JOIN reviewer r on r.reviewer_oa_id = oa.oa_id
                 JOIN seller s on s.seller_oa_id = oa.oa_id
-                WHERE oa.oa_name ilike $1 AND oa.oa_city ilike $2
-                ORDER BY {} LIMIT $3 OFFSET $4",
+                WHERE oa.oa_id IN (
+                    SELECT oa.oa_id
+                    FROM okkazeo_announce oa
+                    LEFT JOIN reviewer r on r.reviewer_oa_id = oa.oa_id
+                    WHERE oa.oa_name ilike $1 AND oa.oa_city ilike $2
+                    AND oa.oa_price > $3
+                    AND oa.oa_price < $4
+                    {}
+                    GROUP BY oa.oa_id
+                    {}
+                )
+                GROUP BY
+                    oa.oa_last_modification_date,
+                    oa.oa_name,
+                    oa.oa_id,
+                    oa.oa_price,
+                    oa.oa_url,
+                    oa.oa_extension,
+                    oa.oa_barcode,
+                    oa.oa_image,
+                    oa.oa_city,
+                    s.seller_name,
+                    s.seller_url,
+                    s.seller_is_pro,
+                    s.seller_nb_announces,
+                    d.deal_price,
+                    d.deal_percentage
+                ORDER BY {} LIMIT $5 OFFSET $6;",
+        if state.filters.pro.is_some() {
+            "AND NOT s.seller_is_pro"
+        } else {
+            ""
+        },
+        if state.filters.note.is_some() {
+            format!(
+                "HAVING SUM(CASE WHEN r.reviewer_number > 0 THEN r.reviewer_note * r.reviewer_number ELSE 0 END) / SUM(CASE WHEN r.reviewer_number > 0 
+                 THEN r.reviewer_number ELSE 1 END) > {}",
+                //"HAVING AVG(r.reviewer_note* r.reviewer_number) / SUM(r.reviewer_number) > {}",
+                state.filters.note.unwrap()
+            )
+        } else {
+            "".to_string()
+        },
         order_by
     );
 
@@ -319,6 +368,8 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
                     "%{}%",
                     state.filters.city.as_ref().unwrap_or(&String::new())
                 ),
+                &(state.filters.min_price.unwrap_or_default() as f32),
+                &(state.filters.max_price.unwrap_or_else(|| 10000) as f32),
                 &(state.pagination.per_page as i64),
                 &((state.pagination.page * state.pagination.per_page) as i64),
             ],
@@ -331,7 +382,7 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
     for row in res {
         let game = match craft_game_from_row(db_client, row).await {
             Ok(game) => {
-                log::debug!("[DB] game crafted from DB: {:#?}", game);
+                //log::debug!("[DB] game crafted from DB: {:#?}", game);
                 game
             }
             Err(e) => {
@@ -350,18 +401,42 @@ pub async fn select_count_filtered_games_from_db(
     filters: Filters,
 ) -> Result<i64, Error> {
     let select_req = format!(
-        "SELECT COUNT(*)
+        "SELECT COUNT(*) FROM (
+                SELECT oa.oa_id
                 FROM okkazeo_announce oa
                 JOIN deal d on d.deal_oa_id = oa.oa_id
-                WHERE oa.oa_name ilike $1 AND oa.oa_city ilike $2"
+                LEFT JOIN reviewer r on r.reviewer_oa_id = oa.oa_id
+                JOIN seller s on s.seller_oa_id = oa.oa_id
+                WHERE oa.oa_name ilike $1 AND oa.oa_city ilike $2
+                AND oa.oa_price > $3 AND oa.oa_price < $4
+                {}
+                GROUP BY oa.oa_id
+                {}
+        ) AS c;",
+        if filters.pro.is_some() {
+            "AND NOT s.seller_is_pro"
+        } else {
+            ""
+        },
+        if filters.note.is_some() {
+            format!(
+                "HAVING SUM(CASE WHEN r.reviewer_number > 0 THEN r.reviewer_note * r.reviewer_number ELSE 0 END) / SUM(CASE WHEN r.reviewer_number > 0 
+                 THEN r.reviewer_number ELSE 1 END) > {}",
+ //               "HAVING AVG(r.reviewer_note* r.reviewer_number) / SUM(r.reviewer_number) > {}",
+                filters.note.unwrap()
+            )
+        } else {
+            "".to_string()
+        },
     );
-
     let res = db_client
         .query(
             &select_req,
             &[
                 &format!("%{}%", filters.name.unwrap_or_default()),
                 &format!("%{}%", filters.city.unwrap_or_default()),
+                &(filters.min_price.unwrap_or_default() as f32),
+                &(filters.max_price.unwrap_or_else(|| 10000) as f32),
             ],
         )
         .await?;

@@ -16,7 +16,7 @@ Features:
 - scrap older annonces
 - add more website comparison
 - add if product in shop is available or not
-- do a proper frontend with react/vue/node JS
+- filter by vendor
 
 Bugfix:
 - if announce updated, deal should be updated as well 
