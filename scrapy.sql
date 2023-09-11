@@ -35,7 +35,7 @@ CREATE TABLE "okkazeo_announce" (
 
 CREATE TABLE "deal" (
   "deal_id" SERIAL PRIMARY KEY,
-  "deal_oa_id" integer REFERENCES okkazeo_announce("oa_id"),
+  "deal_oa_id" integer REFERENCES okkazeo_announce("oa_id") ON DELETE CASCADE,
   "deal_price" integer,
   "deal_percentage" integer
 );
@@ -43,7 +43,7 @@ CREATE TABLE "deal" (
 
 CREATE TABLE "reference" (
   "ref_id" SERIAL PRIMARY KEY,
-  "ref_oa_id" integer REFERENCES okkazeo_announce("oa_id"),
+  "ref_oa_id" integer REFERENCES okkazeo_announce("oa_id") ON DELETE CASCADE,
   "ref_name" text,
   "ref_price" real,
   "ref_url" text,
@@ -52,7 +52,7 @@ CREATE TABLE "reference" (
 
 CREATE TABLE "reviewer" (
   "reviewer_id" SERIAL PRIMARY KEY,
-  "reviewer_oa_id" integer REFERENCES okkazeo_announce("oa_id"),
+  "reviewer_oa_id" integer REFERENCES okkazeo_announce("oa_id") ON DELETE CASCADE,
   "reviewer_name" text,
   "reviewer_url" text,
   "reviewer_note" real,
@@ -61,14 +61,14 @@ CREATE TABLE "reviewer" (
 
 CREATE TABLE "shipping" (
   "ship_id" SERIAL PRIMARY KEY,
-  "ship_oa_id" integer REFERENCES okkazeo_announce("oa_id"),
+  "ship_oa_id" integer REFERENCES okkazeo_announce("oa_id") ON DELETE CASCADE,
   "ship_shipper" text,
   "ship_price" real
 );
 
 CREATE TABLE "seller" (
   "seller_id" SERIAL PRIMARY KEY,
-  "seller_oa_id" integer REFERENCES okkazeo_announce("oa_id"),
+  "seller_oa_id" integer REFERENCES okkazeo_announce("oa_id") ON DELETE CASCADE,
   "seller_name" text,
   "seller_url" text,
   "seller_nb_announces" integer,

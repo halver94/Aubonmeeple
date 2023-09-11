@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::server::State;
+use super::server::{format_url_params, State};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Pagination {
@@ -16,26 +16,7 @@ impl Default for Pagination {
     }
 }
 
-pub fn generate_pagination_links(total_items: usize, state: &State) -> String {
-    let params = format!(
-        "sort={}{}{}{}",
-        state.sort.sort,
-        if state.filters.city.is_some() {
-            format!("&city={}", state.filters.city.as_ref().unwrap())
-        } else {
-            String::new()
-        },
-        if state.filters.name.is_some() {
-            format!("&name={}", state.filters.name.as_ref().unwrap())
-        } else {
-            String::new()
-        },
-        if state.filters.pro {
-            String::from("&pro=true")
-        } else {
-            String::from("&pro=false")
-        },
-    );
+pub fn generate_pagination_links(total_items: usize, state: &mut State) -> String {
     let total_pages = (total_items + state.pagination.per_page - 1) / state.pagination.per_page;
 
     let style = r#"<style>
@@ -67,27 +48,26 @@ pub fn generate_pagination_links(total_items: usize, state: &State) -> String {
 
     // previous button
     if state.pagination.page != 0 {
+        let mut new_state = state.clone();
+        new_state.pagination.page -= 1;
         pagination_html.push_str(&format!(
-            r#"<a href="/?{}&page={}&per_page={}">Previous</a>"#,
-            params,
-            state.pagination.page - 1,
-            state.pagination.per_page,
+            r#"<a href="/{}">Previous</a>"#,
+            format_url_params(&new_state),
         ));
     }
 
     for page in 0..total_pages {
+        let mut new_state = state.clone();
+        new_state.pagination.page = page;
         if page < min_visible_pages || page > total_pages - min_visible_pages - 1 {
-            println!("min visible pages");
             pagination_html.push_str(&format!(
-                r#"<a {} href="/?{}&page={}&per_page={}">{}</a>"#,
+                r#"<a {} href="/{}">{}</a>"#,
                 if page == current_page {
                     r#"class="active""#
                 } else {
                     ""
                 },
-                params,
-                page,
-                state.pagination.per_page,
+                format_url_params(&new_state),
                 page,
             ));
         } else if (current_page > offset && page < current_page - offset)
@@ -98,15 +78,13 @@ pub fn generate_pagination_links(total_items: usize, state: &State) -> String {
             }
         } else {
             pagination_html.push_str(&format!(
-                r#"<a {} href="/?{}&page={}&per_page={}">{}</a>"#,
+                r#"<a {} href="/{}">{}</a>"#,
                 if page == current_page {
                     r#"class="active""#
                 } else {
                     ""
                 },
-                params,
-                page,
-                state.pagination.per_page,
+                format_url_params(&new_state),
                 page,
             ));
         }
@@ -114,15 +92,14 @@ pub fn generate_pagination_links(total_items: usize, state: &State) -> String {
 
     // next button
     if state.pagination.page != total_pages - 1 {
+        let mut new_state = state.clone();
+        new_state.pagination.page += 1;
         pagination_html.push_str(&format!(
-            r#"<a href="/?{}&page={}&per_page={}">Next</a>"#,
-            params,
-            state.pagination.page + 1,
-            state.pagination.per_page,
+            r#"<a href="/{}">Next</a>"#,
+            format_url_params(&new_state),
         ));
     }
     pagination_html.push_str("</div></center>");
 
-    println!("{}", pagination_html);
     pagination_html
 }
