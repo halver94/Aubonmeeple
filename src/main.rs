@@ -240,12 +240,20 @@ async fn parse_game_feed(db_client: &Client) {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + 'static>> {
     log_panics::init();
+
+    // construct a subscriber that prints formatted traces to stdout
+    /*let subscriber = tracing_subscriber::FmtSubscriber::new();
+        // use that subscriber to process traces emitted after this point
+        tracing::subscriber::set_global_default(subscriber)?;
+    */
     //this one is for vscode
     env::set_var("RUST_LOG", "boardgame_finder=debug");
     env_logger::Builder::from_env(
         env_logger::Env::default().default_filter_or(Level::Debug.as_str()),
     )
     .init();
+
+    //console_subscriber::init();
 
     let client = connect_db().await?;
 

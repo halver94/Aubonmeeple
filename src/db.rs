@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
 use tokio_postgres::{Client, Error, NoTls, Row};
+use tracing::instrument;
 
 use crate::{
     frontend::{filter::Filters, server::State},
@@ -284,6 +285,7 @@ pub async fn select_game_with_id_from_db(db_client: &Client, id: u32) -> Option<
 }
 
 pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<Games, Error> {
+    let now = chrono::Utc::now();
     let order_by = match state.sort.sort.as_str() {
         "price" => "d.deal_price ASC",
         "percent" => "d.deal_percentage ASC",
@@ -314,6 +316,7 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
                     SELECT oa.oa_id
                     FROM okkazeo_announce oa
                     LEFT JOIN reviewer r on r.reviewer_oa_id = oa.oa_id
+                    JOIN seller s on s.seller_oa_id = oa.oa_id
                     WHERE oa.oa_name ilike $1 AND oa.oa_city ilike $2
                     AND oa.oa_price > $3
                     AND oa.oa_price < $4
@@ -355,6 +358,10 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
         },
         order_by
     );
+    log::debug!(
+        "Took {} befoe req",
+        (chrono::Utc::now() - now).num_milliseconds()
+    );
 
     let res = db_client
         .query(
@@ -376,6 +383,10 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
         )
         .await?;
 
+    log::debug!(
+        "Took {} after req",
+        (chrono::Utc::now() - now).num_milliseconds()
+    );
     let mut games = Games {
         ..Default::default()
     };
