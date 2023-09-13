@@ -75,6 +75,13 @@ CREATE TABLE "seller" (
   "seller_is_pro" boolean
 );
 
+CREATE INDEX idx_deal_oa_id ON deal (deal_oa_id);
+CREATE INDEX idx_oa_id ON okkazeo_announce (oa_id);
+CREATE INDEX idx_reference_oa_id ON reference (ref_oa_id);
+CREATE INDEX idx_reviewer_oa_id ON reviewer (reviewer_oa_id);
+CREATE INDEX idx_ship_oa_id ON shipping (ship_oa_id);
+CREATE INDEX idx_seller_oa_id ON seller (seller_oa_id);
+
 -- Assignation des privilèges sur les tables
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO scrapy;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO scrapy;

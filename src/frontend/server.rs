@@ -79,24 +79,42 @@ pub async fn root(
             .0
             .note_form
             .unwrap()
-            .parse::<i32>()
-            .map_or_else(|e| None, |n| Some(n));
+            .parse::<f32>()
+            .map_or_else(
+                |e| {
+                    log::error!("note parse error : {}", e);
+                    None
+                },
+                |n| Some(n),
+            );
         let max_price = filters_form
             .0
             .max_price_form
             .unwrap()
             .parse::<i32>()
-            .map_or_else(|e| None, |n| Some(n));
+            .map_or_else(
+                |e| {
+                    log::error!("max price parse error : {}", e);
+                    None
+                },
+                |n| Some(n),
+            );
         let min_price = filters_form
             .0
             .min_price_form
             .unwrap()
             .parse::<i32>()
-            .map_or_else(|e| None, |n| Some(n));
-        let pro = if filters_form.0.pro_form == Some("off".to_string()) {
-            None
-        } else {
+            .map_or_else(
+                |e| {
+                    log::error!("max price parse error : {}", e);
+                    None
+                },
+                |n| Some(n),
+            );
+        let pro = if filters_form.0.pro_form == Some("on".to_string()) {
             Some(true)
+        } else {
+            None
         };
         let city = if filters_form.0.city_form.as_ref().unwrap().is_empty() {
             None
@@ -161,6 +179,7 @@ pub async fn root(
     let response_html = create_html_table(part_games, &mut state);
     let pagination_html = generate_pagination_links(total_items, &mut state);
     let footer_html = generate_footer_html();
+
     Html(format!(
         "{}{}{}{}",
         filter_html, response_html, pagination_html, footer_html

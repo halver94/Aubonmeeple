@@ -7,7 +7,7 @@ pub struct Filters {
     pub city: Option<String>,
     pub name: Option<String>,
     pub pro: Option<bool>,
-    pub note: Option<i32>,
+    pub note: Option<f32>,
     pub max_price: Option<i32>,
     pub min_price: Option<i32>,
 }
@@ -58,10 +58,10 @@ impl Filters {
             <form action=\"/{}\" method=\"post\">
             <div class=\"form-group\"><label for=\"city\">Filter on city :</label><input type=\"text\" id=\"city\" name=\"city_form\" {}></div>
             <div class=\"form-group\"><label for=\"name\">Filter on name :</label><input type=\"text\" id=\"name\" name=\"name_form\" {}></div>
-            <div class=\"form-group\"><label for=\"note\">Minimal note :</label><input type=\"number\" step=\"any\" id=\"note\" name=\"note_form\" {}></div>
-            <div class=\"form-group\"><label for=\"min_price\">Minimal price :</label><input type=\"number\" step=\"any\" id=\"min_price\" name=\"min_price_form\" {}></div>
-            <div class=\"form-group\"><label for=\"max_price\">Maximal price :</label><input type=\"number\" step=\"any\" id=\"max_price\" name=\"max_price_form\" {}></div>
-            <div class=\"form-group\"><label for=\"pro\">Exclude pro vendors</label><input type=\"checkbox\" id=\"pro\" name=\"pro_form\" ></div>
+            <div class=\"form-group\"><label for=\"note\">Minimal note :</label><input type=\"number\" step=\"any\" id=\"note\" name=\"note_form\" {} min=\"0\" max=\"10\"></div>
+            <div class=\"form-group\"><label for=\"min_price\">Minimal price :</label><input type=\"number\" step=\"1\" id=\"min_price\" name=\"min_price_form\" {} min=\"0\"></div>
+            <div class=\"form-group\"><label for=\"max_price\">Maximal price :</label><input type=\"number\" step=\"1\" id=\"max_price\" name=\"max_price_form\" {}></div>
+            <div class=\"form-group\"><label for=\"pro\">Exclude pro vendors</label><input type=\"checkbox\" id=\"pro\" name=\"pro_form\" {}></div>
                     <input type=\"submit\" value=\"Filter\">
                 </form>",
             style,
@@ -71,6 +71,7 @@ impl Filters {
         if state2.filters.note.is_some() {format!("value=\"{}\"", state2.filters.note.unwrap())} else {"".to_string()},
         if state2.filters.min_price.is_some() {format!("value=\"{}\"", state2.filters.min_price.unwrap())} else {"".to_string()},
         if state2.filters.max_price.is_some() {format!("value=\"{}\"", state2.filters.max_price.unwrap())} else {"".to_string()},
+        if state2.filters.pro.is_some() {"checked"} else {""},
         );
         html
     }

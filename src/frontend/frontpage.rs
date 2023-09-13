@@ -2,6 +2,7 @@ use crate::game::Games;
 
 use super::server::{format_url_params, State};
 
+#[tracing::instrument]
 pub fn create_html_table(games: Games, state: &mut State) -> String {
     let mut table = String::new();
     table.push_str(

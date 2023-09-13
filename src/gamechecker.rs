@@ -11,7 +11,7 @@ pub async fn task(start_date_offset: Duration, duration: Duration) {
         let start_date = chrono::Utc::now() - start_date_offset;
         let end_date = start_date - duration;
         log::debug!(
-            "[GAMECHECKER] new loop start : {:#?}, end : {:#?}",
+            "[GAMECHECKER] new loop start : {:?}, end : {:?}",
             start_date_offset,
             duration
         );
@@ -39,7 +39,7 @@ pub async fn task(start_date_offset: Duration, duration: Duration) {
         };
 
         println!(
-            "[GAMECHECKER] checking {} games for interval (duration {:#?})",
+            "[GAMECHECKER] checking {} games for interval (duration {:?})",
             ids.len(),
             scrap_interval
         );
@@ -47,7 +47,7 @@ pub async fn task(start_date_offset: Duration, duration: Duration) {
         let now = chrono::Utc::now();
         for id in ids {
             log::debug!(
-                "[GAMECHECKER] checking game with id {} (duration {:#?})",
+                "[GAMECHECKER] checking game with id {} (duration {:?})",
                 id,
                 scrap_interval
             );
@@ -64,7 +64,7 @@ pub async fn task(start_date_offset: Duration, duration: Duration) {
         let elapsed = chrono::Utc::now() - now;
         if elapsed < loop_delay {
             log::debug!(
-                "[GAMECHECKER] elapsed ({:#?}) < loop_delay ({:#?}), sleeping for {:#?}",
+                "[GAMECHECKER] elapsed ({:?}) < loop_delay ({:?}), sleeping for {:?}",
                 elapsed,
                 loop_delay,
                 loop_delay - elapsed
