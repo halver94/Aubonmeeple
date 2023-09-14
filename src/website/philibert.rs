@@ -1,4 +1,5 @@
 use scraper::{Html, Selector};
+use stringmetrics::levenshtein_limit;
 
 pub async fn get_philibert_price_and_url_by_barcode(barcode: u64) -> Option<(f32, String)> {
     let search = format!(
@@ -74,7 +75,12 @@ pub async fn get_philibert_price_and_url_by_name(name: &str) -> Option<(f32, Str
                 let href_attr = title.value().attr("href").unwrap_or_default();
 
                 log::debug!("[TASK] href : {} , price : {}", href_attr, price_text);
-                if title_text.to_lowercase() == name.to_lowercase() {
+                if levenshtein_limit(
+                    title_text.to_lowercase().as_str(),
+                    name.to_lowercase().as_str(),
+                    5,
+                ) <= 1
+                {
                     return Some((price_text, href_attr.to_string()));
                 }
             }

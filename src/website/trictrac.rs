@@ -1,4 +1,5 @@
 use scraper::{Html, Selector};
+use stringmetrics::levenshtein_limit;
 
 use crate::game::Reviewer;
 
@@ -47,7 +48,12 @@ pub async fn get_trictrac_note(name: &str) -> Option<Reviewer> {
             return None;
         }
 
-        if title.unwrap().to_lowercase() == name.to_lowercase() {
+        if levenshtein_limit(
+            title.unwrap().to_lowercase().as_str(),
+            name.to_lowercase().as_str(),
+            5,
+        ) <= 1
+        {
             return Some(Reviewer {
                 name: "trictrac".to_string(),
                 note: rating_value.unwrap(),

@@ -27,4 +27,5 @@ tokio-postgres = { version = "0.7.9", features = ["with-chrono-0_4"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
 console-subscriber = "0.1.5"
+stringmetrics = "2.2.2"
 

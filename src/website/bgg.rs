@@ -1,4 +1,5 @@
 use scraper::{Html, Selector};
+use stringmetrics::levenshtein_limit;
 
 use crate::game::Reviewer;
 
@@ -33,7 +34,13 @@ pub async fn get_bgg_note(name: &str) -> Option<Reviewer> {
     }
 
     log::debug!("[TASK] Name: {}, rattings : {:#?}", name, bggrating_values);
-    if bggrating_values.len() == 2 && name.to_lowercase() == selected_name.to_lowercase() {
+    if bggrating_values.len() == 2
+        && levenshtein_limit(
+            name.to_lowercase().as_str(),
+            selected_name.to_lowercase().as_str(),
+            5,
+        ) <= 1
+    {
         let rating = bggrating_values[0].clone().parse::<f32>().unwrap_or(0.0);
         let review_cnt = bggrating_values[1].clone().parse::<u32>().unwrap_or(0);
         return Some(Reviewer {

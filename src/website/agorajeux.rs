@@ -1,4 +1,7 @@
 use scraper::{Html, Selector};
+use stringmetrics::levenshtein_limit;
+
+// : become -
 
 pub async fn get_agorajeux_price_and_url_by_name(name: &str) -> Option<(f32, String)> {
     let search = format!(
@@ -38,7 +41,12 @@ pub async fn get_agorajeux_price_and_url_by_name(name: &str) -> Option<(f32, Str
                         price_text,
                         href_attr
                     );
-                    if product_name_text.to_lowercase() == name.to_lowercase() {
+                    if levenshtein_limit(
+                        product_name_text.to_lowercase().as_str(),
+                        name.to_lowercase().as_str(),
+                        5,
+                    ) <= 1
+                    {
                         return Some((price, href_attr.to_string()));
                     }
                 }

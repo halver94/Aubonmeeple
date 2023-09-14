@@ -1,4 +1,5 @@
 use scraper::{Html, Selector};
+use stringmetrics::levenshtein_limit;
 
 pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f32, String)> {
     let search = format!("https://www.ludocortex.fr/jolisearch?s={}", barcode);
@@ -95,7 +96,12 @@ pub async fn get_ludocortex_price_and_url_by_name(name: &String) -> Option<(f32,
             return None;
         }
 
-        if title.unwrap().to_lowercase() == name.to_lowercase() {
+        if levenshtein_limit(
+            title.unwrap().to_lowercase().as_str(),
+            name.to_lowercase().as_str(),
+            5,
+        ) <= 1
+        {
             return Some((regular_price.unwrap(), href.unwrap().to_string()));
         }
     }
