@@ -1,10 +1,12 @@
 use std::{
     collections::HashMap,
+    error::{self},
     fs::File,
     io::{Cursor, Write},
     path::Path,
 };
 
+use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use feed_rs::{
     model::Feed,
     parser::{self, ParseFeedError},
@@ -12,7 +14,7 @@ use feed_rs::{
 use hyper::StatusCode;
 use image::io::Reader as ImageReader;
 use regex::Regex;
-use reqwest::{get, Client, ClientBuilder};
+use reqwest::{get, ClientBuilder};
 use scraper::{Html, Selector};
 
 use crate::game::Seller;
@@ -31,24 +33,12 @@ pub async fn game_still_available(id: u32) -> bool {
 }
 
 pub fn okkazeo_is_pro_seller(document: &Html) -> bool {
-    log::debug!("[TASK] checking if seller is pro");
-
     let class_selector = Selector::parse("i.fas.fa-fw.fa-user-tie.big").unwrap();
 
-    let is_pro_present = document.select(&class_selector).next().is_some();
-
-    if is_pro_present {
-        log::debug!("[TASK] The 'PRO' tag is present.");
-    } else {
-        log::debug!("[TASK] The 'PRO' tag is not present.");
-    }
-
-    is_pro_present
+    document.select(&class_selector).next().is_some()
 }
 
 pub fn get_okkazeo_shipping(document: &Html) -> HashMap<String, f32> {
-    log::debug!("[TASK] getting shipping from okkazeo");
-
     let mut ships = HashMap::<String, f32>::new();
     // Vérifier la présence de 'handshake'
     let handshake_selector = Selector::parse("i.far.fa-fw.fa-handshake").unwrap();
@@ -81,13 +71,10 @@ pub fn get_okkazeo_shipping(document: &Html) -> HashMap<String, f32> {
         ships.insert(truck_name, truck_price);
     }
 
-    log::debug!("[TASK] shipping :{:#?}", ships);
     ships
 }
 
 pub fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
-    log::debug!("[TASK] getting seller from okkazeo");
-
     let seller_selector = Selector::parse(".seller").unwrap();
     let href_selector = Selector::parse(".div-seller").unwrap();
     let nb_annonces_selector = Selector::parse(".nb_annonces").unwrap();
@@ -107,13 +94,15 @@ pub fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
         .parse::<u32>()
         .unwrap();
 
-    log::debug!(
-        "[TASK] seller: {}, href: {}, nb Annonces: {}",
-        seller_name,
-        href_attr,
-        nb_annonces_text
-    );
+    let id = href_attr
+        .split('/')
+        .collect::<Vec<&str>>()
+        .last()?
+        .parse::<u32>()
+        .unwrap();
+
     Some(Seller {
+        id: id,
         name: seller_name.to_string(),
         url: format!(
             "https://www.okkazeo.com/{}",
@@ -125,8 +114,6 @@ pub fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
 }
 
 pub fn get_okkazeo_barcode(document: &Html) -> Option<u64> {
-    log::debug!("[TASK] getting barcode from okkazeo");
-
     let barcode_selector = Selector::parse("i.fa-barcode").unwrap();
     let barcode = if let Some(barcode) = document.select(&barcode_selector).next() {
         barcode
@@ -142,8 +129,6 @@ pub fn get_okkazeo_barcode(document: &Html) -> Option<u64> {
 }
 
 pub fn get_okkazeo_city(document: &Html) -> Option<String> {
-    log::debug!("[TASK] getting city from okkazeo");
-
     let city_selector = Selector::parse("div.gray div.grid-x div.cell").unwrap();
 
     if let Some(city_element) = document.select(&city_selector).next() {
@@ -152,6 +137,88 @@ pub fn get_okkazeo_city(document: &Html) -> Option<String> {
     };
 
     None
+}
+
+pub fn get_okkazeo_announce_price(
+    document: &Html,
+) -> Result<f32, Box<dyn error::Error + Send + Sync>> {
+    let price_selector = Selector::parse(".desc_jeu .prix").unwrap();
+
+    if let Some(price_element) = document.select(&price_selector).next() {
+        let price = price_element.text().collect::<Vec<_>>().join("");
+
+        return Ok(price.replace("€", ".").parse::<f32>()?);
+    };
+
+    Err("error get_okkazeo_price, no entry in select".into())
+}
+
+pub fn get_okkazeo_announce_name(
+    document: &Html,
+) -> Result<String, Box<dyn error::Error + Send + Sync>> {
+    let name_selector = Selector::parse("div.large-12.cell h1").unwrap();
+
+    if let Some(name_element) = document.select(&name_selector).next() {
+        return Ok(name_element.text().collect::<Vec<_>>().join(""));
+    };
+
+    Err("error get_okkazeo_name, no entry in select".into())
+}
+
+pub fn get_okkazeo_announce_extension(
+    document: &Html,
+) -> Result<String, Box<dyn error::Error + Send + Sync>> {
+    let extension_selector = Selector::parse("div.large-12.cell b").unwrap();
+
+    if let Some(extension_element) = document.select(&extension_selector).next() {
+        return Ok(extension_element.text().collect::<Vec<_>>().join(""));
+    };
+
+    Err("error get_okkazeo_extension, no entry in select".into())
+}
+
+pub fn get_okkazeo_announce_modification_date(
+    document: &Html,
+) -> Result<DateTime<Utc>, Box<dyn error::Error + Send + Sync>> {
+    let re = Regex::new(r"Modifiée le (\d{2}/\d{2}/\d{2})").unwrap();
+
+    if let Some(captures) = re.captures(&document.html()) {
+        if let Some(date) = captures.get(1) {
+            let naive_date: NaiveDate = NaiveDate::parse_from_str(date.as_str(), "%d/%m/%y")?;
+
+            // this is a trick as okkazeo announces dont have time, only date, so in order to try to have
+            // them with the same order as the website, I add the current time (reversed as we are going through pages
+            // in reverse time order)
+            let duration = NaiveTime::from_hms_opt(23, 59, 59)
+                .unwrap()
+                .signed_duration_since(Local::now().naive_utc().time());
+
+            let naive_datetime: NaiveDateTime = naive_date.and_time(
+                NaiveTime::from_hms_opt(
+                    duration.num_hours() as u32,
+                    duration.num_minutes() as u32 % 60,
+                    duration.num_seconds() as u32 % 60,
+                )
+                .unwrap(),
+            );
+            let datetime_utc = DateTime::<Utc>::from_utc(naive_datetime, Utc);
+            return Ok(datetime_utc);
+        }
+    }
+
+    Err("error get_okkazeo_modification_date, no entry in select".into())
+}
+
+pub fn get_okkazeo_announce_image(
+    document: &Html,
+) -> Result<String, Box<dyn error::Error + Send + Sync>> {
+    let image_selector = Selector::parse("div.image-wrapper.image img").unwrap();
+
+    if let Some(image_element) = document.select(&image_selector).next() {
+        return Ok(image_element.value().attr("src").unwrap().to_string());
+    };
+
+    Err("error get_okkazeo_image, no entry in select".into())
 }
 
 pub async fn get_okkazeo_announce_page(id: u32) -> (Html, StatusCode) {
@@ -170,7 +237,7 @@ pub async fn get_okkazeo_announce_page(id: u32) -> (Html, StatusCode) {
     (document, http_code)
 }
 
-pub async fn get_okkazeo_game_image(url: &str) -> Result<String, Box<dyn std::error::Error>> {
+pub async fn download_okkazeo_game_image(url: &str) -> Result<String, Box<dyn std::error::Error>> {
     log::debug!("[TASK] getting image from {}", url);
     let response = get(url).await?;
     let image_bytes = response.bytes().await?;
@@ -215,4 +282,39 @@ pub async fn get_atom_feed() -> Result<Feed, ParseFeedError> {
         .await
         .unwrap();
     parser::parse(content.as_ref())
+}
+
+pub async fn get_games_from_page(
+    page: u32,
+) -> Result<Vec<u32>, Box<dyn error::Error + Send + Sync>> {
+    let search = format!("https:///www.okkazeo.com/jeux/arrivages?page={}", page);
+    log::debug!("getting okkazeo page : {}", &search);
+
+    let client = ClientBuilder::new()
+        .redirect(reqwest::redirect::Policy::none())
+        .build()
+        .unwrap();
+    let response = client.get(search).send().await?;
+    let content = response.bytes().await?;
+    let document = Html::parse_document(std::str::from_utf8(&content)?);
+
+    let mbs_selector = Selector::parse(".mbs").unwrap();
+    let href_selector = Selector::parse(".mbs .h4-like.titre a[href]").unwrap();
+
+    let mut links = Vec::new();
+    for mbs_element in document.select(&mbs_selector) {
+        for element in mbs_element.select(&href_selector) {
+            if let Some(href) = element.value().attr("href") {
+                let ids = href
+                    .split('/')
+                    .collect::<Vec<&str>>()
+                    .last()
+                    .unwrap()
+                    .parse::<u32>()?;
+                links.push(ids);
+            }
+        }
+    }
+
+    Ok(links)
 }

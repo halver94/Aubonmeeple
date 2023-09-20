@@ -91,7 +91,7 @@ pub fn generate_pagination_links(total_items: usize, state: &mut State) -> Strin
     }
 
     // next button
-    if state.pagination.page != total_pages - 1 {
+    if total_pages != 0 && state.pagination.page != total_pages - 1 {
         let mut new_state = state.clone();
         new_state.pagination.page += 1;
         pagination_html.push_str(&format!(

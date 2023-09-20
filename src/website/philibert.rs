@@ -34,7 +34,6 @@ pub async fn get_philibert_price_and_url_by_barcode(barcode: u64) -> Option<(f32
                     .unwrap()
                     .contains(&barcode.to_string())
                 {
-                    log::debug!("[TASK] href : {} , barcode : {}", href_attr, barcode);
                     return Some((price_text, href_attr.to_string()));
                 }
             }
@@ -73,7 +72,6 @@ pub async fn get_philibert_price_and_url_by_name(name: &str) -> Option<(f32, Str
                 let title_text = title_text.trim();
                 let href_attr = title.value().attr("href").unwrap_or_default();
 
-                log::debug!("[TASK] href : {} , price : {}", href_attr, price_text);
                 if title_text.to_lowercase() == name.to_lowercase() {
                     return Some((price_text, href_attr.to_string()));
                 }

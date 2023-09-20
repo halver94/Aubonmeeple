@@ -36,13 +36,6 @@ pub async fn get_trictrac_note(name: &str) -> Option<Reviewer> {
             .and_then(|node| node.value().attr("content"))
             .and_then(|content| content.parse::<u32>().ok());
 
-        log::debug!(
-            "[TASK] title: {:#?}, review value {:#?}, count : {:#?}",
-            title,
-            rating_value,
-            review_count
-        );
-
         if rating_value.is_none() || title.is_none() || review_count.is_none() {
             return None;
         }

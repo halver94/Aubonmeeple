@@ -32,6 +32,7 @@ pub struct Reviewer {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Seller {
+    pub id: u32,
     pub name: String,
     pub url: String,
     pub nb_announces: u32,
@@ -50,7 +51,7 @@ pub struct OkkazeoAnnounce {
     pub seller: Seller,
     pub barcode: Option<u64>,
     pub city: Option<String>,
-    pub last_modification_date: Option<DateTime<Utc>>,
+    pub last_modification_date: DateTime<Utc>,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -92,10 +93,6 @@ impl Eq for Game {}
 
 impl Game {
     pub fn get_deal_advantage(&mut self) {
-        log::debug!(
-            "[TASK] calculating deal advantage for {}",
-            self.okkazeo_announce.name
-        );
         // okkazeo is counted as a ref, so we need at least 2 refs
         if self.references.is_empty() {
             log::debug!("[TASK] no references for {}", self.okkazeo_announce.name);
@@ -125,7 +122,6 @@ impl Game {
     }
 
     pub async fn get_reviews(&mut self) {
-        log::debug!("[TASK] getting reviews for {}", self.okkazeo_announce.name);
         let reviewer = get_trictrac_note(&self.okkazeo_announce.name).await;
         if reviewer.is_some() {
             self.review
