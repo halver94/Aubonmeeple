@@ -2,8 +2,8 @@ use crate::game::Games;
 
 use super::server::{format_url_params, State};
 
-#[tracing::instrument]
 pub fn create_html_table(games: Games, state: &mut State) -> String {
+    let mut init_state = state.clone();
     let mut table = String::new();
     table.push_str(
         "<style>
@@ -37,8 +37,8 @@ pub fn create_html_table(games: Games, state: &mut State) -> String {
             r#"<tr>
             <th>Updated <button onclick="window.location.href='/"#,
             {
-                state.sort.sort = "updated".to_string();
-                format_url_params(state)
+                init_state.sort.sort = "updated".to_string();
+                format_url_params(&init_state)
             },
             r#"';">Sort</button></th>
             <th>Name</th>
@@ -47,14 +47,14 @@ pub fn create_html_table(games: Games, state: &mut State) -> String {
             <th>Shipping</th>
             <th>Deal <button onclick="window.location.href='/"#,
             {
-                state.sort.sort = "price".to_string();
-                format_url_params(state)
+                init_state.sort.sort = "price".to_string();
+                format_url_params(&init_state)
             },
             r#"';">Sort €</button>
             <button onclick="window.location.href='/"#,
             {
-                state.sort.sort = "percent".to_string();
-                format_url_params(state)
+                init_state.sort.sort = "percent".to_string();
+                format_url_params(&init_state)
             },
             r#"';">Sort %</button></th>
             <th>Okkazeo</th>
@@ -71,7 +71,6 @@ pub fn create_html_table(games: Games, state: &mut State) -> String {
             "<td>{}</td>",
             game.okkazeo_announce
                 .last_modification_date
-                .unwrap()
                 .format("%d/%m/%Y %H:%M")
         ));
         table.push_str(&format!(
@@ -90,13 +89,24 @@ pub fn create_html_table(games: Games, state: &mut State) -> String {
             game.okkazeo_announce.city.clone().unwrap_or(String::new())
         ));
         table.push_str(&format!(
-            "<td><a href=\"{}\">{} {}<br>({} announces)</a></td>",
+            "<td>
+                <a href=\"{}\" target=\"_blank\">{} {}
+                    <a href=\'/{}\' target=\"_blank\">
+                        <img src=\"assets/filter.png\" alt=\"fail\" width=\"20\" height=\"20\" />
+                    </a>
+                <br>({} announces)
+                </a>
+            </td>",
             game.okkazeo_announce.seller.url,
             game.okkazeo_announce.seller.name,
             if game.okkazeo_announce.seller.is_pro {
                 "- PRO"
             } else {
                 ""
+            },
+            {
+                init_state.filters.vendor = Some(game.okkazeo_announce.seller.name.clone());
+                format_url_params(&init_state)
             },
             game.okkazeo_announce.seller.nb_announces
         ));
@@ -129,7 +139,7 @@ pub fn create_html_table(games: Games, state: &mut State) -> String {
         }
 
         table.push_str(&format!(
-            "<td><a href=\"{}\">{} &euro;</a></td>",
+            "<td><a href=\"{}\" target=\"_blank\">{} &euro;</a></td>",
             game.okkazeo_announce.url, game.okkazeo_announce.price,
         ));
 
@@ -139,7 +149,7 @@ pub fn create_html_table(games: Games, state: &mut State) -> String {
         } else {
             for val in game.references.values() {
                 table.push_str(&format!(
-                    "<a href=\"{}\">{} : {} &euro;</a><br>",
+                    "<a href=\"{}\" target=\"_blank\">{} : {} &euro;</a><br>",
                     val.url, val.name, val.price,
                 ));
             }
@@ -156,7 +166,7 @@ pub fn create_html_table(games: Games, state: &mut State) -> String {
 
             for val in game.review.reviews.values() {
                 table.push_str(&format!(
-                    "<a href=\"{}\">{}: {} ({} reviews)</a><br>",
+                    "<a href=\"{}\" target=\"_blank\">{}: {} ({} reviews)</a><br>",
                     val.url, val.name, val.note, val.number
                 ));
             }

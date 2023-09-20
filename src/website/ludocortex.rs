@@ -32,13 +32,6 @@ pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f3
             .replace(',', ".")
             .parse::<f32>();
 
-        log::debug!(
-            "[TASK] title: {:?}, href: {:#?}, price: {:#?}",
-            title,
-            href,
-            regular_price
-        );
-
         if href.is_none() || title.is_none() || regular_price.is_err() {
             return None;
         }
@@ -83,13 +76,6 @@ pub async fn get_ludocortex_price_and_url_by_name(name: &String) -> Option<(f32,
             .replace("&nbsp;€", "")
             .replace(',', ".")
             .parse::<f32>();
-
-        log::debug!(
-            "[TASK] title: {:?}, href: {:?}, regular price: {:?}",
-            title,
-            href,
-            regular_price
-        );
 
         if href.is_none() || title.is_none() || regular_price.is_err() {
             return None;

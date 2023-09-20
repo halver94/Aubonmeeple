@@ -13,14 +13,9 @@ Parsing Bugfix
 
 Features:
 - poc a levenstein distance heuristic when comparing names
-- scrap older annonces
 - add more website comparison
 - add if product in shop is available or not
-- filter by vendor
 
 Bugfix:
-- if announce updated, deal should be updated as well 
-- if announce updated, shipping cost should be updated
 
 Refacto:
-- check and replace all unwrap

@@ -32,7 +32,6 @@ pub async fn get_bgg_note(name: &str) -> Option<Reviewer> {
         bggrating_values.push(ratings.to_string());
     }
 
-    log::debug!("[TASK] Name: {}, rattings : {:#?}", name, bggrating_values);
     if bggrating_values.len() == 2 && name.to_lowercase() == selected_name.to_lowercase() {
         let rating = bggrating_values[0].clone().parse::<f32>().unwrap_or(0.0);
         let review_cnt = bggrating_values[1].clone().parse::<u32>().unwrap_or(0);

@@ -20,6 +20,14 @@ GRANT ALL PRIVILEGES ON DATABASE scraper TO scrapy;
 -- Connexion à la base de données
 \c scraper;
 
+CREATE TABLE "seller" (
+  "seller_id" integer PRIMARY KEY,
+  "seller_name" text,
+  "seller_url" text,
+  "seller_nb_announces" integer,
+  "seller_is_pro" boolean
+);
+
 CREATE TABLE "okkazeo_announce" (
   "oa_id" integer UNIQUE NOT NULL,
   "oa_last_modification_date" timestamptz NOT NULL,
@@ -28,6 +36,7 @@ CREATE TABLE "okkazeo_announce" (
   "oa_price" real NOT NULL,
   "oa_url" text NOT NULL,
   "oa_extension" text,
+  "oa_seller" integer REFERENCES seller("seller_id"),
   "oa_barcode" bigint,
   "oa_city" text,
   "oa_nbr_player" integer
@@ -66,21 +75,13 @@ CREATE TABLE "shipping" (
   "ship_price" real
 );
 
-CREATE TABLE "seller" (
-  "seller_id" SERIAL PRIMARY KEY,
-  "seller_oa_id" integer REFERENCES okkazeo_announce("oa_id") ON DELETE CASCADE,
-  "seller_name" text,
-  "seller_url" text,
-  "seller_nb_announces" integer,
-  "seller_is_pro" boolean
-);
 
 CREATE INDEX idx_deal_oa_id ON deal (deal_oa_id);
 CREATE INDEX idx_oa_id ON okkazeo_announce (oa_id);
 CREATE INDEX idx_reference_oa_id ON reference (ref_oa_id);
 CREATE INDEX idx_reviewer_oa_id ON reviewer (reviewer_oa_id);
 CREATE INDEX idx_ship_oa_id ON shipping (ship_oa_id);
-CREATE INDEX idx_seller_oa_id ON seller (seller_oa_id);
+CREATE INDEX idx_seller ON seller (seller_id);
 
 -- Assignation des privilèges sur les tables
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO scrapy;

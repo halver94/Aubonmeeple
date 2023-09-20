@@ -32,12 +32,6 @@ pub async fn get_agorajeux_price_and_url_by_name(name: &str) -> Option<(f32, Str
                 if let Some(product_name) = product_name_element {
                     let product_name_text = product_name.text().collect::<String>();
                     let product_name_text = product_name_text.trim();
-                    log::debug!(
-                        "[TASK] Product Name: {}, Price: {}, Href: {}",
-                        product_name_text,
-                        price_text,
-                        href_attr
-                    );
                     if product_name_text.to_lowercase() == name.to_lowercase() {
                         return Some((price, href_attr.to_string()));
                     }

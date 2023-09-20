@@ -24,16 +24,21 @@ pub struct State {
 
 pub fn format_url_params(state: &State) -> String {
     format!(
-        "?{}{}{}{}{}{}{}{}{}",
+        "?{}{}{}{}{}{}{}{}{}{}",
         format!("page={}", state.pagination.page),
         format!("&per_page={}", state.pagination.per_page),
-        if state.filters.city.is_some() {
-            format!("&city={}", state.filters.city.as_ref().unwrap())
-        } else {
-            String::new()
-        },
-        if state.filters.name.is_some() {
-            format!("&name={}", state.filters.name.as_ref().unwrap())
+        state
+            .filters
+            .city
+            .as_ref()
+            .map_or(String::new(), |city| format!("&city={}", city)),
+        state
+            .filters
+            .name
+            .as_ref()
+            .map_or(String::new(), |name| format!("&name={}", name)),
+        if state.filters.vendor.is_some() {
+            format!("&vendor={}", state.filters.vendor.as_ref().unwrap())
         } else {
             String::new()
         },
@@ -126,9 +131,15 @@ pub async fn root(
         } else {
             filters_form.0.name_form
         };
+        let vendor = if filters_form.0.vendor_form.as_ref().unwrap().is_empty() {
+            None
+        } else {
+            filters_form.0.vendor_form
+        };
         filters_param = Filters {
             city: city,
             name: name,
+            vendor: vendor,
             pro: pro,
             note: note,
             max_price: max_price,
@@ -146,10 +157,6 @@ pub async fn root(
         };
 
     log::debug!("[SERVER] counting {} games entries from db", total_items);
-
-    if total_items == 0 {
-        return Html(String::new());
-    }
 
     let max_page = total_items / pagination_param.per_page;
     if max_page < pagination_param.page {
@@ -175,6 +182,7 @@ pub async fn root(
         &state,
         part_games.games.len()
     );
+
     let filter_html = Filters::create_html(&state);
     let response_html = create_html_table(part_games, &mut state);
     let pagination_html = generate_pagination_links(total_items, &mut state);

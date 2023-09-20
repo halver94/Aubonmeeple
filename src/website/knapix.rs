@@ -1,8 +1,10 @@
+use std::error;
+
 use scraper::{Html, Selector};
 
 use crate::game::{Game, Reference};
 
-pub async fn get_knapix_prices(game: &mut Game) {
+pub async fn get_knapix_prices(game: &mut Game) -> Result<(), Box<dyn error::Error>> {
     let name = game.okkazeo_announce.name.replace(' ', "+");
     let search = format!(
         "https://www.knapix.com/comparateur.php?nom_jeu={}&checkbox-exact=on&affiner=",
@@ -10,13 +12,13 @@ pub async fn get_knapix_prices(game: &mut Game) {
     );
 
     log::debug!("[TASK] searching knapix {}", search);
-    let content = reqwest::get(search).await.unwrap().bytes().await.unwrap();
-    let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
+    let content = reqwest::get(search).await?.bytes().await?;
+    let document = Html::parse_document(std::str::from_utf8(&content)?);
 
     // choper <tr data-href="/r/127347999"> pou rla redirection vers le site
-    let row_selector = Selector::parse("tr[data-href]").unwrap();
-    let img_selector = Selector::parse("img[alt]").unwrap();
-    let price_selector = Selector::parse(".prix").unwrap();
+    let row_selector = Selector::parse("tr[data-href]")?;
+    let img_selector = Selector::parse("img[alt]")?;
+    let price_selector = Selector::parse(".prix")?;
 
     for row in document.select(&row_selector) {
         let url = format!(
@@ -35,14 +37,14 @@ pub async fn get_knapix_prices(game: &mut Game) {
                     .trim()
                     .replace(" €", "")
                     .replace(',', ".")
-                    .parse::<f32>();
+                    .parse::<f32>()?;
                 match alt_value.as_str() {
                     "agorajeux" | "philibert" | "ultrajeux" => {
                         game.references.insert(
                             String::from(alt_value.as_str()),
                             Reference {
                                 name: String::from(alt_value.as_str()),
-                                price: price.unwrap(),
+                                price: price,
                                 url,
                             },
                         );
@@ -52,4 +54,6 @@ pub async fn get_knapix_prices(game: &mut Game) {
             }
         }
     }
+
+    Ok(())
 }
