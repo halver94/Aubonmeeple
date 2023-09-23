@@ -3,8 +3,9 @@ use std::collections::HashMap;
 use chrono::{DateTime, Utc};
 use tokio_postgres::{Client, Error, NoTls, Row};
 
+use crate::frontlib::server::State;
 use crate::{
-    frontend::{filter::Filters, server::State},
+    frontlib::filter::Filters,
     game::{Deal, Game, Games, OkkazeoAnnounce, Reference, Review, Reviewer, Seller},
 };
 

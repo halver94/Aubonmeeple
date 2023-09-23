@@ -1,9 +1,9 @@
 use chrono::Duration;
 
-use crate::{
-    db::{connect_db, delete_from_all_table_with_id, select_intervalled_ids_from_oa_table_from_db},
-    website::okkazeo::game_still_available,
+use boardgame_finder::db::{
+    connect_db, delete_from_all_table_with_id, select_intervalled_ids_from_oa_table_from_db,
 };
+use boardgame_finder::website::okkazeo::game_still_available;
 
 pub async fn task(start_date_offset: Duration, duration: Duration) {
     let db_client = connect_db().await.unwrap();

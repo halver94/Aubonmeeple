@@ -7,8 +7,9 @@ use tokio_postgres::Client;
 use tower_http::services::ServeDir;
 
 use crate::db::{connect_db, select_count_filtered_games_from_db, select_games_from_db};
-use crate::frontend::frontpage::create_html_table;
-use crate::frontend::pagination::generate_pagination_links;
+use crate::frontlib::frontpage::create_html_table;
+use crate::frontlib::header::generate_header_html;
+use crate::frontlib::pagination::generate_pagination_links;
 
 use super::filter::{Filters, FiltersForm};
 use super::footer::generate_footer_html;
@@ -183,14 +184,15 @@ pub async fn root(
         part_games.games.len()
     );
 
+    let header_html = generate_header_html();
     let filter_html = Filters::create_html(&state);
     let response_html = create_html_table(part_games, &mut state);
     let pagination_html = generate_pagination_links(total_items, &mut state);
     let footer_html = generate_footer_html();
 
     Html(format!(
-        "{}{}{}{}",
-        filter_html, response_html, pagination_html, footer_html
+        "{}{}{}{}{}",
+        header_html, filter_html, response_html, pagination_html, footer_html
     ))
 }
 

@@ -57,6 +57,7 @@ impl Filters {
         </style>";
 
         let html = format!("{}
+            <div>
             <form action=\"/{}\" method=\"post\">
             <div class=\"form-group\"><label for=\"city\">Filter on city :</label><input type=\"text\" id=\"city\" name=\"city_form\" {}></div>
             <div class=\"form-group\"><label for=\"name\">Filter on name :</label><input type=\"text\" id=\"name\" name=\"name_form\" {}></div>
@@ -66,7 +67,8 @@ impl Filters {
             <div class=\"form-group\"><label for=\"max_price\">Maximal price :</label><input type=\"number\" step=\"1\" id=\"max_price\" name=\"max_price_form\" {}></div>
             <div class=\"form-group\"><label for=\"pro\">Exclude pro vendors</label><input type=\"checkbox\" id=\"pro\" name=\"pro_form\" {}></div>
                     <input type=\"submit\" value=\"Filter\">
-                </form>",
+                </form>
+            </div>",
             style,
             params,
         if state2.filters.city.is_some() {format!("value=\"{}\"", state2.filters.city.unwrap())} else {"".to_string()},

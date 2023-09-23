@@ -2,23 +2,21 @@ use std::time::Duration;
 
 use tokio::time;
 
-use crate::{
-    db::{connect_db, insert_announce_into_db, select_game_with_id_from_db},
-    get_game_infos,
-    website::okkazeo::get_games_from_page,
-};
+use boardgame_finder::db::{connect_db, insert_announce_into_db, select_game_with_id_from_db};
+use boardgame_finder::website::okkazeo::get_games_from_page;
+
+use crate::get_game_infos;
 
 pub async fn start_crawler() {
     log::info!("starting crawler thread");
 
     let db_client = connect_db().await.unwrap();
 
-    let interval = Duration::from_secs(60);
+    let interval = Duration::from_secs(20);
     let mut interval_stream = time::interval(interval);
 
     let mut page = 1;
     loop {
-        log::debug!("crawler tick");
         match get_games_from_page(page).await {
             Err(e) => log::error!("error getting game from page {} :{}", page, e),
             Ok(v) => {
@@ -38,14 +36,11 @@ pub async fn start_crawler() {
                                 }
                             }
                         }
+                        interval_stream.tick().await;
                     }
                 }
             }
         }
-        //interval_stream.tick().await;
         page += 1;
     }
-    // every 2min get next page
-    // parse page and games
-    // insert into DB
 }
