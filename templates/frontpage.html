@@ -1,0 +1,166 @@
+{% macro url_param(page, per_page, city, name, vendor, pro, note, max_price, min_price, sort) -%}
+page={{ page }}
+&per_page={{per_page}}
+&city={{city}}
+&name={{name}}
+{% if vendor is string -%} 
+&vendor={{vendor}}
+{% endif -%}
+{% if pro -%} 
+&pro={{pro}}
+{% endif -%}
+{% if note is number -%} 
+&note={{note}}
+{% endif -%}
+{% if max_price is string -%} 
+&max_price={{max_price}}
+{% endif -%}
+{% if min_price is number -%} 
+&min_price={{min_price}}
+{% endif -%}
+{% if sort is string -%} 
+&sort={{sort}}
+{% endif -%}
+{% endmacro url_param -%}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="{{style_css}}">
+</head>
+<body>
+    <div id="banner">
+        <div id="wrapper">
+            <div id="container">
+                <a><img class="banner-img" src="{{background_img}}" alt="fail"></a>
+            </div>
+        </div>
+    </div>
+    <div>
+        <form action="/{{url_params}}" method="post">
+            <div class="form-group">
+                <label for="city">Filter on city :</label>
+                <input type="text" id="city" name="city_form" value="{{ state.filters.city | default(value="") }}"></div>
+            <div class="form-group">
+                <label for="name">Filter on name :</label>
+                <input type="text" id="name" name="name_form" value="{{ state.filters.name | default(value="") }}"></div>
+            <div class="form-group">
+                <label for="vendor">Filter on vendor :</label>
+                <input type="text" id="vendor" name="vendor_form" value="{{ state.filters.vendor | default(value="") }}"></div>
+            <div class="form-group">
+                <label for="note">Minimal note :</label>
+                <input type="number" step="any" id="note" name="note_form" value="{{ state.filters.note | default(value="") }}" min="0" max="10"></div>
+            <div class="form-group">
+                <label for="min_price">Minimal price :</label>
+                <input type="number" step="1" id="min_price" name="min_price_form" value="{{ state.filters.min_price | default(value="") }}" min="0"></div>
+            <div class="form-group">
+                <label for="max_price">Maximal price :</label>
+                <input type="number" step="1" id="max_price" name="max_price_form" value="{{ state.filters.max_price | default(value="") }}" min="0"></div>
+            <div class="form-group">
+                <label for="pro">Exclude pro vendors</label>
+                <input type="checkbox" id="pro" name="pro_form" {% if state.filters.pro -%}{{ "checked" }}{% endif -%}></div>
+            <input type="submit" value="Filter">
+        </form>
+    </div>
+    <table>
+        <tr>
+            <th>Updated <button onclick="window.location.href='/{{url_param_sort_updated}}';">Sort</button></th>
+            <th>Name</th>
+            <th>City</th>
+            <th>Seller</th>
+            <th>Shipping</th>
+            <th>Deal <button onclick="window.location.href='/{{url_param_sort_price}}';">Sort €</button>
+            <button onclick="window.location.href='/{{url_param_sort_percent}}';">Sort %</button></th>
+            <th>Okkazeo</th>
+            <th>Shops</th>
+            <th>Note</th>
+        </tr>
+        {% for game in games -%}
+        <tr>
+            <td>{{game.okkazeo_announce.last_modification_date | date(format="%d/%m/%Y %H:%M")}}</td>
+            <td>
+                <div class="flex-container">
+                    <img src="{{game.okkazeo_announce.image}}" alt="fail" width="100" height="100" />
+                    {{game.okkazeo_announce.name}}<br>({{game.okkazeo_announce.extension}})
+                </div>
+            </td>
+            <td>{{game.okkazeo_announce.city}}</td>
+            <td>
+                <a href="{{game.okkazeo_announce.seller.url}}" target="_blank">{{game.okkazeo_announce.seller.name}} 
+                    {% if game.okkazeo_announce.seller.is_pro -%} - PRO {% endif -%}
+                    <a href="/?{{ self::url_param(
+                                page=state.pagination.page,
+                                per_page=state.pagination.per_page, 
+                                city=state.filters.city, 
+                                name=state.filters.name, 
+                                vendor=game.okkazeo_announce.seller.name, 
+                                pro=state.filters.pro, 
+                                note=state.filters.note, 
+                                max_price=state.filters.max_price, 
+                                min_price=state.filters.min_price, 
+                                sort=state.sort.sort) }}" target="_blank">
+                        <img src="assets/filter.png" alt="fail" width="20" height="20" />
+                    </a>
+                <br>({{game.okkazeo_announce.seller.nb_announces}} announces)
+                </a>
+            </td>
+            <td>
+            {% for key, val in game.okkazeo_announce.shipping -%}
+                - {{key}} : {{val | round(precision=1)}}€<br>
+            {% endfor -%}
+            </td>
+            {% if game.deal.deal_price < 0 -%} 
+                {% set color = "green" -%}
+                {% set sign = "" -%}
+            {% else -%}
+                {% set color = "red" -%}
+                {% set sign = "+" -%}
+             {% endif -%}
+            {% if game.deal.deal_price != 0 -%} 
+            <td style="color:{{color}}">
+                {{sign}}{{game.deal.deal_price}}€ ({{sign}}{{game.deal.deal_percentage}}%)
+            </td>
+            {% else -%}
+            <td>-</td>
+            {% endif -%}
+            <td>
+                <a href='{{game.okkazeo_announce.url}}' target="_blank">{{game.okkazeo_announce.price | round(precision=2)}} €</a>
+            </td>
+            <td>
+            {% for key, val in game.references -%}
+                <a href="{{val.url}}" target="_blank">{{val.name}} : {{val.price | round(precision=2)}} &euro;</a><br>
+            {% endfor -%}
+            </td>
+            <td>
+            {% if game.review.average_note == 0 -%}
+                -
+            {% else -%}
+                Average note : {{game.review.average_note | round(precision=2)}}<br><br>
+                {% for key, val in game.review.reviews -%}
+                    <a href="{{val.url}}" target="_blank">{{val.name}} : {{val.note | round(precision=2)}} ( {{val.number}} reviews)</a><br>
+                {% endfor -%}
+            {% endif -%}
+            </td>
+
+        </tr>
+        {% endfor -%}
+    </table>
+    <div>
+        <center>
+            <div class="pagination">
+                {{ pagination | safe}}
+            </div>
+        </center>
+    </div>
+
+    <footer>
+        <a href="https://paypal.me/Cravail" target="_blank">
+            <img src="assets/bmc.png" alt="fail" width="160" height="60" />
+        </a>
+        <a href="https://github.com/halver94/Scrapy" target="_blank">
+            <img src="assets/github.jpg" alt="fail" width="160" height="60" />
+        </a>
+    </footer>
+</body>
+</html>
