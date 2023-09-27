@@ -1,26 +1,11 @@
 {% macro url_param(page, per_page, city, name, vendor, pro, note, max_price, min_price, sort) -%}
-page={{ page }}
-&per_page={{per_page}}
-&city={{city}}
-&name={{name}}
-{% if vendor is string -%} 
-&vendor={{vendor}}
-{% endif -%}
-{% if pro -%} 
-&pro={{pro}}
-{% endif -%}
-{% if note is number -%} 
-&note={{note}}
-{% endif -%}
-{% if max_price is string -%} 
-&max_price={{max_price}}
-{% endif -%}
-{% if min_price is number -%} 
-&min_price={{min_price}}
-{% endif -%}
-{% if sort is string -%} 
-&sort={{sort}}
-{% endif -%}
+page={{ page }}&per_page={{per_page}}&city={{city}}&name={{name}}
+{% if vendor is string -%}&vendor={{vendor}}{% endif -%}
+{% if pro -%}&pro={{pro}}{% endif -%}
+{% if note is number -%}&note={{note}}{% endif -%}
+{% if max_price is string -%}&max_price={{max_price}}{% endif -%}
+{% if min_price is number -%}&min_price={{min_price}}{% endif -%}
+{% if sort is string -%}&sort={{sort}}{% endif -%}
 {% endmacro url_param -%}
 
 <!DOCTYPE html>
@@ -37,7 +22,7 @@ page={{ page }}
             </div>
         </div>
     </div>
-    <div>
+    <div id="form-container">
         <form action="/{{url_params}}" method="post">
             <div class="form-group">
                 <label for="city">Filter on city :</label>
@@ -62,6 +47,9 @@ page={{ page }}
                 <input type="checkbox" id="pro" name="pro_form" {% if state.filters.pro -%}{{ "checked" }}{% endif -%}></div>
             <input type="submit" value="Filter">
         </form>
+        <div id="reset-button">
+            <button onclick="window.location.href='/?page=0&per_page=25&sort={{state.sort.sort}}';">Reset filters</button>
+        </div>
     </div>
     <table>
         <tr>

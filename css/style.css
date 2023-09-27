@@ -1,6 +1,8 @@
 #wrapper {
     width: 100%;
     overflow: hidden;
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
 #container {
@@ -16,9 +18,11 @@
 
 /* Style pour le conteneur du formulaire */
 .form-container {
-    text-align: center;
-    max-width: 400px;
-    margin: 0 auto;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: row;
+    align-items: left;
 }
 
 /* Style pour le formulaire */
@@ -27,6 +31,13 @@ form {
     flex-direction: row;
     align-items: left;
 }   
+
+.reset-button {
+    margin-bottom: 15px;
+    margin-right: 15px;
+    display: flex;
+    align-items: right;
+}
 
 /* Style pour chaque groupe label + input */
 .form-group {
@@ -38,6 +49,8 @@ form {
 }
 
 table {
+    margin-top: 15px;
+    margin-bottom: 15px;
     border-collapse: collapse;
     width: 100%;
 }
