@@ -4,7 +4,7 @@ use std::{cmp::Ordering, collections::HashMap};
 
 use crate::website::{bgg::get_bgg_note, trictrac::get_trictrac_note};
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize)]
 pub struct Games {
     pub games: Vec<Box<Game>>,
 }
@@ -39,7 +39,7 @@ pub struct Seller {
     pub is_pro: bool,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize)]
 pub struct OkkazeoAnnounce {
     pub id: u32,
     pub name: String,
@@ -54,7 +54,7 @@ pub struct OkkazeoAnnounce {
     pub last_modification_date: DateTime<Utc>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize)]
 pub struct Game {
     pub okkazeo_announce: OkkazeoAnnounce,
     pub references: HashMap<String, Reference>,
@@ -62,7 +62,7 @@ pub struct Game {
     pub deal: Deal,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize)]
 pub struct Deal {
     pub deal_price: i32,
     pub deal_percentage: i32,

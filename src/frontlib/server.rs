@@ -2,21 +2,18 @@ use axum::extract::Query;
 use axum::response::Html;
 use axum::Extension;
 use axum::{extract::Form, routing::get, Router};
+use serde::Serialize;
 use std::sync::Arc;
+use tera::{Context, Tera};
 use tokio_postgres::Client;
 use tower_http::services::ServeDir;
 
 use crate::db::{connect_db, select_count_filtered_games_from_db, select_games_from_db};
-use crate::frontlib::frontpage::create_html_table;
-use crate::frontlib::header::generate_header_html;
-use crate::frontlib::pagination::generate_pagination_links;
+use crate::frontlib::generate_pagination_links;
 
-use super::filter::{Filters, FiltersForm};
-use super::footer::generate_footer_html;
-use super::pagination::Pagination;
-use super::sort::Sort;
+use super::{Filters, FiltersForm, Pagination, Sort};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct State {
     pub pagination: Pagination,
     pub filters: Filters,
@@ -184,16 +181,46 @@ pub async fn root(
         part_games.games.len()
     );
 
-    let header_html = generate_header_html();
-    let filter_html = Filters::create_html(&state);
-    let response_html = create_html_table(part_games, &mut state);
-    let pagination_html = generate_pagination_links(total_items, &mut state);
-    let footer_html = generate_footer_html();
+    let tera;
+    match Tera::new("templates/*") {
+        Ok(t) => {
+            tera = t;
+        }
+        Err(e) => {
+            log::error!("error tera loading template : {}", e);
+            return Html(String::new());
+        }
+    }
+    let mut ctx = Context::new();
+    ctx.insert("style_css", &"css/style.css");
+    ctx.insert("background_img", &"assets/banner.jpg");
 
-    Html(format!(
-        "{}{}{}{}{}",
-        header_html, filter_html, response_html, pagination_html, footer_html
-    ))
+    let params = format_url_params(&state);
+    ctx.insert("url_params", &params);
+    ctx.insert("state", &state);
+
+    let mut state_clone = state.clone();
+    state_clone.sort.sort = String::from("updated");
+    ctx.insert("url_param_sort_updated", &format_url_params(&state_clone));
+    state_clone.sort.sort = String::from("price");
+    ctx.insert("url_param_sort_price", &format_url_params(&state_clone));
+    state_clone.sort.sort = String::from("percent");
+    ctx.insert("url_param_sort_percent", &format_url_params(&state_clone));
+
+    ctx.insert("games", &part_games.games);
+
+    let pagination_html = generate_pagination_links(total_items, &mut state);
+    ctx.insert("pagination", &pagination_html);
+
+    match tera.render("frontpage.html", &ctx) {
+        Ok(r) => {
+            return Html(r);
+        }
+        Err(e) => {
+            log::error!("error tera rendering : {}", e);
+            return Html(String::new());
+        }
+    }
 }
 
 pub async fn set_server() {
@@ -206,6 +233,7 @@ pub async fn set_server() {
         .route("/", get(root).post(root))
         .nest_service("/img", ServeDir::new("img"))
         .nest_service("/assets", ServeDir::new("assets"))
+        .nest_service("/css", ServeDir::new("css"))
         .layer(Extension(client));
 
     // run our app with hyper, listening globally on port 3000

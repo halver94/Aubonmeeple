@@ -5,7 +5,7 @@ use tokio_postgres::{Client, Error, NoTls, Row};
 
 use crate::frontlib::server::State;
 use crate::{
-    frontlib::filter::Filters,
+    frontlib::Filters,
     game::{Deal, Game, Games, OkkazeoAnnounce, Reference, Review, Reviewer, Seller},
 };
 

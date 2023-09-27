@@ -1,0 +1,80 @@
+#wrapper {
+    width: 100%;
+    overflow: hidden;
+}
+
+#container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.banner-img {
+    width: 70%;
+    display: block;
+    margin: auto;
+}
+
+/* Style pour le conteneur du formulaire */
+.form-container {
+    text-align: center;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Style pour le formulaire */
+form {
+    display: flex;
+    flex-direction: row;
+    align-items: left;
+}   
+
+/* Style pour chaque groupe label + input */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    margin-bottom: 15px;
+    margin-right: 15px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+}
+th {
+    background-color: lightgray;
+}
+
+.flex-container {
+    display: flex;
+    align-items: center; /* Alignement vertical */
+}
+.flex-container img {
+    margin-right: 10px; /* Espacement entre l'image et le texte */
+}
+
+.pagination {
+    display: inline-block;
+    align-items: center; /* Alignement vertical */
+}
+
+.pagination a {
+  color: black;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+.pagination a.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.pagination a:hover:not(.active) {
+    background-color: #ddd;
+}
