@@ -1,28 +1,78 @@
-#wrapper {
-    width: 100%;
-    overflow: hidden;
-    margin-top: 15px;
-    margin-bottom: 15px;
+body {
+    /*background-image:url("../assets/background_meeple2.jpg");*/
+    background-color: #000000; 
+    margin:auto;
+    background-attachment: fixed;
+    background-size: 100%;
+    font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
 }
 
-#container {
+#main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#header {
+    top: 0px;
+    position: sticky;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #000000; 
+}
+
+.button {
+    background-color: #a17b0f;
+    border: 1px solid rgba(27, 31, 35, .15);
+    border-radius: 6px;
+    box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+    font-size: small;
+    font-weight: 600;
+    line-height: 10px;
+    margin-bottom: 5px;
+    padding: 6px 16px;
+}
+
+    
+.okkazeo_price {
+    font-size: larger;
+}
+
+#wrapper {
     width: 100%;
-    margin: 0 auto;
+    background-color: #000000; 
 }
 
 .banner-img {
-    width: 70%;
+    width: 45%;
     display: block;
     margin: auto;
 }
 
+.nbrTextbox {
+    width: 50px;
+    height: 20px;
+}
+
+.textbox {
+    width: 100px;
+    height: 20px;
+}
+
 /* Style pour le conteneur du formulaire */
 .form-container {
-    margin-top: 15px;
-    margin-bottom: 15px;
+    width: 50%;
+    margin-top: 5px;
+    margin-bottom: 5px;
     display: flex;
     flex-direction: row;
-    align-items: left;
+    align-items: center;
 }
 
 /* Style pour le formulaire */
@@ -30,54 +80,117 @@ form {
     display: flex;
     flex-direction: row;
     align-items: left;
+    gap: 10px;
 }   
-
-.reset-button {
-    margin-bottom: 15px;
-    margin-right: 15px;
-    display: flex;
-    align-items: right;
-}
 
 /* Style pour chaque groupe label + input */
 .form-group {
     display: flex;
     flex-direction: column;
     align-items: left;
+    margin-bottom: 5px;
+    margin-right: 8px;
+    color: #fff;
+    font-size: small;
+    font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+}
+
+#sort{
+    display: flex;
+    gap: 10px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+#items {
+    display: flex;
+    width: 80%;
+    flex-direction: column;
+    align-items: left;
+    margin-bottom: 15px;
+    background-color: #ffffff; 
+}
+
+.item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border: solid #5c5b5b;
+}
+
+.gray_bg {
+    background-color: #eeecec; 
+}
+
+.game {
+    display: flex;
+    width: 20%;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.seller {
+    width: 15%;
+}
+
+#shipping {
+    display: flex;
+    width: 20%;
+    flex-direction: column;
+    align-items: left;
+    margin-right: 15px;
+}
+
+.ship {
+    display: flex;
+    flex-direction: row;
+    align-items: left;
+    gap: 5px;
+}
+
+.review {
+    width: 20%;
+}
+
+#deal {
+    display: flex;
+    width: 10%;
+    flex-direction: column;
+    align-items: center;
+    white-space: nowrap;
+    gap: 10px;
+    font-size: larger;
+}
+
+#prices {
+    display: flex;
+    width: 15%;
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 15px;
     margin-right: 15px;
 }
 
-table {
-    margin-top: 15px;
-    margin-bottom: 15px;
-    border-collapse: collapse;
-    width: 100%;
-}
-th, td {
-    border: 1px solid black;
-    padding: 8px;
-    text-align: center;
-}
-th {
-    background-color: lightgray;
-}
-
-.flex-container {
+#reviews {
     display: flex;
-    align-items: center; /* Alignement vertical */
-}
-.flex-container img {
-    margin-right: 10px; /* Espacement entre l'image et le texte */
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 15px;
+    margin-right: 15px;
 }
 
 .pagination {
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
     align-items: center; /* Alignement vertical */
+    color: #fff;
 }
 
 .pagination a {
-  color: black;
+  color: rgb(255, 255, 255);
   float: left;
   padding: 8px 16px;
   text-decoration: none;
@@ -90,4 +203,57 @@ th {
 
 .pagination a:hover:not(.active) {
     background-color: #ddd;
+}
+
+.average_note {
+    align-items: center;
+}
+
+.footer {
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    background-color: #5c5b5b;
+    margin-top: 30px;
+}
+
+.flex-col-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.flex-row-center {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.flex-col-left {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+}
+
+.flex-row-left {
+    display: flex;
+    flex-direction: row;
+    align-items: left;
+    gap: 5px;
+}
+
+.green {
+  color: rgb(65, 212, 84);
+}
+
+.yellow {
+  color: rgb(238, 209, 45);
+}
+
+.red {
+  color: rgb(173, 55, 55);
+}
+
+.bold {
+  font-weight: bold;
 }

@@ -10,74 +10,94 @@ page={{ page }}&per_page={{per_page}}&city={{city}}&name={{name}}
 
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{style_css}}">
+    <script src="https://kit.fontawesome.com/3882acb684.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
-    <div id="banner">
-        <div id="wrapper">
-            <div id="container">
+    <div id="main">
+        <div id="header">
+            <div id="wrapper">
                 <a><img class="banner-img" src="{{background_img}}" alt="fail"></a>
             </div>
-        </div>
-    </div>
-    <div id="form-container">
-        <form action="/{{url_params}}" method="post">
-            <div class="form-group">
-                <label for="city">Filter on city :</label>
-                <input type="text" id="city" name="city_form" value="{{ state.filters.city | default(value="") }}"></div>
-            <div class="form-group">
-                <label for="name">Filter on name :</label>
-                <input type="text" id="name" name="name_form" value="{{ state.filters.name | default(value="") }}"></div>
-            <div class="form-group">
-                <label for="vendor">Filter on vendor :</label>
-                <input type="text" id="vendor" name="vendor_form" value="{{ state.filters.vendor | default(value="") }}"></div>
-            <div class="form-group">
-                <label for="note">Minimal note :</label>
-                <input type="number" step="any" id="note" name="note_form" value="{{ state.filters.note | default(value="") }}" min="0" max="10"></div>
-            <div class="form-group">
-                <label for="min_price">Minimal price :</label>
-                <input type="number" step="1" id="min_price" name="min_price_form" value="{{ state.filters.min_price | default(value="") }}" min="0"></div>
-            <div class="form-group">
-                <label for="max_price">Maximal price :</label>
-                <input type="number" step="1" id="max_price" name="max_price_form" value="{{ state.filters.max_price | default(value="") }}" min="0"></div>
-            <div class="form-group">
-                <label for="pro">Exclude pro vendors</label>
-                <input type="checkbox" id="pro" name="pro_form" {% if state.filters.pro -%}{{ "checked" }}{% endif -%}></div>
-            <input type="submit" value="Filter">
-        </form>
-        <div id="reset-button">
-            <button onclick="window.location.href='/?page=0&per_page=25&sort={{state.sort.sort}}';">Reset filters</button>
-        </div>
-    </div>
-    <table>
-        <tr>
-            <th>Updated <button onclick="window.location.href='/{{url_param_sort_updated}}';">Sort</button></th>
-            <th>Name</th>
-            <th>City</th>
-            <th>Seller</th>
-            <th>Shipping</th>
-            <th>Deal <button onclick="window.location.href='/{{url_param_sort_price}}';">Sort €</button>
-            <button onclick="window.location.href='/{{url_param_sort_percent}}';">Sort %</button></th>
-            <th>Okkazeo</th>
-            <th>Shops</th>
-            <th>Note</th>
-        </tr>
-        {% for game in games -%}
-        <tr>
-            <td>{{game.okkazeo_announce.last_modification_date | date(format="%d/%m/%Y %H:%M")}}</td>
-            <td>
-                <div class="flex-container">
-                    <img src="{{game.okkazeo_announce.image}}" alt="fail" width="100" height="100" />
-                    {{game.okkazeo_announce.name}}<br>({{game.okkazeo_announce.extension}})
+            <div id="form-container">
+                <form action="/{{url_params}}" method="post">
+                    <div class="form-group">
+                        <label for="city">Localisation</label>
+                        <input class="textbox" type="text" id="city" name="city_form"
+                            value="{{ state.filters.city | default(value="") }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Nom</label>
+                        <input class="textbox" type="text" id="name" name="name_form"
+                            value="{{ state.filters.name | default(value="") }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="vendor">Vendeur</label>
+                        <input class="textbox" type="text" id="vendor" name="vendor_form"
+                            value="{{ state.filters.vendor | default(value="") }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="note">Note min</label>
+                        <input class="nbrTextbox" type="number" step="any" id="note" name="note_form"
+                            value="{{ state.filters.note | default(value="") }}" min="0" max="10">
+                    </div>
+                    <div class="form-group">
+                        <label for="min_price">Prix min</label>
+                        <input class="nbrTextbox" type="number" step="1" id="min_price" name="min_price_form"
+                            value="{{ state.filters.min_price | default(value="") }}" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="max_price">Prix max</label>
+                        <input class="nbrTextbox" type="number" step="1" id="max_price" name="max_price_form"
+                            value="{{ state.filters.max_price | default(value="") }}" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="pro">Exclure pro</label>
+                        <input type="checkbox" id="pro" name="pro_form" {% if state.filters.pro -%}{{ "checked" }}{%
+                            endif -%}>
+                    </div>
+                    <input class="button" type="submit" value="Filter">
+                    <button class="button"
+                        onclick="window.location.href='/?page=0&per_page=25&sort={{state.sort.sort}}';">Reset<br><br>
+                        filters</button>
+                </form>
+                <div id="sort">
+                    <button class="button" onclick="window.location.href='/{{url_param_sort_updated}}';">Sort
+                        updated</button>
+                    <button class="button" onclick="window.location.href='/{{url_param_sort_price}}';">Sort €</button>
+                    <button class="button" onclick="window.location.href='/{{url_param_sort_percent}}';">Sort %</button>
                 </div>
-            </td>
-            <td>{{game.okkazeo_announce.city}}</td>
-            <td>
-                <a href="{{game.okkazeo_announce.seller.url}}" target="_blank">{{game.okkazeo_announce.seller.name}} 
-                    {% if game.okkazeo_announce.seller.is_pro -%} - PRO {% endif -%}
-                    <a href="/?{{ self::url_param(
+            </div>
+        </div>
+        <div id="items">
+            {% for game in games -%}
+            {% if loop.index % 2 == 0%}
+            <div class="item">
+                {% else %}
+                <div class="item gray_bg">
+                    {% endif %}
+                    <div class="game">
+                        <div>
+                            <img src="{{game.okkazeo_announce.image}}" alt="fail" width="100" height="100" />
+                        </div>
+                        <div>
+                            {{game.okkazeo_announce.name}}<br>
+                            ({{game.okkazeo_announce.extension}})<br>
+                            {{game.okkazeo_announce.last_modification_date | date(format="%d/%m/%Y %H:%M")}}<br>
+                        </div>
+                    </div>
+                    <div class="flex-col-left seller">
+                        <div>
+                            <i class="fas fa-fw fa-user" title="Seller" aria-hidden="true"></i>
+                            <a href="{{game.okkazeo_announce.seller.url}}" target="_blank">
+                                {{game.okkazeo_announce.seller.name}}
+                                {% if game.okkazeo_announce.seller.is_pro -%} - PRO {% endif -%}
+                                <a href="/?{{ self::url_param(
                                 page=state.pagination.page,
                                 per_page=state.pagination.per_page, 
                                 city=state.filters.city, 
@@ -88,67 +108,90 @@ page={{ page }}&per_page={{per_page}}&city={{city}}&name={{name}}
                                 max_price=state.filters.max_price, 
                                 min_price=state.filters.min_price, 
                                 sort=state.sort.sort) }}" target="_blank">
-                        <img src="assets/filter.png" alt="fail" width="20" height="20" />
-                    </a>
-                <br>({{game.okkazeo_announce.seller.nb_announces}} announces)
-                </a>
-            </td>
-            <td>
-            {% for key, val in game.okkazeo_announce.shipping -%}
-                - {{key}} : {{val | round(precision=1)}}€<br>
-            {% endfor -%}
-            </td>
-            {% if game.deal.deal_price < 0 -%} 
-                {% set color = "green" -%}
-                {% set sign = "" -%}
-            {% else -%}
-                {% set color = "red" -%}
-                {% set sign = "+" -%}
-             {% endif -%}
-            {% if game.deal.deal_price != 0 -%} 
-            <td style="color:{{color}}">
-                {{sign}}{{game.deal.deal_price}}€ ({{sign}}{{game.deal.deal_percentage}}%)
-            </td>
-            {% else -%}
-            <td>-</td>
-            {% endif -%}
-            <td>
-                <a href='{{game.okkazeo_announce.url}}' target="_blank">{{game.okkazeo_announce.price | round(precision=2)}} €</a>
-            </td>
-            <td>
-            {% for key, val in game.references -%}
-                <a href="{{val.url}}" target="_blank">{{val.name}} : {{val.price | round(precision=2)}} &euro;</a><br>
-            {% endfor -%}
-            </td>
-            <td>
-            {% if game.review.average_note == 0 -%}
-                -
-            {% else -%}
-                Average note : {{game.review.average_note | round(precision=2)}}<br><br>
-                {% for key, val in game.review.reviews -%}
-                    <a href="{{val.url}}" target="_blank">{{val.name}} : {{val.note | round(precision=2)}} ( {{val.number}} reviews)</a><br>
-                {% endfor -%}
-            {% endif -%}
-            </td>
-
-        </tr>
-        {% endfor -%}
-    </table>
-    <div>
-        <center>
-            <div class="pagination">
-                {{ pagination | safe}}
+                                    <img src="assets/filter.png" alt="fail" width="20" height="20" />
+                                </a>
+                                <div>({{game.okkazeo_announce.seller.nb_announces}} announces)</div>
+                            </a>
+                        </div>
+                        <div>
+                            <i class="fa fa-fw fa-map-marker-alt" title="Location" aria-hidden="true"></i>
+                            {{game.okkazeo_announce.city}}
+                        </div>
+                    </div>
+                    <div id="deal">
+                        <a class="okkazeo_price" href='{{game.okkazeo_announce.url}}'
+                            target="_blank">{{game.okkazeo_announce.price |
+                            round(precision=2)}}€</a>
+                        {% if game.deal.deal_price < 0 -%} {% set color="green" -%} {% set sign="" -%} {% else -%} {%
+                            set color="red" -%} {% set sign="+" -%} {% endif -%} <div class="{{color}}">
+                            {% if game.deal.deal_price != 0 -%}
+                            {{sign}}{{game.deal.deal_price}}€ ({{sign}}{{game.deal.deal_percentage}}%)
+                            {% else -%}
+                            -
+                            {% endif -%}
+                    </div>
+                </div>
+                <div id="prices">
+                    <div id="price">
+                        {% for key, val in game.references -%}
+                        <a href="{{val.url}}" target="_blank">
+                            <img src="assets/{{val.name}}_icon.jpeg" alt="fail" width="50" height="50" />
+                            {{val.price | round(precision=2)}}
+                            &euro;</a><br>
+                        {% endfor -%}
+                    </div>
+                </div>
+                <div class="review flex-col-left">
+                    {% if game.review.average_note == 0 -%}
+                    <div>-</div>
+                    {% else -%}
+                    {% if game.review.average_note <= 6 -%} <div class="flex-row-left average_note red bold">
+                        {% elif game.review.average_note <= 7 -%} <div class="flex-row-left average_note yellow bold">
+                            {% else -%}
+                            <div class="flex-row-left average_note green bold">
+                                {% endif -%}
+                                <div class="fa-regular fa-star fa-xl" title="Rate" aria-hidden="true"></div>
+                                <div>{{game.review.average_note | round(precision=2)}} / 10</div>
+                            </div>
+                            {% for key, val in game.review.reviews -%}
+                            <a href="{{val.url}}" target="_blank">{{val.name}} : {{val.note | round(precision=2)}} (
+                                {{val.number}}
+                                reviews)</a><br>
+                            {% endfor -%}
+                            {% endif -%}
+                </div>
+                <div id="shipping">
+                    {% for key, val in game.okkazeo_announce.shipping -%}
+                    <div class="ship">
+                        {% if key == "hand_delivery" %}
+                        <i class="far fa-fw fa-handshake" title="Remise en main propre ?" aria-hidden="true"></i>
+                        Remise
+                        en man propre
+                        {% else %}
+                        <i class="fas fa-fw fa-truck" title="Shipping mode" aria-hidden="true"></i>
+                        {{key}} : {{val | round(precision=1)}}€
+                        {% endif %}
+                    </div>
+                    {% endfor -%}
+                </div>
             </div>
-        </center>
+            {% endfor -%}
+        </div>
+    </div>
+    <div>
+        <div class="pagination">
+            {{ pagination | safe}}
+        </div>
     </div>
 
-    <footer>
+    <div class="flex-row-center footer">
         <a href="https://paypal.me/Cravail" target="_blank">
             <img src="assets/bmc.png" alt="fail" width="160" height="60" />
         </a>
         <a href="https://github.com/halver94/Scrapy" target="_blank">
             <img src="assets/github.jpg" alt="fail" width="160" height="60" />
         </a>
-    </footer>
+    </div>
 </body>
+
 </html>
