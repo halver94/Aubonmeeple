@@ -224,7 +224,7 @@ pub async fn root(
 }
 
 pub async fn set_server() {
-    log::info!("[SERVER] starting server on 0.0.0.0:3000");
+    log::info!("[SERVER] starting server on 0.0.0.0:3001");
 
     let client = Arc::new(connect_db().await.unwrap());
     log::info!("[SERVER] connected with DB");
@@ -237,7 +237,7 @@ pub async fn set_server() {
         .layer(Extension(client));
 
     // run our app with hyper, listening globally on port 3000
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+    axum::Server::bind(&"0.0.0.0:3001".parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
