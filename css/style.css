@@ -185,15 +185,18 @@ form {
     display: flex;
     justify-content: center;
     flex-direction: row;
-    align-items: center; /* Alignement vertical */
+    align-items: center;
     color: #fff;
 }
 
 .pagination a {
   color: rgb(255, 255, 255);
   float: left;
+  border-radius: 0.8rem;
   padding: 8px 16px;
   text-decoration: none;
+  margin-right: 2px;
+  margin-left: 2px;
 }
 
 .pagination a.active {

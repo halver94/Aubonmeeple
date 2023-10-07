@@ -1,5 +1,5 @@
 {% macro url_param(page, per_page, city, name, vendor, pro, note, max_price, min_price, sort) -%}
-page={{ page }}&per_page={{per_page}}&city={{city}}&name={{name}}
+?page={{ page }}&per_page={{per_page}}&city={{city}}&name={{name}}
 {% if vendor is string -%}&vendor={{vendor}}{% endif -%}
 {% if pro -%}&pro={{pro}}{% endif -%}
 {% if note is number -%}&note={{note}}{% endif -%}
@@ -7,6 +7,20 @@ page={{ page }}&per_page={{per_page}}&city={{city}}&name={{name}}
 {% if min_price is number -%}&min_price={{min_price}}{% endif -%}
 {% if sort is string -%}&sort={{sort}}{% endif -%}
 {% endmacro url_param -%}
+
+{% macro url_param_change_page(state, page) -%}
+{{ self::url_param(
+page=page,
+per_page=state.pagination.per_page,
+city=state.filters.city,
+name=state.filters.name,
+vendor=state.filters.vendor,
+pro=state.filters.pro,
+note=state.filters.note,
+max_price=state.filters.max_price,
+min_price=state.filters.min_price,
+sort=state.sort.sort) }}
+{% endmacro url_param_change_page -%}
 
 <!DOCTYPE html>
 <html>
@@ -180,7 +194,36 @@ page={{ page }}&per_page={{per_page}}&city={{city}}&name={{name}}
     </div>
     <div>
         <div class="pagination">
-            {{ pagination | safe}}
+            {% if state.pagination.page != 0 %}
+            <a href="/{{ self::url_param_change_page(state=state, page=(state.pagination.page - 1)) }}"><i
+                    class="fa-solid fa-chevron-left"></i></a>
+            {% endif %}
+
+            {% set min_visible_pages=2 %}
+            {% set offset=1 %}
+            {% set ellipsis=false %}
+            {% for page in pages_vec %}
+            {% if page < min_visible_pages or page> total_pages - min_visible_pages - 1 %}
+                <a {% if page==state.pagination.page %}class="active" {% endif %}
+                    href="/{{ self::url_param_change_page(state=state, page=page) }}">{{ page }}</a>
+                {% set_global ellipsis=false %}
+                {% elif state.pagination.page > offset and page < state.pagination.page - offset %} {% if
+                    ellipsis==false %} {% set_global ellipsis=true %} <a>...</a> {% endif %}
+                    {% elif page > state.pagination.page + offset %} {% if ellipsis==false %}
+                    {% set_global ellipsis=true %}
+                    <a>...</a> {% endif %}
+                    {% else %}
+                    <a {% if page==state.pagination.page %}class="active" {% endif %}
+                        href="/{{ self::url_param_change_page(state=state, page=page) }}">{{ page }}</a>
+                    {% set_global ellipsis=false %}
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if total_pages != 0 and state.pagination.page != (total_pages - 1) %}
+                    <a href="/{{ self::url_param_change_page(state=state, page=(state.pagination.page + 1)) }}"><i
+                            class="fa-solid fa-chevron-right"></i></a>
+                    {% endif %}
+
         </div>
     </div>
 
