@@ -9,7 +9,6 @@ use tokio_postgres::Client;
 use tower_http::services::ServeDir;
 
 use crate::db::{connect_db, select_count_filtered_games_from_db, select_games_from_db};
-use crate::frontlib::generate_pagination_links;
 
 use super::{Filters, FiltersForm, Pagination, Sort};
 
@@ -209,10 +208,18 @@ pub async fn root(
 
     ctx.insert("games", &part_games.games);
 
-    let pagination_html = generate_pagination_links(total_items, &mut state);
-    ctx.insert("pagination", &pagination_html);
+    let total_pages = (total_items + state.pagination.per_page - 1) / state.pagination.per_page;
+    ctx.insert("total_pages", &total_pages);
 
-    match tera.render("frontpage.html", &ctx) {
+    // this is dumb but there is no way in tera to do an iteration
+    // on anumber
+    let mut pages_vec = Vec::new();
+    for i in 0..total_pages {
+        pages_vec.push(i);
+    }
+    ctx.insert("pages_vec", &pages_vec);
+
+    match tera.render("frontpage.tera", &ctx) {
         Ok(r) => {
             return Html(r);
         }
