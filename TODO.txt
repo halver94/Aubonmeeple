@@ -12,13 +12,10 @@ Parsing Bugfix
     - remove - VF or - VO
 
 Features:
-- poc a levenstein distance heuristic when comparing names
+- poc a kind of levenstein distance heuristic when comparing names
 - add more website comparison
 - add if product in shop is available or not
-- add reset filter button
 
 Bugfix:
-- vendor filerin inhtml template
-- fi pagination
 
 Refacto:
