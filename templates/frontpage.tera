@@ -75,23 +75,25 @@ sort=state.sort.sort) }}
                         <input type="checkbox" id="pro" name="pro_form" {% if state.filters.pro -%}{{ "checked" }}{%
                             endif -%}>
                     </div>
-                    <input class="button" type="submit" value="Filter">
-                    <button class="button"
-                        onclick="window.location.href='/?page=0&per_page=25&sort={{state.sort.sort}}';">Reset<br><br>
-                        filters</button>
+                    <input class="button" type="submit" value="Filtrer">
+                    <button class="button" type="button"
+                        onclick="window.location.href='/?page=0&per_page=25&sort={{state.sort.sort}}';">Effacer<br><br>
+                        filtres</button>
                 </form>
                 <div id="sort">
-                    <button class="button" onclick="window.location.href='/{{url_param_sort_updated}}';">Sort
-                        updated</button>
-                    <button class="button" onclick="window.location.href='/{{url_param_sort_price}}';">Sort €</button>
-                    <button class="button" onclick="window.location.href='/{{url_param_sort_percent}}';">Sort %</button>
+                    <button class="button" onclick="window.location.href='/{{url_param_sort_updated}}';">Trier /
+                        date</button>
+                    <button class="button" onclick="window.location.href='/{{url_param_sort_price}}';">Trier /
+                        €</button>
+                    <button class="button" onclick="window.location.href='/{{url_param_sort_percent}}';">Trier /
+                        %</button>
                 </div>
             </div>
         </div>
         <div id="items">
             {% for game in games -%}
             {% if loop.index % 2 == 0%}
-            <div class="item">
+            <div class="item white_bg">
                 {% else %}
                 <div class="item gray_bg">
                     {% endif %}
@@ -132,7 +134,7 @@ sort=state.sort.sort) }}
                             {{game.okkazeo_announce.city}}
                         </div>
                     </div>
-                    <div id="deal">
+                    <div class="deal bold">
                         <a class="okkazeo_price" href='{{game.okkazeo_announce.url}}'
                             target="_blank">{{game.okkazeo_announce.price |
                             round(precision=2)}}€</a>
@@ -146,16 +148,18 @@ sort=state.sort.sort) }}
                     </div>
                 </div>
                 <div id="prices">
+                    {% for key, val in game.references -%}
                     <div id="price">
-                        {% for key, val in game.references -%}
-                        <a href="{{val.url}}" target="_blank">
-                            <img src="assets/{{val.name}}_icon.jpeg" alt="fail" width="50" height="50" />
-                            {{val.price | round(precision=2)}}
-                            &euro;</a><br>
-                        {% endfor -%}
+                        <div><a href="{{val.url}}" target="_blank">
+                                <img src="assets/{{val.name}}_icon.png" alt="fail" width="80" height="20" /></a>
+                        </div>
+                        <div>
+                            {{val.price | round(precision=2)}}&euro;
+                        </div>
                     </div>
+                    {% endfor -%}
                 </div>
-                <div class="review flex-col-left">
+                <div class="flex-col-left reviews">
                     {% if game.review.average_note == 0 -%}
                     <div>-</div>
                     {% else -%}
@@ -168,9 +172,14 @@ sort=state.sort.sort) }}
                                 <div>{{game.review.average_note | round(precision=2)}} / 10</div>
                             </div>
                             {% for key, val in game.review.reviews -%}
-                            <a href="{{val.url}}" target="_blank">{{val.name}} : {{val.note | round(precision=2)}} (
-                                {{val.number}}
-                                reviews)</a><br>
+                            <div class="review">
+                                <a href="{{val.url}}" target="_blank">
+                                    <img src="assets/{{val.name}}_icon.png" alt="fail" width="30" height="30" /></a>
+
+                                <div>
+                                    {{val.note | round(precision=2)}} ({{val.number}} avis)
+                                </div>
+                            </div>
                             {% endfor -%}
                             {% endif -%}
                 </div>
@@ -180,7 +189,7 @@ sort=state.sort.sort) }}
                         {% if key == "hand_delivery" %}
                         <i class="far fa-fw fa-handshake" title="Remise en main propre ?" aria-hidden="true"></i>
                         Remise
-                        en man propre
+                        en main propre
                         {% else %}
                         <i class="fas fa-fw fa-truck" title="Shipping mode" aria-hidden="true"></i>
                         {{key}} : {{val | round(precision=1)}}€

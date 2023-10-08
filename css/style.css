@@ -50,7 +50,7 @@ body {
 }
 
 .banner-img {
-    width: 45%;
+    width: 60%;
     display: block;
     margin: auto;
 }
@@ -109,26 +109,35 @@ form {
     flex-direction: column;
     align-items: left;
     margin-bottom: 15px;
-    background-color: #ffffff; 
 }
 
 .item {
     display: flex;
     flex-direction: row;
     align-items: center;
-    border: solid #5c5b5b;
+    border: solid #000000;
+    border-width: thin;
+  border-radius: 0.8rem;
 }
 
 .gray_bg {
     background-color: #eeecec; 
 }
 
+.white_bg {
+    background-color: #ffffff; 
+}
+
 .game {
     display: flex;
-    width: 20%;
+    width: 25%;
     flex-direction: row;
     align-items: center;
-    margin-right: 15px;
+  margin-right: 7px;
+  margin-left: 7px;
+  margin-bottom: 7px;
+  margin-top: 7px;
+    gap: 5px;
 }
 
 .seller {
@@ -151,10 +160,18 @@ form {
 }
 
 .review {
-    width: 20%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
 }
 
-#deal {
+.review a{
+    display: flex;
+    align-items: center;
+}
+
+.deal {
     display: flex;
     width: 10%;
     flex-direction: column;
@@ -166,19 +183,30 @@ form {
 
 #prices {
     display: flex;
+    gap: 10px;
     width: 15%;
     flex-direction: column;
-    align-items: center;
-    margin-bottom: 15px;
-    margin-right: 15px;
+    align-items: left;
+    justify-content: center;
+    margin-bottom: 5px;
+    margin-top: 5px;
 }
 
-#reviews {
+#price {
     display: flex;
-    flex-direction: column;
+    gap: 10px;
+    flex-direction: row;
     align-items: center;
-    margin-bottom: 15px;
+    justify-content: center;
+}
+
+.reviews {
+    width: 15%;
+    gap: 5px;
+    align-items: center;
     margin-right: 15px;
+  margin-bottom: 6px;
+  margin-top: 6px;
 }
 
 .pagination {
@@ -200,26 +228,33 @@ form {
 }
 
 .pagination a.active {
-  background-color: #4CAF50;
+  background-color: #a17b0f;
   color: white;
 }
 
 .pagination a:hover:not(.active) {
-    background-color: #ddd;
+    background-color: #a17b0f;
 }
 
 .average_note {
     align-items: center;
+    font-size: large;
+  margin-bottom: 10px;
+  margin-top: 10px;
 }
 
 .footer {
     justify-content: center;
     align-items: center;
     gap: 30px;
-    background-color: #5c5b5b;
+    background-color: #ffffff;
     margin-top: 30px;
 }
 
+.footer a {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
 .flex-col-center {
     display: flex;
     flex-direction: column;
