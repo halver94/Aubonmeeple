@@ -7,18 +7,19 @@ body {
     font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
 }
 
-#main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+img,
+picture,
+video {
+  max-width: 100%;
 }
 
-#header {
+
+.main {
+}
+
+.header {
     top: 0px;
     position: sticky;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     background-color: #000000; 
 }
 
@@ -70,9 +71,6 @@ body {
     width: 50%;
     margin-top: 5px;
     margin-bottom: 5px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
 }
 
 /* Style pour le formulaire */
@@ -85,9 +83,6 @@ form {
 
 /* Style pour chaque groupe label + input */
 .form-group {
-    display: flex;
-    flex-direction: column;
-    align-items: left;
     margin-bottom: 5px;
     margin-right: 8px;
     color: #fff;
@@ -96,48 +91,29 @@ form {
 }
 
 #sort{
-    display: flex;
     gap: 10px;
-    flex-direction: row;
-    align-items: center;
     justify-content: center;
 }
 
-#items {
-    display: flex;
+.items {
     width: 80%;
-    flex-direction: column;
-    align-items: left;
     margin-bottom: 15px;
 }
 
 .item {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+    width: 100%;
     border: solid #000000;
     border-width: thin;
   border-radius: 0.8rem;
 }
 
-.gray_bg {
-    background-color: #eeecec; 
-}
-
-.white_bg {
-    background-color: #ffffff; 
-}
-
 .game {
-    display: flex;
-    width: 25%;
-    flex-direction: row;
-    align-items: center;
+  width: 25%;
   margin-right: 7px;
   margin-left: 7px;
   margin-bottom: 7px;
   margin-top: 7px;
-    gap: 5px;
+  gap: 5px;
 }
 
 .seller {
@@ -145,24 +121,17 @@ form {
 }
 
 #shipping {
-    display: flex;
     width: 20%;
-    flex-direction: column;
     align-items: left;
     margin-right: 15px;
 }
 
 .ship {
-    display: flex;
-    flex-direction: row;
     align-items: left;
     gap: 5px;
 }
 
 .review {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
     gap: 10px;
 }
 
@@ -172,30 +141,23 @@ form {
 }
 
 .deal {
-    display: flex;
     width: 10%;
-    flex-direction: column;
-    align-items: center;
     white-space: nowrap;
     gap: 10px;
     font-size: larger;
 }
 
-#prices {
-    display: flex;
+.prices {
     gap: 10px;
     width: 15%;
-    flex-direction: column;
     align-items: left;
     justify-content: center;
     margin-bottom: 5px;
     margin-top: 5px;
 }
 
-#price {
-    display: flex;
+.price {
     gap: 10px;
-    flex-direction: row;
     align-items: center;
     justify-content: center;
 }
@@ -203,17 +165,13 @@ form {
 .reviews {
     width: 15%;
     gap: 5px;
-    align-items: center;
     margin-right: 15px;
   margin-bottom: 6px;
   margin-top: 6px;
 }
 
 .pagination {
-    display: flex;
     justify-content: center;
-    flex-direction: row;
-    align-items: center;
     color: #fff;
 }
 
@@ -237,15 +195,14 @@ form {
 }
 
 .average_note {
-    align-items: center;
     font-size: large;
+    gap: 5px;
   margin-bottom: 10px;
   margin-top: 10px;
 }
 
 .footer {
     justify-content: center;
-    align-items: center;
     gap: 30px;
     background-color: #ffffff;
     margin-top: 30px;
@@ -255,6 +212,8 @@ form {
     margin-top: 5px;
     margin-bottom: 5px;
 }
+
+
 .flex-col-center {
     display: flex;
     flex-direction: column;
@@ -265,19 +224,6 @@ form {
     display: flex;
     flex-direction: row;
     align-items: center;
-}
-
-.flex-col-left {
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-}
-
-.flex-row-left {
-    display: flex;
-    flex-direction: row;
-    align-items: left;
-    gap: 5px;
 }
 
 .green {
@@ -294,4 +240,12 @@ form {
 
 .bold {
   font-weight: bold;
+}
+
+.gray_bg {
+    background-color: #eeecec; 
+}
+
+.white_bg {
+    background-color: #ffffff; 
 }

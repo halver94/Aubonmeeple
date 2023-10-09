@@ -33,44 +33,44 @@ sort=state.sort.sort) }}
 </head>
 
 <body>
-    <div id="main">
-        <div id="header">
+    <div class="flex-col-center main">
+        <div class="flex-col-center header">
             <div id="wrapper">
                 <a><img class="banner-img" src="{{background_img}}" alt="fail"></a>
             </div>
-            <div id="form-container">
+            <div class="flex-col-center form-container">
                 <form action="/{{url_params}}" method="post">
-                    <div class="form-group">
+                    <div class="flex-col-center form-group">
                         <label for="city">Localisation</label>
                         <input class="textbox" type="text" id="city" name="city_form"
                             value="{{ state.filters.city | default(value="") }}">
                     </div>
-                    <div class="form-group">
+                    <div class="flex-col-center form-group">
                         <label for="name">Nom</label>
                         <input class="textbox" type="text" id="name" name="name_form"
                             value="{{ state.filters.name | default(value="") }}">
                     </div>
-                    <div class="form-group">
+                    <div class="flex-col-center form-group">
                         <label for="vendor">Vendeur</label>
                         <input class="textbox" type="text" id="vendor" name="vendor_form"
                             value="{{ state.filters.vendor | default(value="") }}">
                     </div>
-                    <div class="form-group">
+                    <div class="flex-col-center form-group">
                         <label for="note">Note min</label>
                         <input class="nbrTextbox" type="number" step="any" id="note" name="note_form"
                             value="{{ state.filters.note | default(value="") }}" min="0" max="10">
                     </div>
-                    <div class="form-group">
+                    <div class="flex-col-center form-group">
                         <label for="min_price">Prix min</label>
                         <input class="nbrTextbox" type="number" step="1" id="min_price" name="min_price_form"
                             value="{{ state.filters.min_price | default(value="") }}" min="0">
                     </div>
-                    <div class="form-group">
+                    <div class="flex-col-center form-group">
                         <label for="max_price">Prix max</label>
                         <input class="nbrTextbox" type="number" step="1" id="max_price" name="max_price_form"
                             value="{{ state.filters.max_price | default(value="") }}" min="0">
                     </div>
-                    <div class="form-group">
+                    <div class="flex-col-center form-group">
                         <label for="pro">Exclure pro</label>
                         <input type="checkbox" id="pro" name="pro_form" {% if state.filters.pro -%}{{ "checked" }}{%
                             endif -%}>
@@ -80,7 +80,7 @@ sort=state.sort.sort) }}
                         onclick="window.location.href='/?page=0&per_page=25&sort={{state.sort.sort}}';">Effacer<br><br>
                         filtres</button>
                 </form>
-                <div id="sort">
+                <div class="flex-row-center sort">
                     <button class="button" onclick="window.location.href='/{{url_param_sort_updated}}';">Trier /
                         date</button>
                     <button class="button" onclick="window.location.href='/{{url_param_sort_price}}';">Trier /
@@ -90,14 +90,14 @@ sort=state.sort.sort) }}
                 </div>
             </div>
         </div>
-        <div id="items">
+        <div class="flex-col-center items">
             {% for game in games -%}
             {% if loop.index % 2 == 0%}
-            <div class="item white_bg">
+            <div class="flex-row-center item white_bg">
                 {% else %}
-                <div class="item gray_bg">
+                <div class="flex-row-center item gray_bg">
                     {% endif %}
-                    <div class="game">
+                    <div class="flex-row-center game">
                         <div>
                             <img src="{{game.okkazeo_announce.image}}" alt="fail" width="100" height="100" />
                         </div>
@@ -134,7 +134,7 @@ sort=state.sort.sort) }}
                             {{game.okkazeo_announce.city}}
                         </div>
                     </div>
-                    <div class="deal bold">
+                    <div class="flex-col-center deal bold">
                         <a class="okkazeo_price" href='{{game.okkazeo_announce.url}}'
                             target="_blank">{{game.okkazeo_announce.price |
                             round(precision=2)}}€</a>
@@ -147,9 +147,9 @@ sort=state.sort.sort) }}
                             {% endif -%}
                     </div>
                 </div>
-                <div id="prices">
+                <div class="flex-col-center prices">
                     {% for key, val in game.references -%}
-                    <div id="price">
+                    <div class="flex-row-center price">
                         <div><a href="{{val.url}}" target="_blank">
                                 <img src="assets/{{val.name}}_icon.png" alt="fail" width="80" height="20" /></a>
                         </div>
@@ -163,16 +163,16 @@ sort=state.sort.sort) }}
                     {% if game.review.average_note == 0 -%}
                     <div>-</div>
                     {% else -%}
-                    {% if game.review.average_note <= 6 -%} <div class="flex-row-left average_note red bold">
-                        {% elif game.review.average_note <= 7 -%} <div class="flex-row-left average_note yellow bold">
+                    {% if game.review.average_note <= 6 -%} <div class="flex-row-center average_note red bold">
+                        {% elif game.review.average_note <= 7 -%} <div class="flex-row-center average_note yellow bold">
                             {% else -%}
-                            <div class="flex-row-left average_note green bold">
+                            <div class="flex-row-center average_note green bold">
                                 {% endif -%}
                                 <div class="fa-regular fa-star fa-xl" title="Rate" aria-hidden="true"></div>
                                 <div>{{game.review.average_note | round(precision=2)}} / 10</div>
                             </div>
                             {% for key, val in game.review.reviews -%}
-                            <div class="review">
+                            <div class="flex-row-center review">
                                 <a href="{{val.url}}" target="_blank">
                                     <img src="assets/{{val.name}}_icon.png" alt="fail" width="30" height="30" /></a>
 
@@ -183,9 +183,9 @@ sort=state.sort.sort) }}
                             {% endfor -%}
                             {% endif -%}
                 </div>
-                <div id="shipping">
+                <div class="flex-col-center shipping">
                     {% for key, val in game.okkazeo_announce.shipping -%}
-                    <div class="ship">
+                    <div class="flex-row-center ship">
                         {% if key == "hand_delivery" %}
                         <i class="far fa-fw fa-handshake" title="Remise en main propre ?" aria-hidden="true"></i>
                         Remise
@@ -202,7 +202,7 @@ sort=state.sort.sort) }}
         </div>
     </div>
     <div>
-        <div class="pagination">
+        <div class=" flex-row-center pagination">
             {% if state.pagination.page != 0 %}
             <a href="/{{ self::url_param_change_page(state=state, page=(state.pagination.page - 1)) }}"><i
                     class="fa-solid fa-chevron-left"></i></a>
