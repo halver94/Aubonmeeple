@@ -139,7 +139,7 @@ sort=state.sort.sort) }}
                             target="_blank">{{game.okkazeo_announce.price |
                             round(precision=2)}}€</a>
                         {% if game.deal.deal_price < 0 -%} {% set color="green" -%} {% set sign="" -%} {% else -%} {%
-                            set color="red" -%} {% set sign="+" -%} {% endif -%} <div class="{{color}}">
+                            set color="red" -%} {% set sign="+" -%} {% endif -%} <div class="{{color}} deal_price">
                             {% if game.deal.deal_price != 0 -%}
                             {{sign}}{{game.deal.deal_price}}€ ({{sign}}{{game.deal.deal_percentage}}%)
                             {% else -%}
@@ -161,10 +161,11 @@ sort=state.sort.sort) }}
                 </div>
                 <div class="flex-col-left reviews">
                     {% if game.review.average_note == 0 -%}
-                    <div>-</div>
+                    <div class="flex-row-center average_note">-</div>
                     {% else -%}
                     {% if game.review.average_note <= 6 -%} <div class="flex-row-center average_note red bold">
-                        {% elif game.review.average_note <= 7 -%} <div class="flex-row-center average_note yellow bold">
+                        {% elif game.review.average_note <= 6.5 -%} <div
+                            class="flex-row-center average_note yellow bold">
                             {% else -%}
                             <div class="flex-row-center average_note green bold">
                                 {% endif -%}

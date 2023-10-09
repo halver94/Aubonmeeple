@@ -1,3 +1,63 @@
+.flex-col-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.flex-row-center {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.green {
+  color: rgb(69, 214, 69);
+    -webkit-text-stroke-width: 0.01em; 
+    -webkit-text-stroke-color: black; 
+}
+
+.yellow {
+  color: rgb(238, 209, 45);
+    -webkit-text-stroke-width: 0.01em; 
+    -webkit-text-stroke-color: black; 
+}
+
+.red {
+  color: rgb(173, 55, 55);
+    -webkit-text-stroke-width: 0.01em; 
+    -webkit-text-stroke-color: black; 
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.gray_bg {
+    background-color: #eeecec; 
+}
+
+.white_bg {
+    background-color: #ffffff; 
+}
+
+@media screen and (max-width: 600px) {
+  .form-container {
+    width: 90%;
+  }
+  body {
+    font-size: small;
+  }
+}
+
+@media screen and (min-width: 600px) {
+  .form-container {
+    width: 50%;
+  }
+  body {
+    font-size: medium;
+  }
+}
+
 body {
     /*background-image:url("../assets/background_meeple2.jpg");*/
     background-color: #000000; 
@@ -11,38 +71,37 @@ img,
 picture,
 video {
   max-width: 100%;
-}
-
-
-.main {
+  height: auto;
 }
 
 .header {
-    top: 0px;
+    top: 0em;
     position: sticky;
     background-color: #000000; 
 }
 
 .button {
     background-color: #a17b0f;
-    border: 1px solid rgba(27, 31, 35, .15);
-    border-radius: 6px;
-    box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
+    border: 0.1em solid rgba(27, 31, 35, .15);
+    border-radius: 0.6em;
+    box-shadow: rgba(27, 31, 35, .1) 0 0.1em 0;
     box-sizing: border-box;
     color: #fff;
     cursor: pointer;
     display: inline-block;
-    font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
     font-size: small;
-    font-weight: 600;
-    line-height: 10px;
-    margin-bottom: 5px;
-    padding: 6px 16px;
+    font-weight: bold;
+    line-height: 0.5em;
+    margin-bottom: 0.5em;
+    padding: 0.6em 0.6em;
 }
 
     
 .okkazeo_price {
     font-size: larger;
+}
+
+.deal_price {
 }
 
 #wrapper {
@@ -57,51 +116,51 @@ video {
 }
 
 .nbrTextbox {
-    width: 50px;
-    height: 20px;
+    width: 3.5em;
+    height: 1.2em;
 }
 
 .textbox {
-    width: 100px;
-    height: 20px;
+    width: 7em;
+    height: 1.2em;
 }
+
 
 /* Style pour le conteneur du formulaire */
 .form-container {
-    width: 50%;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
 }
+
 
 /* Style pour le formulaire */
 form {
     display: flex;
+    flex-wrap: wrap;
     flex-direction: row;
     align-items: left;
-    gap: 10px;
+    gap: 1em;
 }   
 
 /* Style pour chaque groupe label + input */
 .form-group {
-    margin-bottom: 5px;
-    margin-right: 8px;
+    margin-bottom: 0.5em;
     color: #fff;
-    font-size: small;
-    font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
 }
 
-#sort{
-    gap: 10px;
+.sort{
+    gap: 1em;
     justify-content: center;
 }
 
 .items {
-    width: 80%;
-    margin-bottom: 15px;
+    width: 85%;
+    margin-bottom: 1.5em;
 }
 
 .item {
-    width: 100%;
+  width: 100%;
+    flex-wrap: wrap;
     border: solid #000000;
     border-width: thin;
   border-radius: 0.8rem;
@@ -109,30 +168,30 @@ form {
 
 .game {
   width: 25%;
-  margin-right: 7px;
-  margin-left: 7px;
-  margin-bottom: 7px;
-  margin-top: 7px;
-  gap: 5px;
+  margin-bottom: 0.7em;
+  margin-top: 0.7em;
+  gap: 0.5em;
+}
+.game img {
+  margin-left: 0.7em;
 }
 
 .seller {
     width: 15%;
 }
 
-#shipping {
+.shipping {
     width: 20%;
-    align-items: left;
-    margin-right: 15px;
+    align-items: flex-start;
 }
 
 .ship {
-    align-items: left;
-    gap: 5px;
+    align-items: flex-start;
+    gap: 0.5em;
 }
 
 .review {
-    gap: 10px;
+    gap: 1em;
 }
 
 .review a{
@@ -142,32 +201,31 @@ form {
 
 .deal {
     width: 10%;
-    white-space: nowrap;
-    gap: 10px;
+    align-items: center;
+    gap: 1em;
     font-size: larger;
 }
 
 .prices {
-    gap: 10px;
+    gap: 0.2em;
     width: 15%;
     align-items: left;
     justify-content: center;
-    margin-bottom: 5px;
-    margin-top: 5px;
+    margin-bottom: 0.1em;
+    margin-top: 0.1em;
 }
 
 .price {
-    gap: 10px;
+    gap: 1em;
     align-items: center;
     justify-content: center;
 }
 
 .reviews {
     width: 15%;
-    gap: 5px;
-    margin-right: 15px;
-  margin-bottom: 6px;
-  margin-top: 6px;
+    gap: 0.5em;
+  margin-bottom: 0.6em;
+  margin-top: 0.6em;
 }
 
 .pagination {
@@ -179,10 +237,10 @@ form {
   color: rgb(255, 255, 255);
   float: left;
   border-radius: 0.8rem;
-  padding: 8px 16px;
+  padding: 0.8em 0.8em;
   text-decoration: none;
-  margin-right: 2px;
-  margin-left: 2px;
+  margin-right: 0.2em;
+  margin-left: 0.2em;
 }
 
 .pagination a.active {
@@ -196,56 +254,19 @@ form {
 
 .average_note {
     font-size: large;
-    gap: 5px;
-  margin-bottom: 10px;
-  margin-top: 10px;
+    gap: 0.5em;
+  margin-bottom: 1em;
+  margin-top: 1em;
 }
 
 .footer {
     justify-content: center;
-    gap: 30px;
+    gap: 3em;
     background-color: #ffffff;
-    margin-top: 30px;
+    margin-top: 3em;
 }
 
 .footer a {
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
-
-.flex-col-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.flex-row-center {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.green {
-  color: rgb(65, 212, 84);
-}
-
-.yellow {
-  color: rgb(238, 209, 45);
-}
-
-.red {
-  color: rgb(173, 55, 55);
-}
-
-.bold {
-  font-weight: bold;
-}
-
-.gray_bg {
-    background-color: #eeecec; 
-}
-
-.white_bg {
-    background-color: #ffffff; 
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
 }
