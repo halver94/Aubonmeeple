@@ -369,8 +369,8 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
                     FROM okkazeo_announce oa
                     LEFT JOIN reviewer r on r.reviewer_oa_id = oa.oa_id
                     JOIN seller s on s.seller_id = oa.oa_seller
-                    WHERE oa.oa_name ilike $1 AND oa.oa_city ilike $2
-                    AND s.seller_name ilike $3
+                    WHERE unaccent(oa.oa_name) ilike unaccent($1) AND unaccent(oa.oa_city) ilike unaccent($2)
+                    AND unaccent(s.seller_name) ilike unaccent($3)
                     AND oa.oa_price > $4
                     AND oa.oa_price < $5
                     {}
@@ -476,8 +476,8 @@ pub async fn select_count_filtered_games_from_db(
                 JOIN deal d on d.deal_oa_id = oa.oa_id
                 LEFT JOIN reviewer r on r.reviewer_oa_id = oa.oa_id
                 JOIN seller s on s.seller_id = oa.oa_seller
-                WHERE oa.oa_name ilike $1 AND oa.oa_city ilike $2
-                AND s.seller_name ilike $3
+                WHERE unaccent(oa.oa_name) ilike unaccent($1) AND unaccent(oa.oa_city) ilike unaccent($2)
+                AND unaccent(s.seller_name) ilike unaccent($3)
                 AND oa.oa_price > $4 AND oa.oa_price < $5
                 {}
                 GROUP BY oa.oa_id

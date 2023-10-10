@@ -20,6 +20,8 @@ GRANT ALL PRIVILEGES ON DATABASE scraper TO scrapy;
 -- Connexion à la base de données
 \c scraper;
 
+CREATE EXTENSION unaccent;
+
 CREATE TABLE "seller" (
   "seller_id" integer PRIMARY KEY,
   "seller_name" text,
