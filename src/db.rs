@@ -417,6 +417,13 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
         (chrono::Utc::now() - now).num_milliseconds()
     );
 
+    // this is a trick, if city filter is a number, it means that we're
+    // looking for postcode. Okkazeo format for city is : "city (postcode)"
+    let mut match_start = "";
+    if state.filters.city.is_some() && state.filters.city.as_ref().unwrap().parse::<i32>().is_ok() {
+        match_start = "(";
+    }
+
     let res = db_client
         .query(
             &select_req,
@@ -426,7 +433,8 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
                     state.filters.name.as_ref().unwrap_or(&String::new())
                 ),
                 &format!(
-                    "%{}%",
+                    "%{}{}%",
+                    match_start,
                     state.filters.city.as_ref().unwrap_or(&String::new())
                 ),
                 &format!(
@@ -499,12 +507,18 @@ pub async fn select_count_filtered_games_from_db(
             "".to_string()
         },
     );
+
+    let mut match_start = "";
+    if filters.city.is_some() && filters.city.as_ref().unwrap().parse::<i32>().is_ok() {
+        match_start = "(";
+    }
+
     let res = db_client
         .query(
             &select_req,
             &[
                 &format!("%{}%", filters.name.unwrap_or_default()),
-                &format!("%{}%", filters.city.unwrap_or_default()),
+                &format!("%{}{}%", match_start, filters.city.unwrap_or_default()),
                 &format!("%{}%", filters.vendor.unwrap_or_default()),
                 &(filters.min_price.unwrap_or_default() as f32),
                 &(filters.max_price.unwrap_or_else(|| 10000) as f32),
