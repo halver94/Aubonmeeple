@@ -242,17 +242,17 @@ pub async fn download_okkazeo_game_image(url: &str) -> Result<String, Box<dyn st
     let response = get(url).await?;
     let image_bytes = response.bytes().await?;
 
-    // Créer un lecteur d'image à partir des données téléchargées
     let image_reader = ImageReader::new(std::io::Cursor::new(image_bytes))
         .with_guessed_format()
         .expect("Failed to guess image format");
 
-    // Lire l'image depuis le lecteur
     let image = image_reader.decode().unwrap();
 
-    // Convertissez l'image en PNG (vous pouvez également utiliser JPEG)
     let mut bytes: Vec<u8> = Vec::new();
-    image.write_to(&mut Cursor::new(&mut bytes), image::ImageOutputFormat::Png)?;
+    image.write_to(
+        &mut Cursor::new(&mut bytes),
+        image::ImageOutputFormat::Jpeg(60),
+    )?;
 
     let re = Regex::new(r#"/([^/]+)\.(jpg|png)$"#).unwrap();
     let mut name: &str = "unknown";
@@ -262,11 +262,10 @@ pub async fn download_okkazeo_game_image(url: &str) -> Result<String, Box<dyn st
         }
     }
 
-    // Enregistrez l'image convertie sur le disque
     if !std::path::Path::new("img").exists() {
         std::fs::create_dir("img").unwrap();
     }
-    let output_path = Path::new("img").join(format!("{}{}", name, ".png"));
+    let output_path = Path::new("img").join(format!("{}{}", name, ".jpg"));
     let mut output_file = File::create(&output_path).unwrap();
     output_file.write_all(&bytes).unwrap();
 
