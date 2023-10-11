@@ -374,6 +374,7 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
                     AND oa.oa_price > $4
                     AND oa.oa_price < $5
                     {}
+                    {}
                     GROUP BY oa.oa_id
                     {}
                 )
@@ -397,6 +398,11 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
                 ORDER BY {} LIMIT $6 OFFSET $7;",
         if state.filters.pro.is_some() {
             "AND NOT s.seller_is_pro"
+        } else {
+            ""
+        },
+        if state.filters.delivery.is_some() {
+            "AND oa.oa_id in ( select distinct ship_oa_id from shipping where ship_shipper != 'hand_delivery')"
         } else {
             ""
         },
@@ -488,11 +494,17 @@ pub async fn select_count_filtered_games_from_db(
                 AND unaccent(s.seller_name) ilike unaccent($3)
                 AND oa.oa_price > $4 AND oa.oa_price < $5
                 {}
+                {}
                 GROUP BY oa.oa_id
                 {}
         ) AS c;",
         if filters.pro.is_some() {
             "AND NOT s.seller_is_pro"
+        } else {
+            ""
+        },
+        if filters.delivery.is_some() {
+            "AND oa.oa_id in ( select distinct ship_oa_id from shipping where ship_shipper != 'hand_delivery')"
         } else {
             ""
         },

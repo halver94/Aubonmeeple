@@ -21,7 +21,7 @@ pub struct State {
 
 pub fn format_url_params(state: &State) -> String {
     format!(
-        "?{}{}{}{}{}{}{}{}{}{}",
+        "?{}{}{}{}{}{}{}{}{}{}{}",
         format!("page={}", state.pagination.page),
         format!("&per_page={}", state.pagination.per_page),
         state
@@ -41,6 +41,11 @@ pub fn format_url_params(state: &State) -> String {
         },
         if state.filters.pro.is_some() {
             format!("&pro={}", state.filters.pro.as_ref().unwrap())
+        } else {
+            String::new()
+        },
+        if state.filters.delivery.is_some() {
+            format!("&delivery={}", state.filters.delivery.as_ref().unwrap())
         } else {
             String::new()
         },
@@ -118,6 +123,11 @@ pub async fn root(
         } else {
             None
         };
+        let delivery = if filters_form.0.delivery_form == Some("on".to_string()) {
+            Some(true)
+        } else {
+            None
+        };
         let city = if filters_form.0.city_form.as_ref().unwrap().is_empty() {
             None
         } else {
@@ -138,6 +148,7 @@ pub async fn root(
             name: name,
             vendor: vendor,
             pro: pro,
+            delivery: delivery,
             note: note,
             max_price: max_price,
             min_price: min_price,
