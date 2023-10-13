@@ -10,6 +10,16 @@
     align-items: center;
 }
 
+.bi-element {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    min-width: 23em;
+    width: 33%;
+    gap: 2em;
+    justify-content: space-evenly;
+}
+
 .green {
   color: rgb(69, 214, 69);
     -webkit-text-stroke-width: 0.01em; 
@@ -40,23 +50,6 @@
     background-color: #ffffff; 
 }
 
-@media screen and (max-width: 600px) {
-  .form-container {
-    width: 90%;
-  }
-  body {
-    font-size: small;
-  }
-}
-
-@media screen and (min-width: 600px) {
-  .form-container {
-    width: 50%;
-  }
-  body {
-    font-size: medium;
-  }
-}
 
 body {
     /*background-image:url("../assets/background_meeple2.jpg");*/
@@ -65,6 +58,7 @@ body {
     background-attachment: fixed;
     background-size: 100%;
     font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+    font-size: medium;
 }
 
 img,
@@ -101,9 +95,6 @@ video {
     font-size: larger;
 }
 
-.deal_price {
-}
-
 #wrapper {
     width: 100%;
     background-color: #000000; 
@@ -128,6 +119,7 @@ video {
 
 /* Style pour le conteneur du formulaire */
 .form-container {
+    width: 50%;
     margin-top: 0.5em;
     margin-bottom: 0.5em;
 }
@@ -160,28 +152,33 @@ form {
 
 .item {
   width: 100%;
-    flex-wrap: wrap;
-    border: solid #000000;
-    border-width: thin;
+  flex-wrap: wrap;
+  align-items: center;
+  border: solid #000000;
+  border-width: thin;
   border-radius: 0.8rem;
+  justify-content: center;
 }
 
 .game {
-  width: 25%;
-  margin-bottom: 0.7em;
-  margin-top: 0.7em;
+  min-width: 13em;
+  margin-left: 0.7em;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
   gap: 0.5em;
 }
-.game img {
-  margin-left: 0.7em;
+
+.game_name {
+  flex-wrap: wrap;
+  max-width: 15em;
 }
 
 .seller {
-    width: 15%;
+    min-width: 8em;
 }
 
 .shipping {
-    width: 20%;
+    min-width: 15em;
     align-items: flex-start;
 }
 
@@ -200,16 +197,17 @@ form {
 }
 
 .deal {
-    width: 10%;
+    min-width: 5em;
     align-items: center;
-    gap: 1em;
     font-size: larger;
+    gap: 0.5em;
+    margin-bottom: 0.1em;
+    margin-top: 0.1em;
 }
 
 .prices {
     gap: 0.2em;
-    width: 15%;
-    align-items: left;
+    min-width: 12em;
     justify-content: center;
     margin-bottom: 0.1em;
     margin-top: 0.1em;
@@ -222,10 +220,12 @@ form {
 }
 
 .reviews {
-    width: 15%;
-    gap: 0.5em;
+    min-width: 8em;
+    gap: 0.1em;
   margin-bottom: 0.6em;
   margin-top: 0.6em;
+  align-items: center;
+  justify-content: baseline;
 }
 
 .pagination {
@@ -255,8 +255,8 @@ form {
 .average_note {
     font-size: large;
     gap: 0.5em;
-  margin-bottom: 1em;
-  margin-top: 1em;
+  margin-bottom: 0.2em;
+  margin-top: 0.2em;
 }
 
 .footer {
@@ -269,4 +269,40 @@ form {
 .footer a {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
+}
+
+@media screen and (max-width: 888px) {
+  .form-container {
+    width: 90%;
+  }
+  body {
+    font-size: small;
+  }
+.average_note {
+    font-size: medium;
+}
+.deal {
+    font-size: medium;
+  }
+.game {
+  margin-left: 0.2em;
+  margin-bottom: 0.2em;
+  margin-top: 0.2em;
+  gap: 0.2em;
+}
+.reviews{
+}
+.prices{
+}
+.seller{
+}
+.shipping{
+  align-items: center;
+}
+.item {
+    flex-direction: column;
+}
+.bi-element {
+  width: 100%;
+}
 }
