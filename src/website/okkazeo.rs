@@ -237,7 +237,7 @@ pub async fn get_okkazeo_announce_page(id: u32) -> (Html, StatusCode) {
     (document, http_code)
 }
 
-pub async fn download_okkazeo_game_image(url: &str) -> Result<String, Box<dyn std::error::Error>> {
+pub async fn download_okkazeo_game_image(url: &str) -> Result<String, Box<dyn std::error::Error + Sync + Send>> {
     log::debug!("[TASK] getting image from {}", url);
     let response = get(url).await?;
     let image_bytes = response.bytes().await?;

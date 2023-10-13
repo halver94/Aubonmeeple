@@ -79,7 +79,7 @@ pub async fn get_game_infos(
         }
         game.okkazeo_announce.name = name_result;
     }
-    let image = download_okkazeo_game_image(&image_url).await.unwrap();
+    let image = download_okkazeo_game_image(&image_url).await?;
     game.okkazeo_announce.image = image;
 
     if let Err(e) = get_knapix_prices(&mut game).await {
@@ -155,9 +155,9 @@ pub async fn get_game_infos(
     Ok(game)
 }
 
-async fn parse_game_feed(db_client: &Client) {
+async fn parse_game_feed(db_client: &Client) -> Result<(), Box<dyn error::Error + Send + Sync>> {
     log::debug!("[MAIN] parsing game feed");
-    let feed = get_atom_feed().await.unwrap();
+    let feed = get_atom_feed().await?;
 
     let mut tasks = JoinSet::new();
     'outer: for entry in feed.entries {
@@ -176,11 +176,10 @@ async fn parse_game_feed(db_client: &Client) {
             .collect::<Vec<&str>>()
             .first()
             .unwrap()
-            .parse::<f32>()
-            .unwrap();
+            .parse::<f32>()?;
 
         // if same id, then it is an update
-        let id = entry.id.parse::<u32>().unwrap();
+        let id = entry.id.parse::<u32>()?;
 
         let fetched_game = select_game_with_id_from_db(db_client, id).await;
         if fetched_game.is_some() {
@@ -205,12 +204,12 @@ async fn parse_game_feed(db_client: &Client) {
         }
 
         tasks.spawn(
-            async move { get_game_infos(Some(&entry), entry.id.parse::<u32>().unwrap()).await },
+            async move { get_game_infos(Some(&entry), entry.id.parse::<u32>()?).await },
         );
     }
 
     while let Some(res) = tasks.join_next().await {
-        let game = res.unwrap().unwrap();
+        let game = res??;
         log::debug!("[MAIN] got result for game {}", game.okkazeo_announce.name);
 
         if let Err(e) = insert_announce_into_db(db_client, &game).await {
@@ -221,6 +220,8 @@ async fn parse_game_feed(db_client: &Client) {
             );
         }
     }
+
+    Ok(())
 }
 
 #[tokio::main]
@@ -249,7 +250,9 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
     loop {
         let start = Instant::now();
         log::debug!("[MAIN] scraping time : {:?}", start);
-        parse_game_feed(&client).await;
+        if let Err(e) = parse_game_feed(&client).await {
+            log::error!("{}", e);
+        }
         let duration = start.elapsed();
 
         if duration < interval {
