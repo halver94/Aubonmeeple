@@ -2,8 +2,6 @@ pub mod server;
 
 use serde::{Deserialize, Serialize};
 
-use self::server::{format_url_params, State};
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Sort {
     pub sort: String,
@@ -19,6 +17,7 @@ impl Default for Sort {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Filters {
+    pub date: Option<String>,
     pub city: Option<String>,
     pub name: Option<String>,
     pub vendor: Option<String>,
@@ -32,6 +31,7 @@ pub struct Filters {
 // this is ugly, but otherwise the Form from axum doesnt work properly
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct FiltersForm {
+    pub date_form: Option<String>,
     pub city_form: Option<String>,
     pub name_form: Option<String>,
     pub vendor_form: Option<String>,

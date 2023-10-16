@@ -116,10 +116,15 @@ video {
     height: 1.2em;
 }
 
+.datetbox {
+    width: 8em;
+    height: 1.2em;
+}
+
 
 /* Style pour le conteneur du formulaire */
 .form-container {
-    width: 50%;
+    width: 60%;
     margin-top: 0.5em;
     margin-bottom: 0.5em;
 }

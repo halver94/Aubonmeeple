@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use chrono::{DateTime, Utc};
+use chrono::{format, DateTime, Utc};
 use tokio_postgres::{Client, Error, NoTls, Row};
 
 use crate::frontlib::server::State;
@@ -375,6 +375,7 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
                     AND oa.oa_price < $5
                     {}
                     {}
+                    {}
                     GROUP BY oa.oa_id
                     {}
                 )
@@ -400,6 +401,11 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
             "AND NOT s.seller_is_pro"
         } else {
             ""
+        },
+        if state.filters.date.is_some() {
+            format!("AND oa.oa_last_modification_date >= '{}'", state.filters.date.as_ref().unwrap())
+        } else {
+            String::new()
         },
         if state.filters.delivery.is_some() {
             "AND oa.oa_id in ( select distinct ship_oa_id from shipping where ship_shipper != 'hand_delivery')"
@@ -495,6 +501,7 @@ pub async fn select_count_filtered_games_from_db(
                 AND oa.oa_price > $4 AND oa.oa_price < $5
                 {}
                 {}
+                {}
                 GROUP BY oa.oa_id
                 {}
         ) AS c;",
@@ -502,6 +509,11 @@ pub async fn select_count_filtered_games_from_db(
             "AND NOT s.seller_is_pro"
         } else {
             ""
+        },
+        if filters.date.is_some() {
+            format!("AND oa.oa_last_modification_date >= '{}'", filters.date.as_ref().unwrap())
+        } else {
+            String::new()
         },
         if filters.delivery.is_some() {
             "AND oa.oa_id in ( select distinct ship_oa_id from shipping where ship_shipper != 'hand_delivery')"
