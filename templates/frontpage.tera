@@ -1,7 +1,8 @@
-{% macro url_param(page, per_page, city, name, vendor, pro, delivery, note, max_price, min_price, sort) -%}
+{% macro url_param(page, per_page, city, name, vendor, pro, date, delivery, note, max_price, min_price, sort) -%}
 ?page={{ page }}&per_page={{per_page}}&city={{city}}&name={{name}}
 {% if vendor is string -%}&vendor={{vendor}}{% endif -%}
 {% if pro -%}&pro={{pro}}{% endif -%}
+{% if date -%}&date={{date}}{% endif -%}
 {% if delivery -%}&delivery={{delivery}}{% endif -%}
 {% if note is number -%}&note={{note}}{% endif -%}
 {% if max_price is number -%}&max_price={{max_price}}{% endif -%}
@@ -17,6 +18,7 @@ city=state.filters.city,
 name=state.filters.name,
 vendor=state.filters.vendor,
 pro=state.filters.pro,
+date=state.filters.date,
 delivery=state.filters.delivery,
 note=state.filters.note,
 max_price=state.filters.max_price,
@@ -41,9 +43,14 @@ sort=state.sort.sort) }}
                 <a><img class="banner-img" src="{{background_img}}" alt="fail"></a>
             </div>
             <div class="flex-col-center form-container">
-                <details>
+                <details open>
                     <summary>Filtres</summary>
                     <form action="/{{url_params}}" method="post">
+                        <div class="flex-col-center form-group" title="Annonces parues depuis e ...">
+                            <label for="date">Parues depuis</label>
+                            <input class="datebox" type="date" id="date" name="date_form"
+                                value="{{ state.filters.date | default(value="") }}">
+                        </div>
                         <div class="flex-col-center form-group" title="Nom de ville, code postale ou code département.">
                             <label for="city">Localisation</label>
                             <input class="textbox" type="text" id="city" name="city_form"
@@ -135,6 +142,7 @@ sort=state.sort.sort) }}
                                 name=state.filters.name, 
                                 vendor=game.okkazeo_announce.seller.name, 
                                 pro=state.filters.pro, 
+                                date=state.filters.date, 
                                 delivery=state.filters.delivery, 
                                 note=state.filters.note, 
                                 max_price=state.filters.max_price, 

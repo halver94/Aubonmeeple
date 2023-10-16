@@ -21,7 +21,7 @@ pub struct State {
 
 pub fn format_url_params(state: &State) -> String {
     format!(
-        "?{}{}{}{}{}{}{}{}{}{}{}",
+        "?{}{}{}{}{}{}{}{}{}{}{}{}",
         format!("page={}", state.pagination.page),
         format!("&per_page={}", state.pagination.per_page),
         state
@@ -29,6 +29,11 @@ pub fn format_url_params(state: &State) -> String {
             .city
             .as_ref()
             .map_or(String::new(), |city| format!("&city={}", city)),
+        state
+            .filters
+            .date
+            .as_ref()
+            .map_or(String::new(), |date| format!("&date={}", date)),
         state
             .filters
             .name
@@ -133,6 +138,11 @@ pub async fn root(
         } else {
             filters_form.0.city_form
         };
+        let date = if filters_form.0.date_form.as_ref().unwrap().is_empty() {
+            None
+        } else {
+            filters_form.0.date_form
+        };
         let name = if filters_form.0.name_form.as_ref().unwrap().is_empty() {
             None
         } else {
@@ -144,6 +154,7 @@ pub async fn root(
             filters_form.0.vendor_form
         };
         filters_param = Filters {
+            date: date,
             city: city,
             name: name,
             vendor: vendor,
