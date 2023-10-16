@@ -179,7 +179,7 @@ form {
 
 .shipping {
     min-width: 15em;
-    align-items: flex-start;
+  align-items: baseline;
 }
 
 .ship {
@@ -211,6 +211,7 @@ form {
     justify-content: center;
     margin-bottom: 0.1em;
     margin-top: 0.1em;
+  align-items: baseline;
 }
 
 .price {
@@ -224,7 +225,7 @@ form {
     gap: 0.1em;
   margin-bottom: 0.6em;
   margin-top: 0.6em;
-  align-items: center;
+  align-items: baseline;
   justify-content: baseline;
 }
 
@@ -297,12 +298,46 @@ form {
 .seller{
 }
 .shipping{
-  align-items: center;
 }
 .item {
     flex-direction: column;
 }
 .bi-element {
-  width: 100%;
+  margin-right: 0.5em;
+  margin-left: 0.5em;
+  margin-top: 0.2em;
+  margin-bottom: 0.2em;
 }
 }
+
+  details {
+  background-color: #a17b0f;
+    border: 0.1em solid rgba(27, 31, 35, .15);
+    border-radius: 0.6em;
+    box-shadow: rgba(27, 31, 35, .1) 0 0.1em 0;
+    box-sizing: border-box;
+    color: #fff;
+    display: inline-block;
+      cursor: pointer;
+    font-size: small;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    padding: 0.6em 0.6em;
+  
+  summary {
+      cursor: pointer;
+      color: #ffffff;
+    border: 0.1em solid rgba(27, 31, 35, .15);
+      padding: 1rem;
+      border-bottom: 1px solid #ddd;
+  }
+  }
+    
+  details[open] {
+  background-color: #000000;
+      cursor: auto;
+  }
+
+  summary:hover {
+      cursor: pointer;
+  }

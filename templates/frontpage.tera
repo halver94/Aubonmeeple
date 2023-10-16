@@ -41,64 +41,68 @@ sort=state.sort.sort) }}
                 <a><img class="banner-img" src="{{background_img}}" alt="fail"></a>
             </div>
             <div class="flex-col-center form-container">
-                <form action="/{{url_params}}" method="post">
-                    <div class="flex-col-center form-group" title="Nom de ville, code postale ou code département.">
-                        <label for="city">Localisation</label>
-                        <input class="textbox" type="text" id="city" name="city_form"
-                            value="{{ state.filters.city | default(value="") }}">
+                <details>
+                    <summary>Filtres</summary>
+                    <form action="/{{url_params}}" method="post">
+                        <div class="flex-col-center form-group" title="Nom de ville, code postale ou code département.">
+                            <label for="city">Localisation</label>
+                            <input class="textbox" type="text" id="city" name="city_form"
+                                value="{{ state.filters.city | default(value="") }}">
+                        </div>
+                        <div class="flex-col-center form-group">
+                            <label for="name">Nom</label>
+                            <input class="textbox" type="text" id="name" name="name_form"
+                                value="{{ state.filters.name | default(value="") }}">
+                        </div>
+                        <div class="flex-col-center form-group">
+                            <label for="vendor">Vendeur</label>
+                            <input class="textbox" type="text" id="vendor" name="vendor_form"
+                                value="{{ state.filters.vendor | default(value="") }}">
+                        </div>
+                        <div class="flex-col-center form-group">
+                            <label for="note">Note min</label>
+                            <input class="nbrTextbox" type="number" step="any" id="note" name="note_form"
+                                value="{{ state.filters.note | default(value="") }}" min="0" max="10">
+                        </div>
+                        <div class="flex-col-center form-group">
+                            <label for="min_price">Prix min</label>
+                            <input class="nbrTextbox" type="number" step="1" id="min_price" name="min_price_form"
+                                value="{{ state.filters.min_price | default(value="") }}" min="0">
+                        </div>
+                        <div class="flex-col-center form-group">
+                            <label for="max_price">Prix max</label>
+                            <input class="nbrTextbox" type="number" step="1" id="max_price" name="max_price_form"
+                                value="{{ state.filters.max_price | default(value="") }}" min="0">
+                        </div>
+                        <div class="flex-col-center form-group" title="Exclure vendeurs pro">
+                            <label for="pro">Exclure pro</label>
+                            <input type="checkbox" id="pro" name="pro_form" {% if state.filters.pro -%}{{ "checked" }}{%
+                                endif -%}>
+                        </div>
+                        <div class="flex-col-center form-group" title="Annonces avec livraison">
+                            <label for="delivery"><i class="fas fa-fw fa-truck" style="color: #ffffff;"
+                                    aria-hidden="true"></i></label>
+                            <input type="checkbox" id="delivery" name="delivery_form" {% if state.filters.delivery
+                                -%}{{ "checked" }}{% endif -%}>
+                        </div>
+                        <input class="button" type="submit" value="Filtrer">
+                        <button class="button" type="button"
+                            onclick="window.location.href='/?page=0&per_page=25&sort={{state.sort.sort}}';">Effacer<br><br>
+                            filtres</button>
+                    </form>
+                    <div class="flex-row-center sort">
+                        <button class="button" onclick="window.location.href='/{{url_param_sort_updated}}';">Trier
+                            /
+                            date</button>
+                        <button class="button" onclick="window.location.href='/{{url_param_sort_price}}';">Trier /
+                            €</button>
+                        <button class="button" onclick="window.location.href='/{{url_param_sort_percent}}';">Trier /
+                            %</button>
                     </div>
-                    <div class="flex-col-center form-group">
-                        <label for="name">Nom</label>
-                        <input class="textbox" type="text" id="name" name="name_form"
-                            value="{{ state.filters.name | default(value="") }}">
-                    </div>
-                    <div class="flex-col-center form-group">
-                        <label for="vendor">Vendeur</label>
-                        <input class="textbox" type="text" id="vendor" name="vendor_form"
-                            value="{{ state.filters.vendor | default(value="") }}">
-                    </div>
-                    <div class="flex-col-center form-group">
-                        <label for="note">Note min</label>
-                        <input class="nbrTextbox" type="number" step="any" id="note" name="note_form"
-                            value="{{ state.filters.note | default(value="") }}" min="0" max="10">
-                    </div>
-                    <div class="flex-col-center form-group">
-                        <label for="min_price">Prix min</label>
-                        <input class="nbrTextbox" type="number" step="1" id="min_price" name="min_price_form"
-                            value="{{ state.filters.min_price | default(value="") }}" min="0">
-                    </div>
-                    <div class="flex-col-center form-group">
-                        <label for="max_price">Prix max</label>
-                        <input class="nbrTextbox" type="number" step="1" id="max_price" name="max_price_form"
-                            value="{{ state.filters.max_price | default(value="") }}" min="0">
-                    </div>
-                    <div class="flex-col-center form-group" title="Exclure vendeurs pro">
-                        <label for="pro">Exclure pro</label>
-                        <input type="checkbox" id="pro" name="pro_form" {% if state.filters.pro -%}{{ "checked" }}{%
-                            endif -%}>
-                    </div>
-                    <div class="flex-col-center form-group" title="Annonces avec livraison">
-                        <label for="delivery"><i class="fas fa-fw fa-truck" style="color: #ffffff;"
-                                aria-hidden="true"></i></label>
-                        <input type="checkbox" id="delivery" name="delivery_form" {% if state.filters.delivery
-                            -%}{{ "checked" }}{% endif -%}>
-                    </div>
-                    <input class="button" type="submit" value="Filtrer">
-                    <button class="button" type="button"
-                        onclick="window.location.href='/?page=0&per_page=25&sort={{state.sort.sort}}';">Effacer<br><br>
-                        filtres</button>
-                </form>
-                <div class="flex-row-center sort">
-                    <button class="button" onclick="window.location.href='/{{url_param_sort_updated}}';">Trier
-                        /
-                        date</button>
-                    <button class="button" onclick="window.location.href='/{{url_param_sort_price}}';">Trier /
-                        €</button>
-                    <button class="button" onclick="window.location.href='/{{url_param_sort_percent}}';">Trier /
-                        %</button>
-                </div>
             </div>
+            </details>
         </div>
+
         <div class="flex-col-center items">
             {% for game in games -%}
             {% if loop.index % 2 == 0%}
