@@ -3,15 +3,21 @@ use scraper::{Html, Selector};
 use crate::game::Reviewer;
 
 pub async fn get_bgg_note(name: &str) -> Option<Reviewer> {
+    let name = normalize_bgg_name(name);
     let search = format!(
-        "https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q={}",
-        name.replace(' ', "-")
-            .replace([':', '\''], "")
-            .to_lowercase()
-    );
+        "https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q={}", name);
     log::debug!("[TASK] getting bgg note: {}\n", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
-    let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
+    parse_bgg_document(&name, search, std::str::from_utf8(&content).unwrap())
+}
+
+fn normalize_bgg_name(name: &str) -> String{
+        name.replace([':', '\''], "")
+            .to_lowercase()
+
+}
+fn parse_bgg_document(name: &str, search: String, doc : &str) -> Option<Reviewer> {
+    let document = Html::parse_document(doc);
 
     let primary_selector = Selector::parse("a.primary").unwrap();
 
@@ -23,6 +29,7 @@ pub async fn get_bgg_note(name: &str) -> Option<Reviewer> {
     } else {
         return None;
     };
+    log::trace!("selected_name: {} vs name {}", selected_name, name);
 
     let mut bggrating_values = Vec::new();
     for bggrating in document.select(&bggrating_selector).skip(1).take(2) {
@@ -31,6 +38,7 @@ pub async fn get_bgg_note(name: &str) -> Option<Reviewer> {
 
         bggrating_values.push(ratings.to_string());
     }
+    log::trace!("bggrating_values: {:#?}", bggrating_values);
 
     if bggrating_values.len() == 2 && name.to_lowercase() == selected_name.to_lowercase() {
         let rating = bggrating_values[0].clone().parse::<f32>().unwrap_or(0.0);
@@ -44,4 +52,41 @@ pub async fn get_bgg_note(name: &str) -> Option<Reviewer> {
     }
 
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{fs, env};
+    use log::Level;
+
+    use crate::website::bgg::{normalize_bgg_name, parse_bgg_document};
+
+
+    struct Test {
+        name: String,
+        note: f32,
+        review_cnt: u32,
+        document: String,
+    }
+
+    #[test]
+    fn it_works() {
+    env::set_var("RUST_LOG", "boardgame_finder=trace");
+        env_logger::Builder::from_env(
+        env_logger::Env::default().default_filter_or(Level::Info.as_str()),
+    )
+    .init();
+
+        log::trace!("starting bgg tests");
+        let tests = vec![
+            Test{ name: String::from("Lucky Bastard"), note: 5.0, review_cnt: 1, document: String::from("tests/bgg/test1.html")},
+        ];
+        for test in tests.into_iter() {
+            let name = normalize_bgg_name(test.name.as_str());
+            let html_doc = fs::read_to_string(test.document).expect("Should have been able to read the file");
+            let review = parse_bgg_document(&name, String::new(), &html_doc).unwrap();
+            assert_eq!(review.note, test.note);
+            assert_eq!(review.number, test.review_cnt);
+        }
+    }
 }
