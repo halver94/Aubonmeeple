@@ -9,12 +9,13 @@ Parsing Bugfix
     - fix , check le nom dans les resultats
 
 - agorajeux
-    - remove - VF or - VO
+    - remove - Nouvelle éditon ( Jamaica )
 
 Features:
 - poc a kind of levenstein distance heuristic when comparing names
 - add more website comparison
 - add if product in shop is available or not
+- see if doing async test is possble
 
 Bugfix:
 
