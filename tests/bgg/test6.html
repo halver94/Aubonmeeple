@@ -1,0 +1,4061 @@
+<!DOCTYPE html>
+<html ng-app="GeekApp" lang="en-US" ng-cloak>
+
+<head>
+    <meta charset='utf-8'>
+    <meta id="vp" name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            var width = document.documentElement.clientWidth || window.innerWidth;
+            if (width < 960) {
+                var mvp = document.getElementById('vp');
+                // android debugging
+                mvp.setAttribute('content', 'width=960');
+            }
+        });
+    </script>
+    <meta content='yes' name='apple-mobile-web-app-capable'>
+    <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible'>
+
+    <title>BoardGameGeek | Gaming Unplugged Since 2000</title>
+
+
+    <link rel="apple-touch-icon" href="https://cf.geekdo-static.com/icons/touch-icon180.png" />
+    <link rel="shortcut icon" href="https://cf.geekdo-static.com/icons/favicon2.ico" type="image/ico" />
+    <link rel="icon" href="https://cf.geekdo-static.com/icons/favicon2.ico" type="image/ico" />
+    <link rel="search" href="/game-opensearch.xml" type="application/opensearchdescription+xml"
+        title="BGG Game Search" />
+    <meta name="apple-mobile-web-app-title" content="BGG">
+
+    <meta name="theme-color" content="#2e2b47">
+    <link rel="preconnect" href="https://api.geekdo.com" />
+
+
+
+
+    <meta property="og:image" content="https://cf.geekdo-static.com/images/opengraph/bgg_opengraph.png" />
+
+
+
+    <meta name="keywords"
+        content="board game, boardgames, boardgame, board, games, game, hobby, boardgamegeek, geek, geekdo">
+
+    <script>window.AdSlots = window.AdSlots || {
+            cmd: [],
+            disableScripts: ['gpt'],
+            renderOnFirstLoad: false,
+            divCheck: false
+        };</script>
+
+
+    <link rel='stylesheet' type='text/css' href='https://cf.geekdo-static.com/static/geekui_master2_65304396364c3.css'>
+    <link rel='stylesheet' type='text/css' href='https://cf.geekdo-static.com/static/css_master2_65304388b07ee.css'>
+
+    <base href="/">
+
+    <script src="https://kit.fontawesome.com/ece5b35462.js" crossorigin="anonymous"></script>
+
+    <script>
+        var GEEK = GEEK || {};
+        GEEK.adBlock = [];
+        GEEK.adConfig = { "blockleaderboard": null, "blockskyscraper": null, "noadsense": null, "blocksupportdrive": null };
+        GEEK.adSlots = { "dfp-leaderboard": { "name": "boardgame_leaderboard_728x90" }, "dfp-skyscraper": { "name": "boardgame_skyscraper_160x600" }, "dfp-medrect": { "name": "boardgame_rectangle_300x250" }, "dfp-repeater": { "name": "boardgame_home_repeater" }, "dfp-medrect-reserved-home": { "name": "boardgame_reserved_home_300x250" }, "dfp-leaderboard-lg": { "name": "boardgame_home_hero" }, "dfp-home-sidekick": { "name": "boardgame_home_repeater" }, "dfp-inline-post": { "name": "boardgame_inline_post" } };
+        GEEK.legacyAds = [];
+        GEEK.bggStoreAds = [];
+        GEEK.googleTargets = null;
+        GEEK.userid = 0;
+        GEEK.domainname = 'boardgamegeek.com';
+        GEEK.domain = 'boardgame';
+        GEEK.geekitemPreload = {};
+        GEEK.geekitemSettings = null;
+        GEEK.geekitemModules = null;
+        GEEK.geekGlobalSettings = { "shutdown_file_ops": "1", "shutdown_storeimage_ops": "0", "shutdown_edit_avatar": "0", "shutdown_file_upload": "0", "shutdown_file_download": "0", "shutdown_image_upload": "0" };
+        GEEK.geekimageSettings = null;
+        GEEK.legacy = 1;
+        GEEK.apiurlsPrefix = 'https://api.geekdo.com';
+
+
+
+        GEEK.apiurls = {
+            'root': '/api',
+            'amazon': '/api/amazon',
+            'files': '/api/files',
+            'geekitems': '/api/geekitems',
+            'collectionstatsgraph': '/api/collectionstatsgraph',
+            'images': '/api/images',
+            'threads': '/api/forums/threads',
+            'forums': '/api/forums',
+            'videos': '/api/videos',
+            'hotness': '/api/hotness',
+            'dynamicinfo': '/api/dynamicinfo',
+            'subtypeinfo': '/api/subtypeinfo',
+            'geekbay': '/api/geekbay',
+            'geekmarket': '/market/api/v1',
+            'geekmarketapi': '/api/market',
+            'geeklists': '/api/geeklists',
+            'reviews': '/api/forumreviews',
+            'collections': '/api/collections',
+            'linkeditems': '/api/geekitem/linkeditems',
+            'subscriptions': '/api/subscriptions',
+            'fans': '/api/fans',
+            'geekpreviews': '/api/geekpreviews',
+            'geekpreviewitems': '/api/geekpreviewitems',
+            'geekpreviewparentitems': '/api/geekpreviewparentitems',
+            'recs': '/api/geekitem/recs',
+            'awards': '/api/geekawards',
+            'historicalrankgraph': '/api/historicalrankgraph',
+            'blueprint_recipes': '/api/blueprints/recipes',
+            'affiliateads': '/api/affiliateads',
+            'sleevesbycard': '/api/sleevesbycard',
+            'cardsetsbygame': '/api/cardsetsbygame',
+        };
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-104725-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'analytics_storage': 'denied',
+            'personalization_storage': 'denied',
+            'wait_for_update': 3000
+        });
+        gtag('config', 'UA-104725-1', {
+            'cookie_domain': 'boardgamegeek.com',
+            'send_page_view': false
+        });
+    </script>
+
+    <script type='text/javascript'
+        src='https://cf.geekdo-static.com/static/geekangular17_master2_653043a36a5ed.js'></script>
+    <script type='text/javascript' src='https://cf.geekdo-static.com/static/geekui_master2_65304396364c3.js'></script>
+    <script type='text/javascript' src='https://cf.geekdo-static.com/static/js_master2_653043884929d.js'></script>
+    <script type='text/javascript'
+        src='https://cf.geekdo-static.com/static/geekoutputtemplates_master2_653043a4256c2.js'></script>
+    <script type='text/javascript'
+        src='https://cf.geekdo-static.com/static/geekuicommontemplates_master2_653043a42cf63.js'></script>
+    <script>
+        window.geekCookieConsent.gtagReady.then(function () {
+            gtag('event', 'page_view');
+        });
+    </script>
+    <!-- why this? -->
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+
+    <!-- Add to main?
+<link rel="apple-touch-icon" 	href="https://cf.geekdo-static.com/icons/appleicon.png" />
+<link rel="shortcut icon" 		href="https://cf.geekdo-static.com/icons/favicon.ico" type="image/ico" />
+<link rel="icon" 					href="https://cf.geekdo-static.com/icons/favicon.ico" type="image/ico" />
+<link rel="search" 				href="/game-opensearch.xml" type="application/opensearchdescription+xml" title="BGG Game Search" />
+-->
+
+
+
+
+
+    <!--this is used only for GeekMap -->
+
+
+    <!-- deal with adsense
+	<script type="text/javascript">
+		window.google_analytics_uacct = "UA-104725-1";
+		var googletag = googletag || { };
+		googletag.cmd = googletag.cmd || [];
+		( function() {
+			var gads = document.createElement('script');
+			gads.async = true;
+			gads.type  = 'text/javascript';
+			gads.src   = "//www.googletagservices.com/tag/js/gpt.js";
+			var node = document.getElementsByTagName('script')[0];
+			node.parentNode.insertBefore(gads, node);
+		} )();
+
+		adunits = [
+			{
+				name:    'boardgame_button_120x45',
+				size:    [ 120, 45 ],
+				target:  'dfp-button'
+			},
+			{
+				name:    'boardgame_leaderboard_728x90',
+				size:    [ 728, 90 ],
+				target:  'dfp-leaderboard'
+			},
+			{
+				name:    'boardgame_skyscraper_160x600',
+				size:    [ 160, 600 ],
+				target:  'dfp-skyscraper'
+			},
+			{
+				name:    'boardgame_rectangle_300x250',
+				size:    [ 300, 250 ],
+				target:  'dfp-medrect'
+			},
+			{
+				name:    'boardgame_rectangle_300x250',
+				size:    [ 300, 250 ],
+				target:  'dfp-medrect-reserved-home'
+			},
+			{
+				name:    'boardgame_button_120x90',
+				size:    [ 120, 90 ],
+				target:  'dfp-giftguide'
+			}
+		];
+
+		googletag.cmd.push(function() {
+			for( var i=0; i< adunits.length; i++ )
+			{
+				unit = adunits[i];
+				googletag.defineUnit('/1005854/ca-pub-7206761047394129/'+unit.name, unit.size, unit.target).
+				addService(googletag.pubads());
+			}
+
+			
+			googletag.pubads().setTargeting( "subdomain", "all" );
+			googletag.enableServices();
+		} );
+
+	</script>
+-->
+
+    <script>
+        function start() {
+
+        }
+
+        function ondomready() {
+            Amazon_LoadAds();
+
+            GEEK.addHandlers();
+            GEEK.recaptchaKey = '6Ldyr6EaAAAAAE0F2hYgtHHqbF6nKPTENAwo6SyU';
+        }
+
+        if (typeof window.addEvent === "function") {
+            window.addEvent('domready', function () {
+                ondomready();
+            });
+        } else {
+            window.addEventListener("DOMContentLoaded", function () {
+                ondomready();
+            });
+        }
+        window.onload = start;
+    </script>
+
+
+</head>
+
+<body ng-controller="GeekOutput_LayoutCtrl as layoutctrl" class="domain-boardgame"
+    ng-class="{ 'has-no-max-width' : layoutctrl.geekitemSettings.fluidlayout }">
+
+
+    <div class='d-flex flex-column min-vh-100'>
+
+        <div id="global-header-outer" class='global-header-outer' ng-controller="NavCtrl as navctrl"
+            click-out="navctrl.closeMobileMenu()">
+
+            <geeknav-menu></geeknav-menu>
+        </div>
+
+
+
+        <main class='global-body flex-grow-1' id="mainbody"
+            ng-class="{ 'has-overlay-sidebar': layoutctrl.showOverlaySidebar, 'has-hidden-fixed-sidebar': layoutctrl.localStorage.hideFixedSidebar }">
+
+            <a id='mainbodytarget' tabindex="-1"></a>
+
+            <!-- Home King Ad -->
+
+            <div hide-ad-block="blockleaderboard">
+                <div class="advertisement-leaderboard">
+                    <div class='center-block' ng-dfp-ad="dfp-leaderboard"></div>
+                </div>
+            </div>
+
+            <div class='global-body-content-container container-fluid'>
+                <geekoutput-sidebar deactivate-overlay-sidebar='layoutctrl.deactivateOverlaySidebar'
+                    show-overlay-sidebar='layoutctrl.showOverlaySidebar'></geekoutput-sidebar>
+
+
+                <div class='global-body-content pending' ng-class="{'ready': layoutctrl.ready}">
+
+                    <a id='maincontenttarget' tabindex="-1"></a>
+
+                    <div class="legacy">
+                        <div id="container" class="yui-skin-sam">
+                            <div id="maincontent" ng-non-bindable>
+                                <div style="margin: auto;"></div>
+                                <form method='GET' action="">
+                                    <div class='infobox'>
+                                        <div class='fr'></div>
+                                        <div class='fl'>
+                                            <p class="m-0 text-muted">We may earn a commission when you buy through our
+                                                links. </p>
+                                        </div>
+
+                                        <div class='clear'></div>
+                                    </div>
+                                </form>
+
+                                <div id='collection_status' style='position:absolute; background:red; color:white;'>
+                                </div>
+
+
+                                <div id='collection'>
+                                    <div class='fl sf'><span id='collection_viewlabel'
+                                            style='display:none;'>&nbsp;|&nbsp;View: <span
+                                                id='collection_viewname'></span></span></div>
+
+                                    <div style='text-align:right; margin-bottom:5px;' class='sf'>
+                                    </div>
+
+
+
+                                    <div class="table-responsive">
+                                        <table cellpadding=0 cellspacing=1 class='collection_table' width='100%'
+                                            id='collectionitems'>
+                                            <tr>
+                                                <th class='collection_bggrating'>
+
+                                                    <a href="/search/boardgame?sort=rank&q=Runebound">Board Game
+                                                        Rank</a>
+                                                </th>
+
+                                                <th class='collection_thumbnail'>
+                                                    <span class="sr-only">Thumbnail image</span>
+                                                </th>
+
+                                                <th class='collection_title'>
+
+                                                    <a href="/search/boardgame?sort=title&q=Runebound">Title</a>
+                                                </th>
+
+
+
+                                                <th class='collection_bggrating'>
+                                                    <a href="/search/boardgame?sort=bggrating&q=Runebound">Geek
+                                                        Rating</a>
+
+                                                </th>
+
+                                                <th class='collection_bggrating'>
+                                                    <a href="/search/boardgame?sort=avgrating&q=Runebound">Avg
+                                                        Rating</a>
+
+                                                </th>
+
+                                                <th class='collection_bggrating'>
+                                                    <a href="/search/boardgame?sort=numvoters&q=Runebound">Num
+                                                        Voters</a>
+
+                                                </th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <th class='collection_shop'>
+                                                    Shop
+                                                </th>
+                                            </tr>
+
+
+
+
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    <a name="4673"></a> 4673
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgame/9829/runebound"><img alt="Board Game: Runebound"
+                                                            src="https://cf.geekdo-images.com/WLctv94L_lifTh6c44Zxnw__micro/img/_e3v6kNlFTztPAHusuEjyU9JqU8=/fit-in/64x64/filters:strip_icc()/pic5587884.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname1' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname1'></div>
+                                                    <div id='results_objectname1' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgame/9829/runebound"
+                                                            class='primary'>Runebound</a>
+
+                                                        <span class='smallerfont dull'>(2004)</span>
+
+                                                    </div>
+
+                                                    <p class="smallefont dull" style="margin: 2px 0 0 0;">
+                                                        Sweep the countryside looking for ever bigger monsters to
+                                                        defeat.
+                                                    </p>
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.758 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.22 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    1577 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_9829_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    <a name="1103"></a> 1103
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgame/21523/runebound-second-edition"><img
+                                                            alt="Board Game: Runebound: Second Edition"
+                                                            src="https://cf.geekdo-images.com/9ihKYaEPIQD7d1KkTWfFpQ__micro/img/rcV1CRNz52C72Mal7Hxu6T0IRRY=/fit-in/64x64/filters:strip_icc()/pic178189.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname2' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname2'></div>
+                                                    <div id='results_objectname2' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgame/21523/runebound-second-edition"
+                                                            class='primary'>Runebound: Second Edition</a>
+
+                                                        <span class='smallerfont dull'>(2005)</span>
+
+                                                    </div>
+
+                                                    <p class="smallefont dull" style="margin: 2px 0 0 0;">
+                                                        Adventure and gain life experience until you can beat the
+                                                        Dragon!
+                                                    </p>
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.541 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.89 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    8037 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_21523_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    <a name="564"></a> 564
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgame/181530/runebound-third-edition"><img
+                                                            alt="Board Game: Runebound (Third Edition)"
+                                                            src="https://cf.geekdo-images.com/Zo4slt6oCCOFamxoR1ExcQ__micro/img/7TLKgwMX0r9nBUFg_qX8j0JaTmY=/fit-in/64x64/filters:strip_icc()/pic2625790.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname3' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname3'></div>
+                                                    <div id='results_objectname3' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgame/181530/runebound-third-edition"
+                                                            class='primary'>Runebound (Third Edition)</a>
+
+                                                        <span class='smallerfont dull'>(2015)</span>
+
+                                                    </div>
+
+                                                    <p class="smallefont dull" style="margin: 2px 0 0 0;">
+                                                        Adventure across Terrinoth acquiring skills and items to defeat
+                                                        the great villain.
+                                                    </p>
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.895 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.46 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6005 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_181530_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/225275/runebound-third-edition-unbreakable-bonds"><img
+                                                            alt="Board Game: Runebound (Third Edition): Unbreakable Bonds"
+                                                            src="https://cf.geekdo-images.com/u9Rf0_WHx8MP6FxT80xB2Q__micro/img/LpHb0MF1lJicX5Bm2fA4EN2UxBE=/fit-in/64x64/filters:strip_icc()/pic3514373.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname4' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname4'></div>
+                                                    <div id='results_objectname4' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/225275/runebound-third-edition-unbreakable-bonds"
+                                                            class='primary'>Runebound (Third Edition): Unbreakable
+                                                            Bonds</a>
+
+                                                        <span class='smallerfont dull'>(2017)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.344 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    8.18 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    1003 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_225275_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/13081/runebound-island-dread"><img
+                                                            alt="Board Game: Runebound: The Island of Dread"
+                                                            src="https://cf.geekdo-images.com/wx5PC0ymf-h5I5Xc_lsoNw__micro/img/iFcvja01esiRCxwEVsnhSVXbEck=/fit-in/64x64/filters:strip_icc()/pic5724930.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname5' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname5'></div>
+                                                    <div id='results_objectname5' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/13081/runebound-island-dread"
+                                                            class='primary'>Runebound: The Island of Dread</a>
+
+                                                        <span class='smallerfont dull'>(2005)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.016 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.23 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    918 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_13081_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/19892/runebound-midnight"><img
+                                                            alt="Board Game: Runebound: Midnight"
+                                                            src="https://cf.geekdo-images.com/JwNZvd1EpfydYm6QshbNMg__micro/img/ZuI_wv6g2p2xhyw9gE-a3S4AcxI=/fit-in/64x64/filters:strip_icc()/pic2245558.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname6' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname6'></div>
+                                                    <div id='results_objectname6' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/19892/runebound-midnight"
+                                                            class='primary'>Runebound: Midnight</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.656 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.58 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    384 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_19892_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/22822/runebound-sands-al-kalim"><img
+                                                            alt="Board Game: Runebound: Sands of Al-Kalim"
+                                                            src="https://cf.geekdo-images.com/8jTciUDHSwZKo6rW2eurfQ__micro/img/aQcwHRXCjc5sAEqeE9u9ejaRJ1Y=/fit-in/64x64/filters:strip_icc()/pic763275.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname7' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname7'></div>
+                                                    <div id='results_objectname7' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/22822/runebound-sands-al-kalim"
+                                                            class='primary'>Runebound: Sands of Al-Kalim</a>
+
+                                                        <span class='smallerfont dull'>(2007)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.123 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.60 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    880 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_22822_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/38643/runebound-frozen-wastes"><img
+                                                            alt="Board Game: Runebound: The Frozen Wastes"
+                                                            src="https://cf.geekdo-images.com/Xh5BALtVXd0NAdiW7ePHwA__micro/img/KHGu805b4meySCuJLGvucvxOUDg=/fit-in/64x64/filters:strip_icc()/pic381255.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname8' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname8'></div>
+                                                    <div id='results_objectname8' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/38643/runebound-frozen-wastes"
+                                                            class='primary'>Runebound: The Frozen Wastes</a>
+
+                                                        <span class='smallerfont dull'>(2009)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.902 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.55 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    515 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_38643_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/70230/runebound-mists-zanaga"><img
+                                                            alt="Board Game: Runebound: Mists of Zanaga"
+                                                            src="https://cf.geekdo-images.com/oF2iH77EioM1XTyzKwwYGA__micro/img/6IN1lRybDX9SAvF0Fbc9qvjfyio=/fit-in/64x64/filters:strip_icc()/pic712512.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname9' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname9'></div>
+                                                    <div id='results_objectname9' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/70230/runebound-mists-zanaga"
+                                                            class='primary'>Runebound: Mists of Zanaga</a>
+
+                                                        <span class='smallerfont dull'>(2010)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.814 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.57 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    388 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_70230_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/198942/runebound-third-edition-caught-web-scenario-pack"><img
+                                                            alt="Board Game: Runebound (Third Edition): Caught in a Web – Scenario Pack"
+                                                            src="https://cf.geekdo-images.com/FNbTfeZ1VNvTJqIviQqUzA__micro/img/zc_XPgNW2paad8VYGn5gEg2zcxo=/fit-in/64x64/filters:strip_icc()/pic3539846.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname10' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname10'></div>
+                                                    <div id='results_objectname10' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/198942/runebound-third-edition-caught-web-scenario-pack"
+                                                            class='primary'>Runebound (Third Edition): Caught in a Web –
+                                                            Scenario Pack</a>
+
+                                                        <span class='smallerfont dull'>(2016)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.994 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.78 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    598 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/18626/runebound-artifacts-and-allies"><img
+                                                            alt="Board Game: Runebound: Artifacts and Allies"
+                                                            src="https://cf.geekdo-images.com/JDAMymIdNqc68OdXZQ71dQ__micro/img/ZJRGtuH1-lVsAqcan3v0GBedqxg=/fit-in/64x64/filters:strip_icc()/pic106552.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname11' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname11'></div>
+                                                    <div id='results_objectname11' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/18626/runebound-artifacts-and-allies"
+                                                            class='primary'>Runebound: Artifacts and Allies</a>
+
+                                                        <span class='smallerfont dull'>(2005)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.816 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.08 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    528 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_18626_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/18624/runebound-dark-forest"><img
+                                                            alt="Board Game: Runebound: The Dark Forest"
+                                                            src="https://cf.geekdo-images.com/GQGkV-l8NVl21zU_djyLpw__micro/img/s2Jk2J_4CfyAVkgfCkC_x7gU2PQ=/fit-in/64x64/filters:strip_icc()/pic106553.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname12' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname12'></div>
+                                                    <div id='results_objectname12' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/18624/runebound-dark-forest"
+                                                            class='primary'>Runebound: The Dark Forest</a>
+
+                                                        <span class='smallerfont dull'>(2005)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.803 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.14 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    481 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_18624_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/201629/runebound-third-edition-fall-dark-star-scenario-pa"><img
+                                                            alt="Board Game: Runebound (Third Edition): Fall of the Dark Star – Scenario Pack"
+                                                            src="https://cf.geekdo-images.com/GfMyQgaHmNNExRFGqvi9Pw__micro/img/VKOh080gQkLYu3qsqHHY_1l5IV8=/fit-in/64x64/filters:strip_icc()/pic3084339.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname13' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname13'></div>
+                                                    <div id='results_objectname13' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/201629/runebound-third-edition-fall-dark-star-scenario-pa"
+                                                            class='primary'>Runebound (Third Edition): Fall of the Dark
+                                                            Star – Scenario Pack</a>
+
+                                                        <span class='smallerfont dull'>(2016)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.872 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.60 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    469 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/18622/runebound-scepter-kyros"><img
+                                                            alt="Board Game: Runebound: The Scepter of Kyros"
+                                                            src="https://cf.geekdo-images.com/O7c2oqeRXoIseF2N1RIXqg__micro/img/iQVGRZ6_isv-G-pM2gQus8NmL2s=/fit-in/64x64/filters:strip_icc()/pic106555.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname14' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname14'></div>
+                                                    <div id='results_objectname14' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/18622/runebound-scepter-kyros"
+                                                            class='primary'>Runebound: The Scepter of Kyros</a>
+
+                                                        <span class='smallerfont dull'>(2005)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.786 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.12 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    457 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_18622_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/18623/runebound-crown-elder-kings"><img
+                                                            alt="Board Game: Runebound: Crown of the Elder Kings"
+                                                            src="https://cf.geekdo-images.com/xUOSAvz5wUXyuQq_jrIhHg__micro/img/VvytRrB2A3gRAvCDgX6lc390bKs=/fit-in/64x64/filters:strip_icc()/pic106554.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname15' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname15'></div>
+                                                    <div id='results_objectname15' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/18623/runebound-crown-elder-kings"
+                                                            class='primary'>Runebound: Crown of the Elder Kings</a>
+
+                                                        <span class='smallerfont dull'>(2005)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.721 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.94 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    404 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_18623_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+                                            <script>
+                                                GEEK.bggStoreAds.push('bggstore-inline-post_0');
+                                            </script>
+                                            <tr hidden class="geekcollection_ad" id="bggstore-inline-post_0">
+                                                <td colspan="7">
+                                                    <div class="bgg-featured-items">
+                                                        <h2 class="bgg-featured-items__title fw-bold">
+                                                            Expand Your Collection
+                                                        </h2>
+                                                        <ul class="bgg-featured-item-grid">
+                                                            <li style="display:none;"
+                                                                class="bgg-featured-item-grid__item relative">
+                                                                <img src="" srcset="" width="85" height="85"
+                                                                    loading="lazy" alt="product image alt" />
+                                                                <div>
+                                                                    <h3>
+                                                                        <a class="stretched-link link-text-color"
+                                                                            href="#"></a>
+                                                                    </h3>
+                                                                    <p class="post-meta">
+                                                                        <span
+                                                                            class="post-meta__item text-success bggstore_price"></span><span
+                                                                            class="post-meta__item text-muted  bggstore_storename"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </li>
+                                                            <li style="display:none;"
+                                                                class="bgg-featured-item-grid__item relative">
+                                                                <img src="" srcset="" width="85" height="85"
+                                                                    loading="lazy" alt="product image alt" />
+                                                                <div>
+                                                                    <h3>
+                                                                        <a class="stretched-link link-text-color"
+                                                                            href="#"></a>
+                                                                    </h3>
+                                                                    <p class="post-meta">
+                                                                        <span
+                                                                            class="post-meta__item text-success bggstore_price"></span><span
+                                                                            class="post-meta__item text-muted  bggstore_storename"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </li>
+                                                            <li style="display:none;"
+                                                                class="bgg-featured-item-grid__item relative">
+                                                                <img src="" srcset="" width="85" height="85"
+                                                                    loading="lazy" alt="product image alt" />
+                                                                <div>
+                                                                    <h3>
+                                                                        <a class="stretched-link link-text-color"
+                                                                            href="#"></a>
+                                                                    </h3>
+                                                                    <p class="post-meta">
+                                                                        <span
+                                                                            class="post-meta__item text-success bggstore_price"></span><span
+                                                                            class="post-meta__item text-muted  bggstore_storename"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/23665/runebound-shadows-margath-second-edition"><img
+                                                            alt="Board Game: Runebound: Shadows of Margath (Second Edition)"
+                                                            src="https://cf.geekdo-images.com/MdXREqLpKS4fQngZVLiZpg__micro/img/zlMD_NjkX87XEQPClRgEs68VY0s=/fit-in/64x64/filters:strip_icc()/pic126540.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname16' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname16'></div>
+                                                    <div id='results_objectname16' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/23665/runebound-shadows-margath-second-edition"
+                                                            class='primary'>Runebound: Shadows of Margath (Second
+                                                            Edition)</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.717 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.25 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    301 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_23665_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/198943/runebound-third-edition-gilded-blade-adventure-pac"><img
+                                                            alt="Board Game: Runebound (Third Edition): The Gilded Blade – Adventure Pack"
+                                                            src="https://cf.geekdo-images.com/_PeZEGC5UUQAc00biBJr2Q__micro/img/4P-k2WYYC-aZ1LZwadtd29TlmLA=/fit-in/64x64/filters:strip_icc()/pic3539844.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname17' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname17'></div>
+                                                    <div id='results_objectname17' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/198943/runebound-third-edition-gilded-blade-adventure-pac"
+                                                            class='primary'>Runebound (Third Edition): The Gilded Blade
+                                                            – Adventure Pack</a>
+
+                                                        <span class='smallerfont dull'>(2016)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.916 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.75 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    504 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/18627/runebound-relics-legend"><img
+                                                            alt="Board Game: Runebound: Relics of Legend"
+                                                            src="https://cf.geekdo-images.com/pDpDkXdwK6BUsp7o3OGzgg__micro/img/p2QTIDCulfErfigTl64C3tdOfsM=/fit-in/64x64/filters:strip_icc()/pic106551.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname18' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname18'></div>
+                                                    <div id='results_objectname18' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/18627/runebound-relics-legend"
+                                                            class='primary'>Runebound: Relics of Legend</a>
+
+                                                        <span class='smallerfont dull'>(2005)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.773 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.98 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    479 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_18627_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/18625/runebound-terrors-tomb"><img
+                                                            alt="Board Game: Runebound: The Terrors of the Tomb"
+                                                            src="https://cf.geekdo-images.com/phrzqLU7ADtmLJvcaobrCw__micro/img/QBGT8Q_2Th7e2bBT7QECaowMfjI=/fit-in/64x64/filters:strip_icc()/pic106550.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname19' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname19'></div>
+                                                    <div id='results_objectname19' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/18625/runebound-terrors-tomb"
+                                                            class='primary'>Runebound: The Terrors of the Tomb</a>
+
+                                                        <span class='smallerfont dull'>(2005)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.788 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.15 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    445 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_18625_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/201630/runebound-third-edition-mountains-rise-adventure-p"><img
+                                                            alt="Board Game: Runebound (Third Edition): The Mountains Rise – Adventure Pack"
+                                                            src="https://cf.geekdo-images.com/DpfItQAShbYe0F4ML7GOTA__micro/img/HQDiudKthGAYS1D5O4ylQDyO5_Y=/fit-in/64x64/filters:strip_icc()/pic3084338.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname20' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname20'></div>
+                                                    <div id='results_objectname20' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/201630/runebound-third-edition-mountains-rise-adventure-p"
+                                                            class='primary'>Runebound (Third Edition): The Mountains
+                                                            Rise – Adventure Pack</a>
+
+                                                        <span class='smallerfont dull'>(2016)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.905 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.74 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    491 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/12108/runebound-shadows-margath"><img
+                                                            alt="Board Game: Runebound: Shadows of Margath"
+                                                            src="https://cf.geekdo-images.com/T5XyNtXrsqVWGyhFw66s9A__micro/img/L03EbdEvDhRPf4BzA_YX9regwCw=/fit-in/64x64/filters:strip_icc()/pic56343.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname21' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname21'></div>
+                                                    <div id='results_objectname21' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/12108/runebound-shadows-margath"
+                                                            class='primary'>Runebound: Shadows of Margath</a>
+
+                                                        <span class='smallerfont dull'>(2004)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.594 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.51 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    229 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_12108_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/28874/runebound-cataclysm"><img
+                                                            alt="Board Game: Runebound: The Cataclysm"
+                                                            src="https://cf.geekdo-images.com/11ovcEYSOPNyoRglD8xtdQ__micro/img/VtgMXRqoEz1F4m75-ALpt2QR3Cw=/fit-in/64x64/filters:strip_icc()/pic268197.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname22' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname22'></div>
+                                                    <div id='results_objectname22' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/28874/runebound-cataclysm"
+                                                            class='primary'>Runebound: The Cataclysm</a>
+
+                                                        <span class='smallerfont dull'>(2008)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.695 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.42 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    233 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_28874_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/23511/runebound-cult-rune"><img
+                                                            alt="Board Game: Runebound: Cult of the Rune"
+                                                            src="https://cf.geekdo-images.com/qlsoehdOn8Oj_LpQnkDa7A__micro/img/dkcQeef2NEhZoKIA8ZtjNhKcUog=/fit-in/64x64/filters:strip_icc()/pic126356.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname23' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname23'></div>
+                                                    <div id='results_objectname23' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/23511/runebound-cult-rune"
+                                                            class='primary'>Runebound: Cult of the Rune</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.684 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.03 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    284 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_23511_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/28875/runebound-seven-scions"><img
+                                                            alt="Board Game: Runebound: The Seven Scions"
+                                                            src="https://cf.geekdo-images.com/xDzgHobCnjIa5Qy9B8SuKA__micro/img/IsP5ujBiqmJuZ-dn2MOhPNPYSSQ=/fit-in/64x64/filters:strip_icc()/pic268196.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname24' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname24'></div>
+                                                    <div id='results_objectname24' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/28875/runebound-seven-scions"
+                                                            class='primary'>Runebound: The Seven Scions</a>
+
+                                                        <span class='smallerfont dull'>(2008)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.643 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.12 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    212 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_28875_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/21402/runebound-battlemage-character-deck"><img
+                                                            alt="Board Game: Runebound: Battlemage Character Deck"
+                                                            src="https://cf.geekdo-images.com/TtA6mPvhBHz5PH6WfihrAw__micro/img/psK8tXT3xFwWte1QgCsXQ8k0CbI=/fit-in/64x64/filters:strip_icc()/pic111667.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname25' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname25'></div>
+                                                    <div id='results_objectname25' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/21402/runebound-battlemage-character-deck"
+                                                            class='primary'>Runebound: Battlemage Character Deck</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.593 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.61 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    198 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_21402_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/23510/runebound-avatars-kelnov"><img
+                                                            alt="Board Game: Runebound: Avatars of Kelnov"
+                                                            src="https://cf.geekdo-images.com/jNMT6BAbYjbZNyZM4CZCrg__micro/img/bEMRv6dxdCZuNZj3twFdGlkQqEc=/fit-in/64x64/filters:strip_icc()/pic126357.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname26' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname26'></div>
+                                                    <div id='results_objectname26' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/23510/runebound-avatars-kelnov"
+                                                            class='primary'>Runebound: Avatars of Kelnov</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.677 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.08 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    270 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_23510_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/23512/runebound-drakes-and-dragonspawn"><img
+                                                            alt="Board Game: Runebound: Drakes and Dragonspawn"
+                                                            src="https://cf.geekdo-images.com/hEV27IuduuEVaPRUsf1X1w__micro/img/9lFD1r0toRHo9hH_hVpWioKRDbg=/fit-in/64x64/filters:strip_icc()/pic126355.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname27' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname27'></div>
+                                                    <div id='results_objectname27' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/23512/runebound-drakes-and-dragonspawn"
+                                                            class='primary'>Runebound: Drakes and Dragonspawn</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.726 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.34 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    295 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_23512_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/28873/runebound-beasts-and-bandits"><img
+                                                            alt="Board Game: Runebound: Beasts and Bandits"
+                                                            src="https://cf.geekdo-images.com/2vHYkDLRsyy69e7WVYECtA__micro/img/7bwjbg4PDqyHUKgLfOCmr8hjHF8=/fit-in/64x64/filters:strip_icc()/pic301529.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname28' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname28'></div>
+                                                    <div id='results_objectname28' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/28873/runebound-beasts-and-bandits"
+                                                            class='primary'>Runebound: Beasts and Bandits</a>
+
+                                                        <span class='smallerfont dull'>(2008)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.675 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.43 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    214 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_28873_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/28870/runebound-rituals-and-runes"><img
+                                                            alt="Board Game: Runebound: Rituals and Runes"
+                                                            src="https://cf.geekdo-images.com/6xZ-P-muMV-x8cXzC2iUOg__micro/img/pLE8qlp7yMtxzQs9zRX93yFcB3E=/fit-in/64x64/filters:strip_icc()/pic268193.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname29' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname29'></div>
+                                                    <div id='results_objectname29' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/28870/runebound-rituals-and-runes"
+                                                            class='primary'>Runebound: Rituals and Runes</a>
+
+                                                        <span class='smallerfont dull'>(2008)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.713 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.45 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    251 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_28870_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/23655/runebound-champions-kellos"><img
+                                                            alt="Board Game: Runebound: Champions of Kellos"
+                                                            src="https://cf.geekdo-images.com/AaC6TPZhAXep0bipQmuE4A__micro/img/-qIYQImgSd7Y_XMm19QJmsJYbkU=/fit-in/64x64/filters:strip_icc()/pic126534.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname30' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname30'></div>
+                                                    <div id='results_objectname30' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/23655/runebound-champions-kellos"
+                                                            class='primary'>Runebound: Champions of Kellos</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.712 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.27 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    278 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_23655_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+                                            <tr class="geekcollection_ad">
+                                                <td colspan="7">
+                                                    <div class="text-center" id="dfp-inline-post_1"></div>
+                                                    <script>
+                                                        GEEK.legacyAds.push('dfp-inline-post_1');
+                                                    </script>
+                                                </td>
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/92502/runebound-essential-collection"><img
+                                                            alt="Board Game: Runebound Essential Collection"
+                                                            src="https://cf.geekdo-images.com/yEblT1vy5Nkd0H4_7KAHEA__micro/img/XLEC5TrGfPRnVjrvQ8wWp55iU2U=/fit-in/64x64/filters:strip_icc()/pic996365.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname31' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname31'></div>
+                                                    <div id='results_objectname31' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/92502/runebound-essential-collection"
+                                                            class='primary'>Runebound Essential Collection</a>
+
+                                                        <span class='smallerfont dull'>(2011)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.567 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.70 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    60 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_92502_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/21401/runebound-runemaster-character-deck"><img
+                                                            alt="Board Game: Runebound: Runemaster Character Deck"
+                                                            src="https://cf.geekdo-images.com/RfgQyXgUotbINU07NJw1ng__micro/img/zmxpt16ab4cdJsl_WMPlMLcNxlk=/fit-in/64x64/filters:strip_icc()/pic111666.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname32' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname32'></div>
+                                                    <div id='results_objectname32' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/21401/runebound-runemaster-character-deck"
+                                                            class='primary'>Runebound: Runemaster Character Deck</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.576 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.49 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    187 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_21401_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/23513/runebound-walkers-wild"><img
+                                                            alt="Board Game: Runebound: Walkers of the Wild"
+                                                            src="https://cf.geekdo-images.com/GR7gN8xuwYz5YA7hMTnLqw__micro/img/1JK9tsofcXbMlRXtjRDMEpmormE=/fit-in/64x64/filters:strip_icc()/pic126353.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname33' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname33'></div>
+                                                    <div id='results_objectname33' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/23513/runebound-walkers-wild"
+                                                            class='primary'>Runebound: Walkers of the Wild</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.697 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.20 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    272 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_23513_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/28872/runebound-traps-and-terrors"><img
+                                                            alt="Board Game: Runebound: Traps and Terrors"
+                                                            src="https://cf.geekdo-images.com/B7BqDxrgrXPd0nZwh5qGGw__micro/img/uwzl0ke4Q2REPRUbvSHRpiNo7Es=/fit-in/64x64/filters:strip_icc()/pic268195.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname34' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname34'></div>
+                                                    <div id='results_objectname34' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/28872/runebound-traps-and-terrors"
+                                                            class='primary'>Runebound: Traps and Terrors</a>
+
+                                                        <span class='smallerfont dull'>(2008)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.697 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.25 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    265 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_28872_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/28871/runebound-weapons-legend"><img
+                                                            alt="Board Game: Runebound: Weapons of Legend"
+                                                            src="https://cf.geekdo-images.com/gBwPcyifyAXoVQsu5ZSinA__micro/img/1e1nhBi-HLP-5up-Z-80fiesBnI=/fit-in/64x64/filters:strip_icc()/pic268194.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname35' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname35'></div>
+                                                    <div id='results_objectname35' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/28871/runebound-weapons-legend"
+                                                            class='primary'>Runebound: Weapons of Legend</a>
+
+                                                        <span class='smallerfont dull'>(2008)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.678 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.40 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    218 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_28871_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/21406/runebound-blade-dancer-character-deck"><img
+                                                            alt="Board Game: Runebound: Blade Dancer Character Deck"
+                                                            src="https://cf.geekdo-images.com/gcU8t4ko8a3vwhR7tNfuoQ__micro/img/yTPfTJqtejOQ0iOYm0vK0n8pMRE=/fit-in/64x64/filters:strip_icc()/pic111665.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname36' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname36'></div>
+                                                    <div id='results_objectname36' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/21406/runebound-blade-dancer-character-deck"
+                                                            class='primary'>Runebound: Blade Dancer Character Deck</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.588 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.57 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    193 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_21406_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/21421/runebound-wildlander-character-deck"><img
+                                                            alt="Board Game: Runebound: Wildlander Character Deck"
+                                                            src="https://cf.geekdo-images.com/fQy9Y-slHTiw2vnGYMwNMg__micro/img/GltN0Cl24VviomrpDmyONLMH4Yo=/fit-in/64x64/filters:strip_icc()/pic111670.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname37' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname37'></div>
+                                                    <div id='results_objectname37' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/21421/runebound-wildlander-character-deck"
+                                                            class='primary'>Runebound: Wildlander Character Deck</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.578 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.54 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    180 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_21421_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/21405/runebound-shadow-walker-character-deck"><img
+                                                            alt="Board Game: Runebound: Shadow Walker Character Deck"
+                                                            src="https://cf.geekdo-images.com/G8m3DdQrGXP6kt9tOosnCQ__micro/img/o-skZh1GVOD_CWjdkdqU60rUvNE=/fit-in/64x64/filters:strip_icc()/pic111668.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname38' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname38'></div>
+                                                    <div id='results_objectname38' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/21405/runebound-shadow-walker-character-deck"
+                                                            class='primary'>Runebound: Shadow Walker Character Deck</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.571 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.44 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    173 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_21405_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/21422/runebound-spiritbound-character-deck"><img
+                                                            alt="Board Game: Runebound: Spiritbound Character Deck"
+                                                            src="https://cf.geekdo-images.com/28xfZNPdVs4xJjL9Qunaaw__micro/img/IXhHrKGY2dCYMbc6XZTMI2DTfNE=/fit-in/64x64/filters:strip_icc()/pic111669.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname39' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname39'></div>
+                                                    <div id='results_objectname39' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/21422/runebound-spiritbound-character-deck"
+                                                            class='primary'>Runebound: Spiritbound Character Deck</a>
+
+                                                        <span class='smallerfont dull'>(2006)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.577 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    6.56 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    174 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_21422_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/372257/runebound-berlo-kyrosa"><img
+                                                            alt="Board Game: Runebound: Berło Kyrosa"
+                                                            src="https://cf.geekdo-images.com/dPVhY6WSOAv2idO0vAuRLQ__micro/img/oHMJ7zxS8W0YRS7o8nB8nU0-3uI=/fit-in/64x64/filters:strip_icc()/pic244363.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname40' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname40'></div>
+                                                    <div id='results_objectname40' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/372257/runebound-berlo-kyrosa"
+                                                            class='primary'>Runebound: Berło Kyrosa</a>
+
+                                                        <span class='smallerfont dull'>(2007)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    N/A </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    1.00 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    1 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/372255/runebound-korona-starszych-krolow"><img
+                                                            alt="Board Game: Runebound: Korona Starszych Królów"
+                                                            src="https://cf.geekdo-images.com/XmNcPrTc33JD5mHZJuM-JQ__micro/img/6QiC4YgyQUj1HSzbycnRBjj-0j0=/fit-in/64x64/filters:strip_icc()/pic244364.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname41' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname41'></div>
+                                                    <div id='results_objectname41' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/372255/runebound-korona-starszych-krolow"
+                                                            class='primary'>Runebound: Korona Starszych Królów</a>
+
+                                                        <span class='smallerfont dull'>(2007)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    N/A </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    1.00 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    1 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/372268/runebound-kult-runow"><img
+                                                            alt="Board Game: Runebound: Kult Runów"
+                                                            src="https://cf.geekdo-images.com/gzc0ebfEv13_yJTnxXyK_Q__micro/img/H0EfhXXzDit-bWBvmmUNCEAPVQ4=/fit-in/64x64/filters:strip_icc()/pic7111788.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname42' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname42'></div>
+                                                    <div id='results_objectname42' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/372268/runebound-kult-runow"
+                                                            class='primary'>Runebound: Kult Runów</a>
+
+                                                        <span class='smallerfont dull'>(2010)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    N/A </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    4.50 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    2 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/372269/runebound-awatarowie-kelnova"><img
+                                                            alt="Board Game: Runebound: Awatarowie Kelnova"
+                                                            src="https://cf.geekdo-images.com/wqAsrPXx1sU8M1sh-9jN7g__micro/img/x3mjuqS3LS0ZsFFksH2EYza47_Y=/fit-in/64x64/filters:strip_icc()/pic7111787.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname43' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname43'></div>
+                                                    <div id='results_objectname43' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/372269/runebound-awatarowie-kelnova"
+                                                            class='primary'>Runebound: Awatarowie Kelnova</a>
+
+                                                        <span class='smallerfont dull'>(2010)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    N/A </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    4.50 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    2 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/372262/runebound-mistrz-runow"><img
+                                                            alt="Board Game: Runebound: Mistrz Runów"
+                                                            src="https://cf.geekdo-images.com/Fq0hD4aYlfY4wb3xr0YY-g__micro/img/yxRIa89pVXkBxhUxnfjX3Kwov5w=/fit-in/64x64/filters:strip_icc()/pic7111773.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname44' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname44'></div>
+                                                    <div id='results_objectname44' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/372262/runebound-mistrz-runow"
+                                                            class='primary'>Runebound: Mistrz Runów</a>
+
+                                                        <span class='smallerfont dull'>(2012)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    N/A </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.50 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    2 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a href="/boardgameexpansion/372266/runebound-tancerka-ostrzy"><img
+                                                            alt="Board Game: Runebound: Tancerka Ostrzy"
+                                                            src="https://cf.geekdo-images.com/Rjg34zjkAmey8eP4cTPwjA__micro/img/c4L3NCCOxh968xWUe0Is8tGIRWQ=/fit-in/64x64/filters:strip_icc()/pic7111779.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname45' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname45'></div>
+                                                    <div id='results_objectname45' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/372266/runebound-tancerka-ostrzy"
+                                                            class='primary'>Runebound: Tancerka Ostrzy</a>
+
+                                                        <span class='smallerfont dull'>(2012)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    N/A </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    1.00 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    1 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+
+                                                </td>
+
+                                            </tr>
+                                            <script>
+                                                GEEK.bggStoreAds.push('bggstore-inline-post_2');
+                                            </script>
+                                            <tr hidden class="geekcollection_ad" id="bggstore-inline-post_2">
+                                                <td colspan="7">
+                                                    <div class="bgg-featured-items">
+                                                        <h2 class="bgg-featured-items__title fw-bold">
+                                                            Expand Your Collection
+                                                        </h2>
+                                                        <ul class="bgg-featured-item-grid">
+                                                            <li style="display:none;"
+                                                                class="bgg-featured-item-grid__item relative">
+                                                                <img src="" srcset="" width="85" height="85"
+                                                                    loading="lazy" alt="product image alt" />
+                                                                <div>
+                                                                    <h3>
+                                                                        <a class="stretched-link link-text-color"
+                                                                            href="#"></a>
+                                                                    </h3>
+                                                                    <p class="post-meta">
+                                                                        <span
+                                                                            class="post-meta__item text-success bggstore_price"></span><span
+                                                                            class="post-meta__item text-muted  bggstore_storename"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </li>
+                                                            <li style="display:none;"
+                                                                class="bgg-featured-item-grid__item relative">
+                                                                <img src="" srcset="" width="85" height="85"
+                                                                    loading="lazy" alt="product image alt" />
+                                                                <div>
+                                                                    <h3>
+                                                                        <a class="stretched-link link-text-color"
+                                                                            href="#"></a>
+                                                                    </h3>
+                                                                    <p class="post-meta">
+                                                                        <span
+                                                                            class="post-meta__item text-success bggstore_price"></span><span
+                                                                            class="post-meta__item text-muted  bggstore_storename"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </li>
+                                                            <li style="display:none;"
+                                                                class="bgg-featured-item-grid__item relative">
+                                                                <img src="" srcset="" width="85" height="85"
+                                                                    loading="lazy" alt="product image alt" />
+                                                                <div>
+                                                                    <h3>
+                                                                        <a class="stretched-link link-text-color"
+                                                                            href="#"></a>
+                                                                    </h3>
+                                                                    <p class="post-meta">
+                                                                        <span
+                                                                            class="post-meta__item text-success bggstore_price"></span><span
+                                                                            class="post-meta__item text-muted  bggstore_storename"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/62329/descent-runebound-runewars-figure-jonas-kind"><img
+                                                            alt="Board Game: Descent / Runebound / Runewars Figure: Jonas the Kind"
+                                                            src="https://cf.geekdo-images.com/4H_XUXPZYQprgL1eoyIttA__micro/img/Mv1eJolNjWorDr79LGLNSQXKl_Y=/fit-in/64x64/filters:strip_icc()/pic607552.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname46' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname46'></div>
+                                                    <div id='results_objectname46' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/62329/descent-runebound-runewars-figure-jonas-kind"
+                                                            class='primary'>Descent / Runebound / Runewars Figure: Jonas
+                                                            the Kind</a>
+
+                                                        <span class='smallerfont dull'>(2009)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.634 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.41 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    161 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_62329_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/62325/descent-runebound-runewars-figure-nara-fang"><img
+                                                            alt="Board Game: Descent / Runebound / Runewars Figure: Nara The Fang"
+                                                            src="https://cf.geekdo-images.com/mMb7qR1G62ywMLpdnetB8g__micro/img/eowV6d0tCVnLfS0e6DoVkRX3vJc=/fit-in/64x64/filters:strip_icc()/pic607477.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname47' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname47'></div>
+                                                    <div id='results_objectname47' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/62325/descent-runebound-runewars-figure-nara-fang"
+                                                            class='primary'>Descent / Runebound / Runewars Figure: Nara
+                                                            The Fang</a>
+
+                                                        <span class='smallerfont dull'>(2009)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.653 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.28 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    197 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_62325_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/62349/descent-runebound-runewars-figure-truthseer-kel"><img
+                                                            alt="Board Game: Descent / Runebound / Runewars Figure: Truthseer Kel"
+                                                            src="https://cf.geekdo-images.com/tovxyiJ0JEjf3jiI7rpiXA__micro/img/PMREM2RnmR8dkhAmqxTnrDCR05E=/fit-in/64x64/filters:strip_icc()/pic818782.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname48' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname48'></div>
+                                                    <div id='results_objectname48' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/62349/descent-runebound-runewars-figure-truthseer-kel"
+                                                            class='primary'>Descent / Runebound / Runewars Figure:
+                                                            Truthseer Kel</a>
+
+                                                        <span class='smallerfont dull'>(2009)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.631 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.52 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    148 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_62349_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr id='row_'>
+                                                <td class='collection_rank' align='center'>
+                                                    N/A
+                                                </td>
+
+
+                                                <td class='collection_thumbnail'>
+                                                    <a
+                                                        href="/boardgameexpansion/62327/descent-runebound-runewars-figure-tobin-farslayer"><img
+                                                            alt="Board Game: Descent / Runebound / Runewars Figure: Tobin Farslayer"
+                                                            src="https://cf.geekdo-images.com/7PdE51LzH2GFKz5CxGd0kw__micro/img/E0kxjLd4vsugC6R06tjcxvvDPFI=/fit-in/64x64/filters:strip_icc()/pic607548.jpg"></a>
+                                                </td>
+
+                                                <td id='CEcell_objectname49' class="collection_objectname 
+						 browse">
+
+                                                    <div id='status_objectname49'></div>
+                                                    <div id='results_objectname49' style='z-index:1000;' onclick=''>
+
+                                                        <a href="/boardgameexpansion/62327/descent-runebound-runewars-figure-tobin-farslayer"
+                                                            class='primary'>Descent / Runebound / Runewars Figure: Tobin
+                                                            Farslayer</a>
+
+                                                        <span class='smallerfont dull'>(2009)</span>
+
+                                                    </div>
+
+                                                </td>
+
+
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    5.646 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    7.47 </td>
+
+                                                <td class='collection_bggrating' align='center'>
+                                                    166 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <td class='collection_shop'>
+                                                    <div class='aad' id='aad_thing_62327_textwithprices__'></div>
+                                                </td>
+
+                                            </tr>
+
+
+                                        </table>
+                                    </div>
+
+                                </div>
+
+
+                                <p align='right'></p>
+
+                                <div id="legacy_modal"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class='global-body-content-secondary'>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        <geekoutput-footer></geekoutput-footer>
+    </div>
+
+
+
+
+</body>
+
+</html>

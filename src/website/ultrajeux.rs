@@ -1,5 +1,7 @@
 use regex::Regex;
 
+use crate::website::helper::clean_name;
+
 pub async fn get_ultrajeux_price_and_url_by_barcode(barcode: u64) -> Option<(f32, String)> {
     let search = format!(
         "https://www.ultrajeux.com/search3.php?text={}&submit=Ok",
@@ -21,7 +23,7 @@ pub async fn get_ultrajeux_price_and_url_by_barcode(barcode: u64) -> Option<(f32
 pub async fn get_ultrajeux_price_and_url_by_name(name: &String) -> Option<(f32, String)> {
     let search = format!(
         "https://www.ultrajeux.com/search3.php?text={}&submit=Ok",
-        name
+        clean_name(name)
     );
     log::debug!("[TASK] search on ultrajeux by name: {}", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
