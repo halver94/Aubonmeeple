@@ -1,5 +1,7 @@
 use scraper::{Html, Selector};
 
+use crate::website::helper::{clean_name, are_names_similar};
+
 pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f32, String)> {
     let search = format!("https://www.ludocortex.fr/jolisearch?s={}", barcode);
     log::debug!("[TASK] search on ludocortex by barcode: {}", &search);
@@ -45,7 +47,7 @@ pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f3
 }
 
 pub async fn get_ludocortex_price_and_url_by_name(name: &String) -> Option<(f32, String)> {
-    let search = format!("https://www.ludocortex.fr/jolisearch?s={}", name);
+    let search = format!("https://www.ludocortex.fr/jolisearch?s={}", clean_name(name));
     log::debug!("[TASK] search on ludocortex by name: {}", &search);
 
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
@@ -81,7 +83,7 @@ pub async fn get_ludocortex_price_and_url_by_name(name: &String) -> Option<(f32,
             return None;
         }
 
-        if title.unwrap().to_lowercase() == name.to_lowercase() {
+        if are_names_similar(&(title.unwrap()), name) {
             return Some((regular_price.unwrap(), href.unwrap().to_string()));
         }
     }

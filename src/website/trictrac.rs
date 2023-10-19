@@ -1,13 +1,11 @@
 use scraper::{Html, Selector};
 
-use crate::game::Reviewer;
+use crate::{game::Reviewer, website::helper::{clean_name, are_names_similar}};
 
 pub async fn get_trictrac_note(name: &str) -> Option<Reviewer> {
     let search = format!(
         "https://www.trictrac.net/recherche?search={}",
-        name.replace(' ', "-")
-            .replace([':', '\''], "")
-            .to_lowercase()
+        clean_name(name)
     );
     log::debug!("[TASK] getting tric trac note: {}\n", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
@@ -40,7 +38,7 @@ pub async fn get_trictrac_note(name: &str) -> Option<Reviewer> {
             return None;
         }
 
-        if title.unwrap().to_lowercase() == name.to_lowercase() {
+        if are_names_similar(&title.unwrap(), name) {
             return Some(Reviewer {
                 name: "trictrac".to_string(),
                 note: rating_value.unwrap(),

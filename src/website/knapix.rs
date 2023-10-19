@@ -2,10 +2,10 @@ use std::error;
 
 use scraper::{Html, Selector};
 
-use crate::game::{Game, Reference};
+use crate::{game::{Game, Reference}, website::helper::clean_name};
 
 pub async fn get_knapix_prices(game: &mut Game) -> Result<(), Box<dyn error::Error>> {
-    let name = game.okkazeo_announce.name.replace(' ', "+");
+    let name = clean_name(&game.okkazeo_announce.name).replace(' ', "+");
     let search = format!(
         "https://www.knapix.com/comparateur.php?nom_jeu={}&checkbox-exact=on&affiner=",
         name

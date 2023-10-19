@@ -1,5 +1,7 @@
 use scraper::{Html, Selector};
 
+use crate::website::helper::{clean_name, are_names_similar};
+
 pub async fn get_philibert_price_and_url_by_barcode(barcode: u64) -> Option<(f32, String)> {
     let search = format!(
         "https://www.philibertnet.com/fr/recherche?search_query={}&submit_search=",
@@ -45,7 +47,7 @@ pub async fn get_philibert_price_and_url_by_barcode(barcode: u64) -> Option<(f32
 pub async fn get_philibert_price_and_url_by_name(name: &str) -> Option<(f32, String)> {
     let search = format!(
         "https://www.philibertnet.com/fr/recherche?search_query={}&submit_search=",
-        name
+        clean_name(name)
     );
     log::debug!("[TASK] search on philibert by name: {}", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
@@ -72,7 +74,7 @@ pub async fn get_philibert_price_and_url_by_name(name: &str) -> Option<(f32, Str
                 let title_text = title_text.trim();
                 let href_attr = title.value().attr("href").unwrap_or_default();
 
-                if title_text.to_lowercase() == name.to_lowercase() {
+                if are_names_similar(title_text,name) {
                     return Some((price_text, href_attr.to_string()));
                 }
             }

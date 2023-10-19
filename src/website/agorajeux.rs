@@ -78,7 +78,7 @@ mod tests {
         env_logger::Builder::from_env(
             env_logger::Env::default().default_filter_or(Level::Info.as_str()),
         )
-        .init();
+        .try_init();
 
         let tests =
             vec![

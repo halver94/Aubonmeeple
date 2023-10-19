@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use regex::Regex;
 use unidecode::unidecode;
 
-static TOKENS_UNWANTED: [&str; 10] = [
+static TOKENS_UNWANTED: [&str; 14] = [
     "vf",
     "vo",
     "edition",
@@ -12,17 +12,28 @@ static TOKENS_UNWANTED: [&str; 10] = [
     "jeu",
     "de",
     "societe",
+    "plateau",
     "boardgame",
     "the",
+    "game",
+    "base",
+    "expansion"
 ];
 
 static CHAR_UNWANTED: [&str; 11] = [":", "-", "\'", "&", "[", "]", "=", ",", "!", "`", "’"];
 
+pub fn clean_name(name: &str) -> String {
+    log::trace!("cleaning name : {}", name);
+    let re = Regex::new(&CHAR_UNWANTED.join("|")).unwrap();
+    let name_cleaned = re.replace_all(name, " ").to_string();
+    log::trace!("cleaned name : {}", name_cleaned);
+    name_cleaned
+}
+
 pub fn are_names_similar(name1: &str, name2: &str) -> bool {
     log::trace!("name1 : {}, name2 : {}", name1, name2);
-    let re = Regex::new(&CHAR_UNWANTED.join("|")).unwrap();
-    let name1_clean = re.replace_all(name1, " ").to_string();
-    let name2_clean = re.replace_all(name2, " ").to_string();
+    let name1_clean = clean_name(name1);
+    let name2_clean = clean_name(name2);
     log::trace!(
         "name1_clean : {}, name2_clean : {}",
         name1_clean,
@@ -96,6 +107,26 @@ mod tests {
             Test {
                 name1: "Les Flammes d’Adlerstein",
                 name2: "Les Flammes D'adlerstein",
+                result: true,
+            },
+            Test {
+                name1: "Tiny Epic Western Base",
+                name2: "Tiny Epic Western",
+                result: true,
+            },
+            Test {
+                name1: "Strife: Shadows & Steam",
+                name2: "Strife Shadows Steam",
+                result: true,
+            },
+            Test {
+                name1: "It's a Wonderful World: Corruption & Ascension",
+                name2: "It s A Wonderful World Corruption Ascension",
+                result: true,
+            },
+            Test {
+                name1: "Skaal",
+                name2: "Skåål",
                 result: true,
             },
         ];
