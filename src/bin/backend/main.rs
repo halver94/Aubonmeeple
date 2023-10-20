@@ -203,9 +203,7 @@ async fn parse_game_feed(db_client: &Client) -> Result<(), Box<dyn error::Error 
             continue 'outer;
         }
 
-        tasks.spawn(
-            async move { get_game_infos(Some(&entry), entry.id.parse::<u32>()?).await },
-        );
+        tasks.spawn(async move { get_game_infos(Some(&entry), entry.id.parse::<u32>()?).await });
     }
 
     while let Some(res) = tasks.join_next().await {
@@ -229,7 +227,7 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
     log_panics::init();
 
     //this one is for vscode
-    env::set_var("RUST_LOG", "boardgame_finder=debug");
+    env::set_var("RUST_LOG", "boardgame_finder=trace");
     env_logger::Builder::from_env(
         env_logger::Env::default().default_filter_or(Level::Debug.as_str()),
     )

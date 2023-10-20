@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use regex::Regex;
 use unidecode::unidecode;
 
-static TOKENS_UNWANTED: [&str; 14] = [
+static TOKENS_UNWANTED: [&str; 23] = [
     "vf",
     "vo",
     "edition",
@@ -14,10 +14,19 @@ static TOKENS_UNWANTED: [&str; 14] = [
     "societe",
     "plateau",
     "boardgame",
+    "board",
+    "game",
     "the",
     "game",
     "base",
-    "expansion"
+    "expansion",
+    "deck",
+    "deckbuiding",
+    "buiding",
+    "d",
+    "of",
+    "boite",
+    "box",
 ];
 
 static CHAR_UNWANTED: [&str; 11] = [":", "-", "\'", "&", "[", "]", "=", ",", "!", "`", "’"];
@@ -64,7 +73,7 @@ pub fn are_names_similar(name1: &str, name2: &str) -> bool {
 
     if difference_tokens_unwanted.len() != 0 {
         for word in difference_tokens_unwanted {
-            println!("Word not in tokens_unwanted: {}", word);
+            log::trace!("Word not in tokens_unwanted: {}", word);
         }
         return false;
     }

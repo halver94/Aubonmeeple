@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use chrono::{format, DateTime, Utc};
+use chrono::{DateTime, Utc};
 use tokio_postgres::{Client, Error, NoTls, Row};
 
 use crate::frontlib::server::State;
@@ -261,9 +261,44 @@ pub async fn update_deal_table(db_client: &Client, id: i32, deal: &Deal) -> Resu
 
     Ok(())
 }
+
+pub async fn delete_from_reference_table(db_client: &Client, id: i32) -> Result<(), Error> {
+    db_client
+        .execute("DELETE FROM reference WHERE ref_oa_id = $1", &[&id])
+        .await
+        .map_or_else(|e| Err(e), |_v| Ok(()))
+}
+
+pub async fn delete_from_reviewer_table(db_client: &Client, id: i32) -> Result<(), Error> {
+    db_client
+        .execute("DELETE FROM reviewer WHERE reviewer_oa_id = $1", &[&id])
+        .await
+        .map_or_else(|e| Err(e), |_v| Ok(()))
+}
+
+pub async fn update_reference_table(
+    db_client: &Client,
+    id: i32,
+    refs: &HashMap<String, Reference>,
+) -> Result<(), Error> {
+    delete_from_reference_table(db_client, id).await?;
+    insert_into_reference_table(db_client, id, refs).await
+}
+
+pub async fn update_reviewer_table(
+    db_client: &Client,
+    id: i32,
+    reviews: &Review,
+) -> Result<(), Error> {
+    delete_from_reviewer_table(db_client, id).await?;
+    insert_into_reviewer_table(db_client, id, &reviews.reviews).await
+}
+
 pub async fn update_game_from_db(db_client: &Client, game: &Game) -> Result<(), Error> {
     update_okkazeo_announce_table_from_db(db_client, game).await?;
     update_deal_table(db_client, game.okkazeo_announce.id as i32, &game.deal).await?;
+    update_reviewer_table(db_client, game.okkazeo_announce.id as i32, &game.review).await?;
+    update_reference_table(db_client, game.okkazeo_announce.id as i32, &game.references).await?;
     Ok(())
 }
 

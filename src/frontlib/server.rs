@@ -182,7 +182,7 @@ pub async fn root(
         pagination_param.page = 0;
     }
 
-    let mut state = State {
+    let state = State {
         pagination: pagination_param,
         sort: sort_param,
         filters: filters_param,

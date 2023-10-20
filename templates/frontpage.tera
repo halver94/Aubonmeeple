@@ -135,19 +135,8 @@ sort=state.sort.sort) }}
                                 <a href="{{game.okkazeo_announce.seller.url}}" target="_blank">
                                     {{game.okkazeo_announce.seller.name}}
                                     {% if game.okkazeo_announce.seller.is_pro -%} - PRO {% endif -%}
-                                    <a href="/?{{ self::url_param(
-                                page=state.pagination.page,
-                                per_page=state.pagination.per_page, 
-                                city=state.filters.city, 
-                                name=state.filters.name, 
-                                vendor=game.okkazeo_announce.seller.name, 
-                                pro=state.filters.pro, 
-                                date=state.filters.date, 
-                                delivery=state.filters.delivery, 
-                                note=state.filters.note, 
-                                max_price=state.filters.max_price, 
-                                min_price=state.filters.min_price, 
-                                sort=state.sort.sort) }}" target="_blank">
+                                    <a href="/?page={{ state.pagination.page }}&per_page={{state.pagination.per_page}}&vendor={{game.okkazeo_announce.seller.name }}&sort={{state.sort.sort}}"
+                                        target="_blank">
                                         <img src="assets/filter.png" alt="fail" width="20" height="20" />
                                     </a>
                                     <div>({{game.okkazeo_announce.seller.nb_announces}} announces)</div>
@@ -175,6 +164,7 @@ sort=state.sort.sort) }}
                         </div>
                     </div>
                     <div class="flex-col-center prices">
+                        {% if game.references %}
                         {% for key, val in game.references -%}
                         <div class="flex-row-center price">
                             <div><a href="{{val.url}}" target="_blank">
@@ -185,6 +175,9 @@ sort=state.sort.sort) }}
                             </div>
                         </div>
                         {% endfor -%}
+                        {% else %}
+                        <div class="flex-row-center price"> - </div>
+                        {% endif -%}
                     </div>
                 </div>
                 <div class="bi-element">
@@ -214,6 +207,7 @@ sort=state.sort.sort) }}
                                 {% endif -%}
                     </div>
                     <div class="flex-col-center shipping">
+                        {% if game.okkazeo_announce.shipping %}
                         {% for key, val in game.okkazeo_announce.shipping -%}
                         <div class="flex-row-center ship">
                             {% if key == "hand_delivery" %}
@@ -226,6 +220,9 @@ sort=state.sort.sort) }}
                             {% endif %}
                         </div>
                         {% endfor -%}
+                        {% else %}
+                        <div class="flex-row-center"> - </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
