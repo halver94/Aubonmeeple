@@ -1,21 +1,8 @@
 Parsing Bugfix
-- Okkazeo
-    - year at the end of game name (ex : 2022)
-
-- philibert
-    - remove "edition" at the end of game name
-
-- ultrajeux
-    - fix , check le nom dans les resultats
-
-- agorajeux
-    - remove - Nouvelle éditon ( Jamaica )
 
 Features:
-- poc a kind of levenstein distance heuristic when comparing names
 - add more website comparison
 - add if product in shop is available or not
-- see if doing async test is possble
 
 Bugfix:
 

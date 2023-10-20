@@ -75,7 +75,7 @@ mod tests {
     #[test]
     fn test_parsing() {
         env::set_var("RUST_LOG", "boardgame_finder=trace");
-        env_logger::Builder::from_env(
+        let _ = env_logger::Builder::from_env(
             env_logger::Env::default().default_filter_or(Level::Info.as_str()),
         )
         .try_init();
