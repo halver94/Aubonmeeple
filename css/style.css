@@ -1,41 +1,41 @@
 .flex-col-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .flex-row-center {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
 .bi-element {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    min-width: 23em;
-    width: 33%;
-    gap: 2em;
-    justify-content: space-evenly;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 30em;
+  width: 33%;
+  gap: 2em;
+  justify-content: space-evenly;
 }
 
 .green {
   color: rgb(69, 214, 69);
-    -webkit-text-stroke-width: 0.01em; 
-    -webkit-text-stroke-color: black; 
+  -webkit-text-stroke-width: 0.01em;
+  -webkit-text-stroke-color: black;
 }
 
 .yellow {
   color: rgb(238, 209, 45);
-    -webkit-text-stroke-width: 0.01em; 
-    -webkit-text-stroke-color: black; 
+  -webkit-text-stroke-width: 0.01em;
+  -webkit-text-stroke-color: black;
 }
 
 .red {
   color: rgb(173, 55, 55);
-    -webkit-text-stroke-width: 0.01em; 
-    -webkit-text-stroke-color: black; 
+  -webkit-text-stroke-width: 0.01em;
+  -webkit-text-stroke-color: black;
 }
 
 .bold {
@@ -43,22 +43,21 @@
 }
 
 .gray_bg {
-    background-color: #eeecec; 
+  background-color: #eeecec;
 }
 
 .white_bg {
-    background-color: #ffffff; 
+  background-color: #ffffff;
 }
 
 
 body {
-    /*background-image:url("../assets/background_meeple2.jpg");*/
-    background-color: #000000; 
-    margin:auto;
-    background-attachment: fixed;
-    background-size: 100%;
-    font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
-    font-size: medium;
+  background-color: #000000;
+  margin: auto;
+  background-attachment: fixed;
+  background-size: 100%;
+  font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: medium;
 }
 
 img,
@@ -69,90 +68,90 @@ video {
 }
 
 .header {
-    top: 0em;
-    position: sticky;
-    background-color: #000000; 
+  top: 0em;
+  position: sticky;
+  background-color: #000000;
 }
 
 .button {
-    background-color: #a17b0f;
-    border: 0.1em solid rgba(27, 31, 35, .15);
-    border-radius: 0.6em;
-    box-shadow: rgba(27, 31, 35, .1) 0 0.1em 0;
-    box-sizing: border-box;
-    color: #fff;
-    cursor: pointer;
-    display: inline-block;
-    font-size: small;
-    font-weight: bold;
-    line-height: 0.5em;
-    margin-bottom: 0.5em;
-    padding: 0.6em 0.6em;
+  background-color: #a17b0f;
+  border: 0.1em solid rgba(27, 31, 35, .15);
+  border-radius: 0.6em;
+  box-shadow: rgba(27, 31, 35, .1) 0 0.1em 0;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font-size: small;
+  font-weight: bold;
+  line-height: 0.5em;
+  margin-bottom: 0.5em;
+  padding: 0.6em 0.6em;
 }
 
-    
+
 .okkazeo_price {
-    font-size: larger;
+  font-size: larger;
 }
 
 #wrapper {
-    width: 100%;
-    background-color: #000000; 
+  width: 100%;
+  background-color: #000000;
 }
 
 .banner-img {
-    width: 50%;
-    display: block;
-    margin: auto;
+  width: 50%;
+  display: block;
+  margin: auto;
 }
 
 .nbrTextbox {
-    width: 3.5em;
-    height: 1.2em;
+  width: 3.5em;
+  height: 1.2em;
 }
 
 .textbox {
-    width: 7em;
-    height: 1.2em;
+  width: 7em;
+  height: 1.2em;
 }
 
 .datetbox {
-    width: 8em;
-    height: 1.2em;
+  width: 8em;
+  height: 1.2em;
 }
 
 
 /* Style pour le conteneur du formulaire */
 .form-container {
-    width: 65%;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+  width: 65%;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
 }
 
 
 /* Style pour le formulaire */
 form {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    align-items: left;
-    gap: 1em;
-}   
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: left;
+  gap: 1em;
+}
 
 /* Style pour chaque groupe label + input */
 .form-group {
-    margin-bottom: 0.5em;
-    color: #fff;
+  margin-bottom: 0.5em;
+  color: #fff;
 }
 
-.sort{
-    gap: 1em;
-    justify-content: center;
+.sort {
+  gap: 1em;
+  justify-content: center;
 }
 
 .items {
-    width: 85%;
-    margin-bottom: 1.5em;
+  width: 85%;
+  margin-bottom: 1.5em;
 }
 
 .item {
@@ -179,63 +178,57 @@ form {
 }
 
 .seller {
-    min-width: 8em;
+  min-width: 8em;
 }
 
 .shipping {
-    min-width: 15em;
+  min-width: 15em;
   align-items: baseline;
 }
 
 .ship {
-    align-items: flex-start;
-    gap: 0.5em;
+  align-items: flex-start;
+  gap: 0.5em;
 }
 
 .review {
-    gap: 1em;
+  gap: 1em;
 }
 
-.review a{
-    display: flex;
-    align-items: center;
+.review a {
+  display: flex;
+  align-items: center;
 }
 
 .deal {
-    min-width: 5em;
-    align-items: center;
-    font-size: larger;
-    gap: 0.5em;
-    margin-bottom: 0.1em;
-    margin-top: 0.1em;
+  min-width: 5em;
+  align-items: center;
+  font-size: larger;
+  gap: 0.5em;
 }
 
 .prices {
-    gap: 0.2em;
-    min-width: 12em;
-    justify-content: center;
-    margin-bottom: 0.1em;
-    margin-top: 0.1em;
+  gap: 0.2em;
+  min-width: 10em;
+  justify-content: center;
 }
 
 .price {
-    gap: 1em;
-    align-items: center;
-    justify-content: center;
+  gap: 1em;
+  align-items: center;
+  justify-content: center;
 }
 
 .reviews {
-    min-width: 8em;
-    gap: 0.1em;
-  margin-bottom: 0.6em;
-  margin-top: 0.6em;
+  min-width: 10em;
+  gap: 0.1em;
   align-items: baseline;
   justify-content: baseline;
 }
 
 .pagination {
-    justify-content: center;
-    color: #fff;
+  justify-content: center;
+  color: #fff;
 }
 
 .pagination a {
@@ -254,94 +247,114 @@ form {
 }
 
 .pagination a:hover:not(.active) {
-    background-color: #a17b0f;
+  background-color: #a17b0f;
 }
 
 .average_note {
-    font-size: large;
-    gap: 0.5em;
+  font-size: large;
+  gap: 0.5em;
   margin-bottom: 0.2em;
   margin-top: 0.2em;
 }
 
 .footer {
-    justify-content: center;
-    gap: 3em;
-    background-color: #ffffff;
-    margin-top: 3em;
+  justify-content: center;
+  gap: 3em;
+  background-color: #ffffff;
+  margin-top: 3em;
 }
 
 .footer a {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+details {
+  background-color: #a17b0f;
+  border: 0.1em solid rgba(27, 31, 35, .15);
+  border-radius: 0.6em;
+  box-shadow: rgba(27, 31, 35, .1) 0 0.1em 0;
+  box-sizing: border-box;
+  color: #fff;
+  display: inline-block;
+  cursor: pointer;
+  font-size: small;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  padding: 0.6em 0.6em;
+
+  summary {
+    cursor: pointer;
+    color: #ffffff;
+    border: 0.1em solid rgba(27, 31, 35, .15);
+    padding: 1rem;
+    border-bottom: 1px solid #ddd;
+  }
+}
+
+details[open] {
+  background-color: #000000;
+  cursor: auto;
+}
+
+summary:hover {
+  cursor: pointer;
 }
 
 @media screen and (max-width: 888px) {
   .form-container {
     width: 90%;
   }
+
+  .items {
+    width: 99%;
+  }
+
   body {
     font-size: small;
   }
-.average_note {
-    font-size: medium;
-}
-.deal {
-    font-size: medium;
+
+  .average_note {
+    font-size: 1.1em;
   }
-.game {
-  margin-left: 0.2em;
-  margin-bottom: 0.2em;
-  margin-top: 0.2em;
-  gap: 0.2em;
-}
-.reviews{
-}
-.prices{
-}
-.seller{
-}
-.shipping{
-}
-.item {
+
+  .deal {
+    font-size: 1.1em;
+    gap: 0.1em;
+  }
+
+  .game {
+    margin-left: 0.2em;
+    margin-bottom: 0.2em;
+    margin-top: 0.2em;
+    gap: 0.2em;
+  }
+
+  .okkazeo_price {
+    font-size: 1.2em;
+  }
+
+  .reviews img {
+    max-width: 70%;
+  }
+
+  .prices img {
+    max-width: 70%;
+  }
+
+  .price {
+    gap: 0.1em;
+  }
+
+  .item {
     flex-direction: column;
-}
-.bi-element {
-  margin-right: 0.5em;
-  margin-left: 0.5em;
-  margin-top: 0.2em;
-  margin-bottom: 0.2em;
-}
-}
-
-  details {
-  background-color: #a17b0f;
-    border: 0.1em solid rgba(27, 31, 35, .15);
-    border-radius: 0.6em;
-    box-shadow: rgba(27, 31, 35, .1) 0 0.1em 0;
-    box-sizing: border-box;
-    color: #fff;
-    display: inline-block;
-      cursor: pointer;
-    font-size: small;
-    font-weight: bold;
-    margin-bottom: 0.5em;
-    padding: 0.6em 0.6em;
-  
-  summary {
-      cursor: pointer;
-      color: #ffffff;
-    border: 0.1em solid rgba(27, 31, 35, .15);
-      padding: 1rem;
-      border-bottom: 1px solid #ddd;
-  }
-  }
-    
-  details[open] {
-  background-color: #000000;
-      cursor: auto;
   }
 
-  summary:hover {
-      cursor: pointer;
+  .bi-element {
+    margin-right: 0.5em;
+    margin-left: 0.5em;
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+    gap: 1em;
   }
+}

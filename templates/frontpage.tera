@@ -121,7 +121,9 @@ sort=state.sort.sort) }}
                     <div class="bi-element">
                         <div class="flex-row-center game">
                             <div>
-                                <img src="{{game.okkazeo_announce.image}}" alt="fail" width="100" height="100" />
+                                <a href='{{game.okkazeo_announce.url}}' target="_blank"><img
+                                        src="{{game.okkazeo_announce.image}}" alt="fail" width="100" height="100" />
+                                </a>
                             </div>
                             <div class="game_name">
                                 {{game.okkazeo_announce.name}}<br>
@@ -168,7 +170,7 @@ sort=state.sort.sort) }}
                         {% for key, val in game.references -%}
                         <div class="flex-row-center price">
                             <div><a href="{{val.url}}" target="_blank">
-                                    <img src="assets/{{val.name}}_icon.png" alt="fail" width="80" height="20" /></a>
+                                    <img src="assets/{{val.name}}_icon.png" alt="fail" width="80" height="36" /></a>
                             </div>
                             <div>
                                 {{val.price | round(precision=2)}}&euro;
