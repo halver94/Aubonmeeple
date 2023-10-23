@@ -153,6 +153,20 @@ pub async fn root(
         } else {
             filters_form.0.vendor_form
         };
+
+        pagination_param.per_page = filters_form
+            .0
+            .per_page_form
+            .unwrap()
+            .parse::<i32>()
+            .map_or_else(
+                |e| {
+                    log::error!("per page parse error : {}", e);
+                    25 as usize
+                },
+                |n| n as usize,
+            );
+
         filters_param = Filters {
             date: date,
             city: city,

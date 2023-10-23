@@ -26,6 +26,22 @@ min_price=state.filters.min_price,
 sort=state.sort.sort) }}
 {% endmacro url_param_change_page -%}
 
+{% macro url_param_change_per_page(state, per_page) -%}
+{{ self::url_param(
+page=0,
+per_page=per_page,
+city=state.filters.city,
+name=state.filters.name,
+vendor=state.filters.vendor,
+pro=state.filters.pro,
+date=state.filters.date,
+delivery=state.filters.delivery,
+note=state.filters.note,
+max_price=state.filters.max_price,
+min_price=state.filters.min_price,
+sort=state.sort.sort) }}
+{% endmacro url_param_change_page -%}
+
 <!DOCTYPE html>
 <html>
 
@@ -92,9 +108,22 @@ sort=state.sort.sort) }}
                             <input type="checkbox" id="delivery" name="delivery_form" {% if state.filters.delivery
                                 -%}{{ "checked" }}{% endif -%}>
                         </div>
+                        <div class="flex-col-center form-group" title="Items par page">
+                            <label for="per_page">Jeux/page</label>
+                            <select id="per_page" name="per_page_form">
+                                <option value="25" {% if state.pagination.per_page==25 %}selected {% endif %}>25
+                                </option>
+                                <option value="50" {% if state.pagination.per_page==50 %}selected {% endif %}>50
+                                </option>
+                                <option value="100" {% if state.pagination.per_page==100 %}selected {% endif %}>100
+                                </option>
+                                <option value="200" {% if state.pagination.per_page==200 %}selected {% endif %}>200
+                                </option>
+                            </select>
+                        </div>
                         <input class="button" type="submit" value="Filtrer">
                         <button class="button" type="button"
-                            onclick="window.location.href='/?page=0&per_page=25&sort={{state.sort.sort}}';">Effacer<br><br>
+                            onclick="window.location.href='/?page=0&sort={{state.sort.sort}}';">Effacer<br><br>
                             filtres</button>
                     </form>
                     <div class="flex-row-center sort">
@@ -262,7 +291,6 @@ sort=state.sort.sort) }}
                     <a href="/{{ self::url_param_change_page(state=state, page=(state.pagination.page + 1)) }}"><i
                             class="fa-solid fa-chevron-right"></i></a>
                     {% endif %}
-
         </div>
     </div>
 

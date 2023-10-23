@@ -3,6 +3,7 @@ Parsing Bugfix
 Features:
 - add more website comparison
 - add if product in shop is available or not
+- add prom metrics
 
 Bugfix:
 
