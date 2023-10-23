@@ -40,6 +40,7 @@ pub struct FiltersForm {
     pub note_form: Option<String>,
     pub max_price_form: Option<String>,
     pub min_price_form: Option<String>,
+    pub per_page_form: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
