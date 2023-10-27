@@ -181,127 +181,135 @@ sort=state.sort.sort) }}
                     </div>
                     <div class="bi-element">
                         <div class="flex-col-center deal bold">
-                            <a class="okkazeo_price" href='{{game.okkazeo_announce.url}}'
-                                target="_blank">{{game.okkazeo_announce.price |
-                                round(precision=2)}}€</a>
-                            {% if game.deal.deal_price < 0 -%} {% set color="green" -%} {% set sign="" -%} {% else -%}
-                                {% set color="red" -%} {% set sign="+" -%} {% endif -%} <div
-                                class="{{color}} deal_price">
-                                {% if game.deal.deal_price != 0 -%}
-                                {{sign}}{{game.deal.deal_price}}€ ({{sign}}{{game.deal.deal_percentage}}%)
-                                {% else -%}
-                                -
-                                {% endif -%}
-                        </div>
-                    </div>
-                    <div class="flex-col-center prices">
-                        {% if game.references %}
-                        {% for key, val in game.references -%}
-                        <div class="flex-row-center price">
-                            <div><a href="{{val.url}}" target="_blank">
-                                    <img src="assets/{{val.name}}_icon.png" alt="fail" width="80" height="36" /></a>
-                            </div>
-                            <div>
-                                {{val.price | round(precision=2)}}&euro;
-                            </div>
-                        </div>
-                        {% endfor -%}
-                        {% else %}
-                        <div class="flex-row-center price"> - </div>
-                        {% endif -%}
-                    </div>
-                </div>
-                <div class="bi-element">
-                    <div class="flex-col-center reviews">
-                        {% if game.review.average_note == 0 -%}
-                        <div class="flex-row-center average_note">-</div>
-                        {% else -%}
-                        {% if game.review.average_note <= 6 -%} <div class="flex-row-center average_note red bold">
-                            {% elif game.review.average_note <= 6.5 -%} <div
-                                class="flex-row-center average_note yellow bold">
-                                {% else -%}
-                                <div class="flex-row-center average_note green bold">
-                                    {% endif -%}
-                                    <div class="fa-regular fa-star fa-xl" title="Rate" aria-hidden="true"></div>
-                                    <div>{{game.review.average_note | round(precision=2)}} / 10</div>
+                            <div class="flex-row-center price">
+                                <div><a href="{{game.okkazeo_announce.url}}" target="_blank">
+                                        <img src="assets/okkazeo_icon.png" alt="fail" width="80" height="36" /></a>
                                 </div>
-                                {% for key, val in game.review.reviews -%}
-                                <div class="flex-row-center review">
-                                    <a href="{{val.url}}" target="_blank">
-                                        <img src="assets/{{val.name}}_icon.png" alt="fail" width="30" height="30" /></a>
-
+                                <a class="okkazeo_price" href='{{game.okkazeo_announce.url}}'
+                                    target="_blank">{{game.okkazeo_announce.price |
+                                    round(precision=2)}}€</a>
+                                {% if game.deal.deal_price < 0 -%} {% set color="green" -%} {% set sign="" -%} {% else
+                                    -%} {% set color="red" -%} {% set sign="+" -%} {% endif -%} </div>
+                                    <div class="{{color}} deal_price">
+                                        {% if game.deal.deal_price != 0 -%}
+                                        {{sign}}{{game.deal.deal_price}}€ ({{sign}}{{game.deal.deal_percentage}}%)
+                                        {% else -%}
+                                        -
+                                        {% endif -%}
+                                    </div>
+                            </div>
+                            <div class="flex-col-center prices">
+                                {% if game.references %}
+                                {% for key, val in game.references -%}
+                                <div class="flex-row-center price">
+                                    <div><a href="{{val.url}}" target="_blank">
+                                            <img src="assets/{{val.name}}_icon.png" alt="fail" width="80"
+                                                height="36" /></a>
+                                    </div>
                                     <div>
-                                        {{val.note | round(precision=2)}} ({{val.number}} avis)
+                                        {{val.price | round(precision=2)}}&euro;
                                     </div>
                                 </div>
                                 {% endfor -%}
+                                {% else %}
+                                <div class="flex-row-center price"> - </div>
                                 {% endif -%}
-                    </div>
-                    <div class="flex-col-center shipping">
-                        {% if game.okkazeo_announce.shipping %}
-                        {% for key, val in game.okkazeo_announce.shipping -%}
-                        <div class="flex-row-center ship">
-                            {% if key == "hand_delivery" %}
-                            <i class="far fa-fw fa-handshake" title="Remise en main propre ?" aria-hidden="true"></i>
-                            Remise
-                            en main propre
-                            {% else %}
-                            <i class="fas fa-fw fa-truck" title="Shipping mode" aria-hidden="true"></i>
-                            {{key}} : {{val | round(precision=1)}}€
-                            {% endif %}
+                            </div>
                         </div>
-                        {% endfor -%}
-                        {% else %}
-                        <div class="flex-row-center"> - </div>
-                        {% endif %}
+                        <div class="bi-element">
+                            <div class="flex-col-center reviews">
+                                {% if game.review.average_note == 0 -%}
+                                <div class="flex-row-center average_note">-</div>
+                                {% else -%}
+                                {% if game.review.average_note <= 6 -%} <div
+                                    class="flex-row-center average_note red bold">
+                                    {% elif game.review.average_note <= 6.5 -%} <div
+                                        class="flex-row-center average_note yellow bold">
+                                        {% else -%}
+                                        <div class="flex-row-center average_note green bold">
+                                            {% endif -%}
+                                            <div class="fa-regular fa-star fa-xl" title="Rate" aria-hidden="true"></div>
+                                            <div>{{game.review.average_note | round(precision=2)}} / 10</div>
+                                        </div>
+                                        {% for key, val in game.review.reviews -%}
+                                        <div class="flex-row-center review">
+                                            <a href="{{val.url}}" target="_blank">
+                                                <img src="assets/{{val.name}}_icon.png" alt="fail" width="30"
+                                                    height="30" /></a>
+
+                                            <div>
+                                                {{val.note | round(precision=2)}} ({{val.number}} avis)
+                                            </div>
+                                        </div>
+                                        {% endfor -%}
+                                        {% endif -%}
+                            </div>
+                            <div class="flex-col-center shipping">
+                                {% if game.okkazeo_announce.shipping %}
+                                {% for key, val in game.okkazeo_announce.shipping -%}
+                                <div class="flex-row-center ship">
+                                    {% if key == "hand_delivery" %}
+                                    <i class="far fa-fw fa-handshake" title="Remise en main propre ?"
+                                        aria-hidden="true"></i>
+                                    Remise
+                                    en main propre
+                                    {% else %}
+                                    <i class="fas fa-fw fa-truck" title="Shipping mode" aria-hidden="true"></i>
+                                    {{key}} : {{val | round(precision=1)}}€
+                                    {% endif %}
+                                </div>
+                                {% endfor -%}
+                                {% else %}
+                                <div class="flex-row-center"> - </div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
+                    {% endfor -%}
                 </div>
             </div>
-            {% endfor -%}
-        </div>
-    </div>
-    <div>
-        <div class=" flex-row-center pagination">
-            {% if state.pagination.page != 0 %}
-            <a href="/{{ self::url_param_change_page(state=state, page=(state.pagination.page - 1)) }}"><i
-                    class="fa-solid fa-chevron-left"></i></a>
-            {% endif %}
-
-            {% set min_visible_pages=2 %}
-            {% set offset=1 %}
-            {% set ellipsis=false %}
-            {% for page in pages_vec %}
-            {% if page < min_visible_pages or page> total_pages - min_visible_pages - 1 %}
-                <a {% if page==state.pagination.page %}class="active" {% endif %}
-                    href="/{{ self::url_param_change_page(state=state, page=page) }}">{{ page }}</a>
-                {% set_global ellipsis=false %}
-                {% elif state.pagination.page > offset and page < state.pagination.page - offset %} {% if
-                    ellipsis==false %} {% set_global ellipsis=true %} <a>...</a> {% endif %}
-                    {% elif page > state.pagination.page + offset %} {% if ellipsis==false %}
-                    {% set_global ellipsis=true %}
-                    <a>...</a> {% endif %}
-                    {% else %}
-                    <a {% if page==state.pagination.page %}class="active" {% endif %}
-                        href="/{{ self::url_param_change_page(state=state, page=page) }}">{{ page }}</a>
-                    {% set_global ellipsis=false %}
+            <div>
+                <div class=" flex-row-center pagination">
+                    {% if state.pagination.page != 0 %}
+                    <a href="/{{ self::url_param_change_page(state=state, page=(state.pagination.page - 1)) }}"><i
+                            class="fa-solid fa-chevron-left"></i></a>
                     {% endif %}
-                    {% endfor %}
 
-                    {% if total_pages != 0 and state.pagination.page != (total_pages - 1) %}
-                    <a href="/{{ self::url_param_change_page(state=state, page=(state.pagination.page + 1)) }}"><i
-                            class="fa-solid fa-chevron-right"></i></a>
-                    {% endif %}
-        </div>
-    </div>
+                    {% set min_visible_pages=2 %}
+                    {% set offset=1 %}
+                    {% set ellipsis=false %}
+                    {% for page in pages_vec %}
+                    {% if page < min_visible_pages or page> total_pages - min_visible_pages - 1 %}
+                        <a {% if page==state.pagination.page %}class="active" {% endif %}
+                            href="/{{ self::url_param_change_page(state=state, page=page) }}">{{ page }}</a>
+                        {% set_global ellipsis=false %}
+                        {% elif state.pagination.page > offset and page < state.pagination.page - offset %} {% if
+                            ellipsis==false %} {% set_global ellipsis=true %} <a>...</a> {% endif %}
+                            {% elif page > state.pagination.page + offset %} {% if ellipsis==false %}
+                            {% set_global ellipsis=true %}
+                            <a>...</a> {% endif %}
+                            {% else %}
+                            <a {% if page==state.pagination.page %}class="active" {% endif %}
+                                href="/{{ self::url_param_change_page(state=state, page=page) }}">{{ page }}</a>
+                            {% set_global ellipsis=false %}
+                            {% endif %}
+                            {% endfor %}
 
-    <div class="flex-row-center footer">
-        <a href="https://paypal.me/Cravail" target="_blank">
-            <img src="assets/bmc.png" alt="fail" width="160" height="60" />
-        </a>
-        <a href="https://github.com/halver94/Scrapy" target="_blank">
-            <img src="assets/github.jpg" alt="fail" width="160" height="60" />
-        </a>
-    </div>
+                            {% if total_pages != 0 and state.pagination.page != (total_pages - 1) %}
+                            <a href="/{{ self::url_param_change_page(state=state, page=(state.pagination.page + 1)) }}"><i
+                                    class="fa-solid fa-chevron-right"></i></a>
+                            {% endif %}
+                </div>
+            </div>
+
+            <div class="flex-row-center footer">
+                <a href="https://paypal.me/Cravail" target="_blank">
+                    <img src="assets/bmc.png" alt="fail" width="160" height="60" />
+                </a>
+                <a href="https://github.com/halver94/Scrapy" target="_blank">
+                    <img src="assets/github.jpg" alt="fail" width="160" height="60" />
+                </a>
+            </div>
 </body>
 
 </html>
