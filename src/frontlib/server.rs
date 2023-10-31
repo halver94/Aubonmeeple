@@ -2,11 +2,15 @@ use axum::extract::Query;
 use axum::response::Html;
 use axum::Extension;
 use axum::{extract::Form, routing::get, Router};
+use prometheus::{register_int_counter_vec, Encoder, IntCounter, IntCounterVec, TextEncoder};
 use serde::Serialize;
 use std::sync::Arc;
 use tera::{Context, Tera};
 use tokio_postgres::Client;
 use tower_http::services::ServeDir;
+
+use lazy_static::lazy_static;
+use prometheus::register_int_counter;
 
 use crate::db::{connect_db, select_count_filtered_games_from_db, select_games_from_db};
 
@@ -80,6 +84,7 @@ pub async fn root(
     Extension(db_client): Extension<Arc<Client>>,
     filters_form: Form<FiltersForm>,
 ) -> Html<String> {
+    AXUM_ROOT_GET.inc();
     let mut pagination_param = pagination.unwrap_or_default().0;
     log::debug!("FILTER FORM : {:?}", &filters_form);
     log::debug!("FILTER PARAM : {:?}", &filters);
@@ -184,6 +189,7 @@ pub async fn root(
         match select_count_filtered_games_from_db(&db_client, filters_param.clone()).await {
             Ok(val) => val as usize,
             Err(e) => {
+                DB_ERRORS.with_label_values(&[&e.to_string()]).inc();
                 log::error!("[SERVER] error getting count filtered games : {}", e);
                 0
             }
@@ -205,6 +211,7 @@ pub async fn root(
     let part_games = match select_games_from_db(&db_client, &state).await {
         Ok(g) => g,
         Err(e) => {
+            DB_ERRORS.with_label_values(&[&e.to_string()]).inc();
             log::error!("[SERVER] error getting games from db : {}", e);
             return Html(String::new());
         }
@@ -266,6 +273,20 @@ pub async fn root(
     }
 }
 
+pub async fn metrics() -> Html<String> {
+    AXUM_METRICS_GET.inc();
+    let encoder = TextEncoder::new();
+    let mut buffer = vec![];
+    encoder
+        .encode(&prometheus::gather(), &mut buffer)
+        .expect("Failed to encode metrics");
+
+    let response = String::from_utf8(buffer.clone()).expect("Failed to convert bytes to string");
+    buffer.clear();
+
+    Html(response)
+}
+
 pub async fn set_server() {
     log::info!("[SERVER] starting server on 0.0.0.0:3001");
 
@@ -277,11 +298,28 @@ pub async fn set_server() {
         .nest_service("/img", ServeDir::new("img"))
         .nest_service("/assets", ServeDir::new("assets"))
         .nest_service("/css", ServeDir::new("css"))
-        .layer(Extension(client));
+        .layer(Extension(client))
+        .route("/metrics", get(metrics));
 
     // run our app with hyper, listening globally on port 3000
     axum::Server::bind(&"0.0.0.0:3001".parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+lazy_static! {
+    static ref AXUM_ROOT_GET: IntCounter = register_int_counter!(
+        "axum_root_get",
+        "Number of get or post resquests to root route"
+    )
+    .unwrap();
+    static ref AXUM_METRICS_GET: IntCounter = register_int_counter!(
+        "axum_metrics_get",
+        "Number of get resquests to metrics route"
+    )
+    .unwrap();
+    static ref DB_ERRORS: IntCounterVec =
+        register_int_counter_vec!("db_errors", "Number of error from db queries", &["error"])
+            .unwrap();
 }

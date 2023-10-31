@@ -46,6 +46,7 @@ fn parse_agorajeux_document(name: &str, doc: &str) -> Option<(f32, String)> {
                 if let Some(product_name) = product_name_element {
                     let processed_name = product_name.text().collect::<String>();
                     if are_names_similar(processed_name.as_str(), name) {
+                        AGORAJEUX_STAT.with_label_values(&["success"]).inc();
                         return Some((price, href_attr.to_string()));
                     }
                 }
@@ -56,7 +57,19 @@ fn parse_agorajeux_document(name: &str, doc: &str) -> Option<(f32, String)> {
             log::trace!("fail to select href");
         }
     }
+    AGORAJEUX_STAT.with_label_values(&["fail"]).inc();
     None
+}
+
+use lazy_static::lazy_static;
+use prometheus::{register_int_counter_vec, IntCounterVec};
+lazy_static! {
+    static ref AGORAJEUX_STAT: IntCounterVec = register_int_counter_vec!(
+        "agorajeux_stat",
+        "Stat about parsing/fetch success/fail for this website",
+        &["result"]
+    )
+    .unwrap();
 }
 
 #[cfg(test)]

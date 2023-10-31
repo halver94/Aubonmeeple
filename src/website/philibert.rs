@@ -1,6 +1,6 @@
 use scraper::{Html, Selector};
 
-use crate::website::helper::{clean_name, are_names_similar};
+use crate::website::helper::{are_names_similar, clean_name};
 
 pub async fn get_philibert_price_and_url_by_barcode(barcode: u64) -> Option<(f32, String)> {
     let search = format!(
@@ -36,11 +36,13 @@ pub async fn get_philibert_price_and_url_by_barcode(barcode: u64) -> Option<(f32
                     .unwrap()
                     .contains(&barcode.to_string())
                 {
+                    PHILIBERT_STAT.with_label_values(&["success"]).inc();
                     return Some((price_text, href_attr.to_string()));
                 }
             }
         }
     }
+    PHILIBERT_STAT.with_label_values(&["fail"]).inc();
     None
 }
 
@@ -74,12 +76,14 @@ pub async fn get_philibert_price_and_url_by_name(name: &str) -> Option<(f32, Str
                 let title_text = title_text.trim();
                 let href_attr = title.value().attr("href").unwrap_or_default();
 
-                if are_names_similar(title_text,name) {
+                if are_names_similar(title_text, name) {
+                    PHILIBERT_STAT.with_label_values(&["success"]).inc();
                     return Some((price_text, href_attr.to_string()));
                 }
             }
         }
     }
+    PHILIBERT_STAT.with_label_values(&["fail"]).inc();
     None
 }
 
@@ -93,4 +97,15 @@ pub async fn get_philibert_price_and_url(
         }
     }
     get_philibert_price_and_url_by_name(name).await
+}
+
+use lazy_static::lazy_static;
+use prometheus::{register_int_counter_vec, IntCounterVec};
+lazy_static! {
+    static ref PHILIBERT_STAT: IntCounterVec = register_int_counter_vec!(
+        "philibert_stat",
+        "Stat about parsing/fetch success/fail for this website",
+        &["result"]
+    )
+    .unwrap();
 }

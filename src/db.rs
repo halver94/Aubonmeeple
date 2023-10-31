@@ -9,6 +9,9 @@ use crate::{
     game::{Deal, Game, Games, OkkazeoAnnounce, Reference, Review, Reviewer, Seller},
 };
 
+use lazy_static::lazy_static;
+use prometheus::{register_int_counter_vec, IntCounterVec};
+
 pub async fn connect_db() -> Result<Client, Error> {
     let db_url = "postgres://scrapy:scrapyscrapy@localhost/scraper";
 
@@ -28,22 +31,29 @@ pub async fn delete_from_all_table_with_id(db_client: &Client, id: i32) -> Resul
     db_client
         .execute("DELETE FROM deal WHERE deal_oa_id = $1", &[&id])
         .await?;
+    DB_IO.with_label_values(&["delete", "deal"]).inc();
 
     db_client
         .execute("DELETE FROM shipping WHERE ship_oa_id = $1", &[&id])
         .await?;
+    DB_IO.with_label_values(&["delete", "shipping"]).inc();
 
     db_client
         .execute("DELETE FROM reference WHERE ref_oa_id = $1", &[&id])
         .await?;
+    DB_IO.with_label_values(&["delete", "reference"]).inc();
 
     db_client
         .execute("DELETE FROM reviewer WHERE reviewer_oa_id = $1", &[&id])
         .await?;
+    DB_IO.with_label_values(&["delete", "reviewer"]).inc();
 
     db_client
         .execute("DELETE FROM okkazeo_announce WHERE oa_id = $1", &[&id])
         .await?;
+    DB_IO
+        .with_label_values(&["delete", "okkazeo_announce"])
+        .inc();
 
     Ok(())
 }
@@ -86,6 +96,9 @@ pub async fn insert_into_okkazeo_announce_table(
             ],
         )
         .await?;
+    DB_IO
+        .with_label_values(&["insert", "okkazeo_announce"])
+        .inc();
 
     Ok(())
 }
@@ -105,6 +118,7 @@ pub async fn insert_into_shipping_table(
             .query(&seller_insert_req, &[&id, &key, &value])
             .await?;
     }
+    DB_IO.with_label_values(&["insert", "shipping"]).inc();
 
     Ok(())
 }
@@ -127,6 +141,7 @@ pub async fn insert_into_seller_table(db_client: &Client, seller: &Seller) -> Re
             ],
         )
         .await?;
+    DB_IO.with_label_values(&["insert", "seller"]).inc();
 
     Ok(())
 }
@@ -141,6 +156,7 @@ pub async fn insert_into_deal_table(db_client: &Client, id: i32, deal: &Deal) ->
             &[&id, &deal.deal_price, &deal.deal_percentage],
         )
         .await?;
+    DB_IO.with_label_values(&["insert", "deal"]).inc();
 
     Ok(())
 }
@@ -163,6 +179,7 @@ pub async fn insert_into_reference_table(
             )
             .await?;
     }
+    DB_IO.with_label_values(&["insert", "reference"]).inc();
     Ok(())
 }
 
@@ -184,6 +201,7 @@ pub async fn insert_into_reviewer_table(
             )
             .await?;
     }
+    DB_IO.with_label_values(&["insert", "reviewer"]).inc();
     Ok(())
 }
 
@@ -223,6 +241,7 @@ pub async fn update_seller_table_from_db(db_client: &Client, seller: &Seller) ->
             &[&(seller.nb_announces as i32), &(seller.id as i32)],
         )
         .await?;
+    DB_IO.with_label_values(&["update", "seller"]).inc();
     Ok(())
 }
 pub async fn update_okkazeo_announce_table_from_db(
@@ -244,6 +263,9 @@ pub async fn update_okkazeo_announce_table_from_db(
             ],
         )
         .await?;
+    DB_IO
+        .with_label_values(&["update", "okkazeo_announce"])
+        .inc();
     Ok(())
 }
 
@@ -258,22 +280,37 @@ pub async fn update_deal_table(db_client: &Client, id: i32, deal: &Deal) -> Resu
             &[&deal.deal_price, &deal.deal_percentage, &id],
         )
         .await?;
+    DB_IO.with_label_values(&["update", "deal"]).inc();
 
     Ok(())
 }
 
 pub async fn delete_from_reference_table(db_client: &Client, id: i32) -> Result<(), Error> {
-    db_client
+    let result = db_client
         .execute("DELETE FROM reference WHERE ref_oa_id = $1", &[&id])
-        .await
-        .map_or_else(|e| Err(e), |_v| Ok(()))
+        .await;
+
+    match result {
+        Ok(_v) => {
+            DB_IO.with_label_values(&["delete", "reference"]).inc();
+            Ok(())
+        }
+        Err(e) => Err(e),
+    }
 }
 
 pub async fn delete_from_reviewer_table(db_client: &Client, id: i32) -> Result<(), Error> {
-    db_client
+    let result = db_client
         .execute("DELETE FROM reviewer WHERE reviewer_oa_id = $1", &[&id])
-        .await
-        .map_or_else(|e| Err(e), |_v| Ok(()))
+        .await;
+
+    match result {
+        Ok(_v) => {
+            DB_IO.with_label_values(&["delete", "reviewer"]).inc();
+            Ok(())
+        }
+        Err(e) => Err(e),
+    }
 }
 
 pub async fn update_reference_table(
@@ -358,6 +395,9 @@ pub async fn select_game_with_id_from_db(db_client: &Client, id: u32) -> Option<
             return None;
         }
     };
+    DB_IO
+        .with_label_values(&["select", "okkazeo_announce"])
+        .inc();
 
     let row = res.into_iter().next()?;
 
@@ -516,6 +556,7 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
         };
         games.games.push(Box::new(game))
     }
+    DB_IO.with_label_values(&["select", "game"]).inc();
 
     Ok(games)
 }
@@ -586,6 +627,7 @@ pub async fn select_count_filtered_games_from_db(
         .await?;
 
     let nbr: i64 = res.get(0).unwrap().try_get(0)?;
+    DB_IO.with_label_values(&["select", "game"]).inc();
 
     Ok(nbr)
 }
@@ -599,6 +641,7 @@ pub async fn check_if_seller_in_db(db_client: &Client, id: i32) -> Result<i32, E
     );
 
     let res = db_client.query(&select_req, &[&id]).await?;
+    DB_IO.with_label_values(&["select", "seller"]).inc();
 
     Ok(res.len() as i32)
 }
@@ -621,6 +664,7 @@ pub async fn select_shipping_from_db(
         let price = row.try_get("ship_price")?;
         ships.insert(shipper, price);
     }
+    DB_IO.with_label_values(&["select", "shipping"]).inc();
 
     Ok(ships)
 }
@@ -639,6 +683,9 @@ pub async fn select_intervalled_ids_from_oa_table_from_db(
         .query(&select_req, &[&start_date, &end_date])
         .await?;
 
+    DB_IO
+        .with_label_values(&["select", "okkazeo_announce"])
+        .inc();
     res.into_iter().map(|row| row.try_get("oa_id")).collect()
 }
 
@@ -649,6 +696,9 @@ pub async fn select_all_ids_from_oa_table_from_db(db_client: &Client) -> Result<
     );
 
     let res = db_client.query(&select_req, &[]).await?;
+    DB_IO
+        .with_label_values(&["select", "okkazeo_announce"])
+        .inc();
 
     res.into_iter().map(|row| row.try_get("oa_id")).collect()
 }
@@ -673,6 +723,7 @@ pub async fn select_references_from_db(
         refs.insert(name.clone(), Reference { name, price, url });
     }
 
+    DB_IO.with_label_values(&["select", "reference"]).inc();
     Ok(refs)
 }
 
@@ -707,6 +758,16 @@ pub async fn select_reviews_from_db(db_client: &Client, id: i32) -> Result<Revie
         average_note: 0.0,
     };
     rev.compute_average_note();
+    DB_IO.with_label_values(&["select", "reviews"]).inc();
 
     Ok(rev)
+}
+
+lazy_static! {
+    static ref DB_IO: IntCounterVec = register_int_counter_vec!(
+        "db_io",
+        "Number of select/delete/insert on the db",
+        &["operation", "table"]
+    )
+    .unwrap();
 }

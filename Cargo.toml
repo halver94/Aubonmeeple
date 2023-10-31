@@ -38,4 +38,7 @@ tracing-subscriber = "0.3"
 console-subscriber = "0.1.5"
 tera = { version = "1.19.1", features = ["builtins"] }
 unidecode = "0.3.0"
+prometheus = "0.13.3"
+lazy_static = "1.4.0"
+rand = "0.8.5"
 

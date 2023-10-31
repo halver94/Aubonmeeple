@@ -1,6 +1,9 @@
 use scraper::{Html, Selector};
 
-use crate::{game::Reviewer, website::helper::{clean_name, are_names_similar}};
+use crate::{
+    game::Reviewer,
+    website::helper::{are_names_similar, clean_name},
+};
 
 pub async fn get_trictrac_note(name: &str) -> Option<Reviewer> {
     let search = format!(
@@ -35,10 +38,12 @@ pub async fn get_trictrac_note(name: &str) -> Option<Reviewer> {
             .and_then(|content| content.parse::<u32>().ok());
 
         if rating_value.is_none() || title.is_none() || review_count.is_none() {
+            TRICTRAC_STAT.with_label_values(&["fail"]).inc();
             return None;
         }
 
         if are_names_similar(&title.unwrap(), name) {
+            TRICTRAC_STAT.with_label_values(&["success"]).inc();
             return Some(Reviewer {
                 name: "trictrac".to_string(),
                 note: rating_value.unwrap(),
@@ -48,5 +53,17 @@ pub async fn get_trictrac_note(name: &str) -> Option<Reviewer> {
         }
     }
 
+    TRICTRAC_STAT.with_label_values(&["fail"]).inc();
     None
+}
+
+use lazy_static::lazy_static;
+use prometheus::{register_int_counter_vec, IntCounterVec};
+lazy_static! {
+    static ref TRICTRAC_STAT: IntCounterVec = register_int_counter_vec!(
+        "trictrac_stat",
+        "Stat about parsing/fetch success/fail for this website",
+        &["result"]
+    )
+    .unwrap();
 }

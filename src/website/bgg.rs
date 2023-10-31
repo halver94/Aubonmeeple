@@ -1,17 +1,22 @@
 use scraper::{Html, Selector};
 
-use crate::{game::Reviewer, website::helper::{are_names_similar, clean_name}};
+use crate::{
+    game::Reviewer,
+    website::helper::{are_names_similar, clean_name},
+};
 
 pub async fn get_bgg_note(name: &str) -> Option<Reviewer> {
     let name = clean_name(name);
     let search = format!(
-        "https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q={}", name);
+        "https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q={}",
+        name
+    );
     log::debug!("[TASK] getting bgg note: {}\n", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
     parse_bgg_document(&name, search, std::str::from_utf8(&content).unwrap())
 }
 
-fn parse_bgg_document(name: &str, search: String, doc : &str) -> Option<Reviewer> {
+fn parse_bgg_document(name: &str, search: String, doc: &str) -> Option<Reviewer> {
     let document = Html::parse_document(doc);
 
     let primary_selector = Selector::parse("a.primary").unwrap();
@@ -22,6 +27,7 @@ fn parse_bgg_document(name: &str, search: String, doc : &str) -> Option<Reviewer
     let selected_name = if let Some(primary) = document.select(&primary_selector).next() {
         primary.text().collect::<Vec<_>>().join("")
     } else {
+        BGG_STAT.with_label_values(&["fail"]).inc();
         return None;
     };
     log::trace!("selected_name: {} vs name {}", selected_name, name);
@@ -38,6 +44,7 @@ fn parse_bgg_document(name: &str, search: String, doc : &str) -> Option<Reviewer
     if bggrating_values.len() == 2 && are_names_similar(name, &selected_name) {
         let rating = bggrating_values[0].clone().parse::<f32>().unwrap_or(0.0);
         let review_cnt = bggrating_values[1].clone().parse::<u32>().unwrap_or(0);
+        BGG_STAT.with_label_values(&["success"]).inc();
         return Some(Reviewer {
             name: "bgg".to_string(),
             note: rating,
@@ -46,16 +53,27 @@ fn parse_bgg_document(name: &str, search: String, doc : &str) -> Option<Reviewer
         });
     }
 
+    BGG_STAT.with_label_values(&["fail"]).inc();
     None
+}
+
+use lazy_static::lazy_static;
+use prometheus::{register_int_counter_vec, IntCounterVec};
+lazy_static! {
+    static ref BGG_STAT: IntCounterVec = register_int_counter_vec!(
+        "bgg_stat",
+        "Stat about parsing/fetch success/fail for this website",
+        &["result"]
+    )
+    .unwrap();
 }
 
 #[cfg(test)]
 mod tests {
-    use std::{fs, env};
     use log::Level;
+    use std::{env, fs};
 
     use crate::website::{bgg::parse_bgg_document, helper::clean_name};
-
 
     struct Test {
         name: String,
@@ -66,24 +84,55 @@ mod tests {
 
     #[test]
     fn it_works() {
-    env::set_var("RUST_LOG", "boardgame_finder=trace");
+        env::set_var("RUST_LOG", "boardgame_finder=trace");
         let _ = env_logger::Builder::from_env(
-        env_logger::Env::default().default_filter_or(Level::Info.as_str()),
-    )
-    .try_init();
+            env_logger::Env::default().default_filter_or(Level::Info.as_str()),
+        )
+        .try_init();
 
         log::trace!("starting bgg tests");
         let tests = vec![
-            Test{ name: String::from("Lucky Bastard"), note: 5.0, review_cnt: 1, document: String::from("tests/bgg/test1.html")},
-            Test{ name: String::from("Cartaventura : Versailles"), note: 6.79, review_cnt: 8, document: String::from("tests/bgg/test2.html")},
-            Test{ name: String::from("Michel Strogoff VF"), note: 6.72, review_cnt: 621, document: String::from("tests/bgg/test3.html")},
-            Test{ name: String::from("Tiny Epic Western Base"), note: 6.64, review_cnt: 4179, document: String::from("tests/bgg/test4.html")},
-            Test{ name: String::from("Strife: Shadows & Steam"), note: 6.53, review_cnt: 138, document: String::from("tests/bgg/test5.html")},
-            Test{ name: String::from("Runebound"), note: 6.22, review_cnt: 1577, document: String::from("tests/bgg/test6.html")},
+            Test {
+                name: String::from("Lucky Bastard"),
+                note: 5.0,
+                review_cnt: 1,
+                document: String::from("tests/bgg/test1.html"),
+            },
+            Test {
+                name: String::from("Cartaventura : Versailles"),
+                note: 6.79,
+                review_cnt: 8,
+                document: String::from("tests/bgg/test2.html"),
+            },
+            Test {
+                name: String::from("Michel Strogoff VF"),
+                note: 6.72,
+                review_cnt: 621,
+                document: String::from("tests/bgg/test3.html"),
+            },
+            Test {
+                name: String::from("Tiny Epic Western Base"),
+                note: 6.64,
+                review_cnt: 4179,
+                document: String::from("tests/bgg/test4.html"),
+            },
+            Test {
+                name: String::from("Strife: Shadows & Steam"),
+                note: 6.53,
+                review_cnt: 138,
+                document: String::from("tests/bgg/test5.html"),
+            },
+            Test {
+                name: String::from("Runebound"),
+                note: 6.22,
+                review_cnt: 1577,
+                document: String::from("tests/bgg/test6.html"),
+            },
         ];
         for test in tests.into_iter() {
             let name = clean_name(test.name.as_str());
-            let html_doc = fs::read_to_string(test.document).expect("Should have been able to read the file");
+            let html_doc =
+                fs::read_to_string(test.document).expect("Should have been able to read the file");
             let review = parse_bgg_document(&name, String::new(), &html_doc).unwrap();
             assert_eq!(review.note, test.note);
             assert_eq!(review.number, test.review_cnt);
