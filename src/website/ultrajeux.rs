@@ -14,9 +14,11 @@ pub async fn get_ultrajeux_price_and_url_by_barcode(barcode: u64) -> Option<(f32
     for capture in re.captures_iter(content_str) {
         if let Some(value) = capture.get(1) {
             let number: f32 = value.as_str().replace(',', ".").parse().unwrap();
+            ULTRAJEUX_STAT.with_label_values(&["success"]).inc();
             return Some((number, search));
         }
     }
+    ULTRAJEUX_STAT.with_label_values(&["fail"]).inc();
     None
 }
 
@@ -32,9 +34,11 @@ pub async fn get_ultrajeux_price_and_url_by_name(name: &String) -> Option<(f32, 
     for capture in re.captures_iter(content_str) {
         if let Some(value) = capture.get(1) {
             let number: f32 = value.as_str().replace(',', ".").parse().unwrap();
+            ULTRAJEUX_STAT.with_label_values(&["success"]).inc();
             return Some((number, search));
         }
     }
+    ULTRAJEUX_STAT.with_label_values(&["fail"]).inc();
     None
 }
 
@@ -48,4 +52,15 @@ pub async fn get_ultrajeux_price_and_url(
         }
     }
     get_ultrajeux_price_and_url_by_name(name).await
+}
+
+use lazy_static::lazy_static;
+use prometheus::{register_int_counter_vec, IntCounterVec};
+lazy_static! {
+    static ref ULTRAJEUX_STAT: IntCounterVec = register_int_counter_vec!(
+        "ultrajeux_stat",
+        "Stat about parsing/fetch success/fail for this website",
+        &["result"]
+    )
+    .unwrap();
 }

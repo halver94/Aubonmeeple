@@ -1,5 +1,6 @@
+use lazy_static::lazy_static;
+use prometheus::{register_int_counter, IntCounter};
 use std::time::Duration;
-
 use tokio::time;
 
 use boardgame_finder::db::{
@@ -19,11 +20,13 @@ pub async fn start_crawler() {
 
     let mut page = 1;
     loop {
+        CRAWLER_PAGE_CRAWLED.inc();
         match get_games_from_page(page).await {
             Err(e) => log::error!("error getting game from page {} :{}", page, e),
             Ok(v) => {
                 log::debug!("fetching {} games for page {}", v.len(), page);
                 for id in v {
+                    CRAWLER_GAME_CRAWLED.inc();
                     let fetched_game = select_game_with_id_from_db(&db_client, id).await;
                     match get_game_infos(None, id).await {
                         Err(e) => log::error!("{}", e),
@@ -53,4 +56,11 @@ pub async fn start_crawler() {
         }
         page += 1;
     }
+}
+
+lazy_static! {
+    static ref CRAWLER_PAGE_CRAWLED: IntCounter =
+        register_int_counter!("crawler_page_crawled", "Number of page crawled").unwrap();
+    static ref CRAWLER_GAME_CRAWLED: IntCounter =
+        register_int_counter!("crawler_game_crawled", "Number of game crawled").unwrap();
 }

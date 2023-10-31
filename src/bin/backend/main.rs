@@ -1,3 +1,6 @@
+use axum::response::Html;
+use axum::routing::get;
+use axum::Router;
 use boardgame_finder::game::{Game, OkkazeoAnnounce, Reference};
 use boardgame_finder::website::agorajeux::get_agorajeux_price_and_url_by_name;
 use boardgame_finder::website::knapix::get_knapix_prices;
@@ -9,6 +12,8 @@ use boardgame_finder::website::okkazeo::{
 use boardgame_finder::website::philibert::get_philibert_price_and_url;
 use boardgame_finder::website::ultrajeux::get_ultrajeux_price_and_url;
 use feed_rs::model::Entry;
+use lazy_static::lazy_static;
+use prometheus::{register_int_counter, Encoder, IntCounter, TextEncoder};
 use std::collections::HashMap;
 use std::error::Error;
 use std::time::{Duration, Instant};
@@ -158,6 +163,7 @@ pub async fn get_game_infos(
 async fn parse_game_feed(db_client: &Client) -> Result<(), Box<dyn error::Error + Send + Sync>> {
     log::debug!("[MAIN] parsing game feed");
     let feed = get_atom_feed().await?;
+    GET_ATOM_FEED.inc();
 
     let mut tasks = JoinSet::new();
     'outer: for entry in feed.entries {
@@ -222,6 +228,28 @@ async fn parse_game_feed(db_client: &Client) -> Result<(), Box<dyn error::Error 
     Ok(())
 }
 
+pub async fn metrics() -> Html<String> {
+    let encoder = TextEncoder::new();
+    let mut buffer = vec![];
+    encoder
+        .encode(&prometheus::gather(), &mut buffer)
+        .expect("Failed to encode metrics");
+
+    let response = String::from_utf8(buffer.clone()).expect("Failed to convert bytes to string");
+    buffer.clear();
+
+    Html(response)
+}
+
+async fn set_server() {
+    let app = Router::new().route("/metrics", get(metrics));
+
+    axum::Server::bind(&"0.0.0.0:3002".parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + 'static>> {
     log_panics::init();
@@ -242,6 +270,7 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
         interval.as_secs()
     );
 
+    let _ = tokio::spawn(async move { set_server().await });
     let _ = tokio::spawn(async move { crawler::start_crawler().await });
     let _ = start_game_checker().await;
 
@@ -257,4 +286,9 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
             time::sleep(interval - duration).await;
         }
     }
+}
+
+lazy_static! {
+    static ref GET_ATOM_FEED: IntCounter =
+        register_int_counter!("get_atom_feed", "Number of time we get the atom feed").unwrap();
 }

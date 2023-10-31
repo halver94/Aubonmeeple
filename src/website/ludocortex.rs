@@ -1,6 +1,6 @@
 use scraper::{Html, Selector};
 
-use crate::website::helper::{clean_name, are_names_similar};
+use crate::website::helper::{are_names_similar, clean_name};
 
 pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f32, String)> {
     let search = format!("https://www.ludocortex.fr/jolisearch?s={}", barcode);
@@ -35,19 +35,25 @@ pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f3
             .parse::<f32>();
 
         if href.is_none() || title.is_none() || regular_price.is_err() {
+            LUDOCORTEX_STAT.with_label_values(&["fail"]).inc();
             return None;
         }
 
         if href.unwrap().contains(&barcode.to_string()) {
+            LUDOCORTEX_STAT.with_label_values(&["success"]).inc();
             return Some((regular_price.unwrap(), href.unwrap().to_string()));
         }
     }
 
+    LUDOCORTEX_STAT.with_label_values(&["fail"]).inc();
     None
 }
 
 pub async fn get_ludocortex_price_and_url_by_name(name: &String) -> Option<(f32, String)> {
-    let search = format!("https://www.ludocortex.fr/jolisearch?s={}", clean_name(name));
+    let search = format!(
+        "https://www.ludocortex.fr/jolisearch?s={}",
+        clean_name(name)
+    );
     log::debug!("[TASK] search on ludocortex by name: {}", &search);
 
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
@@ -80,14 +86,17 @@ pub async fn get_ludocortex_price_and_url_by_name(name: &String) -> Option<(f32,
             .parse::<f32>();
 
         if href.is_none() || title.is_none() || regular_price.is_err() {
+            LUDOCORTEX_STAT.with_label_values(&["success"]).inc();
             return None;
         }
 
         if are_names_similar(&(title.unwrap()), name) {
+            LUDOCORTEX_STAT.with_label_values(&["success"]).inc();
             return Some((regular_price.unwrap(), href.unwrap().to_string()));
         }
     }
 
+    LUDOCORTEX_STAT.with_label_values(&["fail"]).inc();
     None
 }
 
@@ -101,4 +110,15 @@ pub async fn get_ludocortex_price_and_url(
         }
     }
     get_ludocortex_price_and_url_by_name(name).await
+}
+
+use lazy_static::lazy_static;
+use prometheus::{register_int_counter_vec, IntCounterVec};
+lazy_static! {
+    static ref LUDOCORTEX_STAT: IntCounterVec = register_int_counter_vec!(
+        "ludocortex_stat",
+        "Stat about parsing/fetch success/fail for this website",
+        &["result"]
+    )
+    .unwrap();
 }
