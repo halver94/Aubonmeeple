@@ -25,7 +25,7 @@ pub struct State {
 
 pub fn format_url_params(state: &State) -> String {
     format!(
-        "?{}{}{}{}{}{}{}{}{}{}{}{}",
+        "?{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
         format!("page={}", state.pagination.page),
         format!("&per_page={}", state.pagination.per_page),
         state
@@ -50,6 +50,29 @@ pub fn format_url_params(state: &State) -> String {
         },
         if state.filters.pro.is_some() {
             format!("&pro={}", state.filters.pro.as_ref().unwrap())
+        } else {
+            String::new()
+        },
+        if state.filters.type_ext.is_some() {
+            format!("&type_ext={}", state.filters.type_ext.as_ref().unwrap())
+        } else {
+            String::new()
+        },
+        if state.filters.type_game_ext.is_some() {
+            format!(
+                "&type_game_ext={}",
+                state.filters.type_game_ext.as_ref().unwrap()
+            )
+        } else {
+            String::new()
+        },
+        if state.filters.type_game.is_some() {
+            format!("&type_game={}", state.filters.type_game.as_ref().unwrap())
+        } else {
+            String::new()
+        },
+        if state.filters.type_misc.is_some() {
+            format!("&type_misc={}", state.filters.type_misc.as_ref().unwrap())
         } else {
             String::new()
         },
@@ -128,7 +151,28 @@ pub async fn root(
                 },
                 |n| Some(n),
             );
-        let pro = if filters_form.0.pro_form == Some("on".to_string()) {
+        let pro: Option<bool> = if filters_form.0.pro_form == Some("on".to_string()) {
+            Some(true)
+        } else {
+            None
+        };
+        let type_ext: Option<bool> = if filters_form.0.type_ext_form == Some("on".to_string()) {
+            Some(true)
+        } else {
+            None
+        };
+        let type_game_ext: Option<bool> =
+            if filters_form.0.type_game_ext_form == Some("on".to_string()) {
+                Some(true)
+            } else {
+                None
+            };
+        let type_game: Option<bool> = if filters_form.0.type_game_form == Some("on".to_string()) {
+            Some(true)
+        } else {
+            None
+        };
+        let type_misc: Option<bool> = if filters_form.0.type_misc_form == Some("on".to_string()) {
             Some(true)
         } else {
             None
@@ -182,6 +226,10 @@ pub async fn root(
             note: note,
             max_price: max_price,
             min_price: min_price,
+            type_game,
+            type_game_ext,
+            type_ext,
+            type_misc,
         }
     }
 
