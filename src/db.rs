@@ -418,6 +418,17 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
         _ => "oa.oa_last_modification_date DESC",
     };
 
+    let type_filter = format!(
+        "AND (({} = true AND oa_extension = 'Jeu') OR
+    ({} = true AND oa_extension = 'Extension') OR
+    ({} = true AND oa_extension = 'Jeu + Extension') OR
+    ({} = true AND oa_extension NOT IN ('Jeu', 'Jeu + Extension', 'Extension')))",
+        state.filters.type_game.is_some(),
+        state.filters.type_ext.is_some(),
+        state.filters.type_game_ext.is_some(),
+        state.filters.type_misc.is_some(),
+    );
+
     let select_req = format!(
         "SELECT 
             oa.oa_name,
@@ -451,6 +462,7 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
                     {}
                     {}
                     {}
+                    {}
                     GROUP BY oa.oa_id
                     {}
                 )
@@ -477,6 +489,7 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
         } else {
             ""
         },
+        type_filter,
         if state.filters.date.is_some() {
             format!("AND oa.oa_last_modification_date >= '{}'", state.filters.date.as_ref().unwrap())
         } else {
@@ -565,6 +578,17 @@ pub async fn select_count_filtered_games_from_db(
     db_client: &Client,
     filters: Filters,
 ) -> Result<i64, Error> {
+    let type_filter = format!(
+        "AND (({} = true AND oa_extension = 'Jeu') OR
+    ({} = true AND oa_extension = 'Extension') OR
+    ({} = true AND oa_extension = 'Jeu + Extension') OR
+    ({} = true AND oa_extension NOT IN ('Jeu', 'Jeu + Extension', 'Extension')))",
+        filters.type_game.is_some(),
+        filters.type_ext.is_some(),
+        filters.type_game_ext.is_some(),
+        filters.type_misc.is_some(),
+    );
+
     let select_req = format!(
         "SELECT COUNT(*) FROM (
                 SELECT oa.oa_id
@@ -578,6 +602,7 @@ pub async fn select_count_filtered_games_from_db(
                 {}
                 {}
                 {}
+                {}
                 GROUP BY oa.oa_id
                 {}
         ) AS c;",
@@ -586,6 +611,7 @@ pub async fn select_count_filtered_games_from_db(
         } else {
             ""
         },
+        type_filter,
         if filters.date.is_some() {
             format!("AND oa.oa_last_modification_date >= '{}'", filters.date.as_ref().unwrap())
         } else {

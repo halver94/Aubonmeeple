@@ -7,6 +7,10 @@
 {% if note is number -%}&note={{note}}{% endif -%}
 {% if max_price is number -%}&max_price={{max_price}}{% endif -%}
 {% if min_price is number -%}&min_price={{min_price}}{% endif -%}
+{% if type_ext -%}&type_ext={{type_ext}}{% endif -%}
+{% if type_game -%}&type_game={{type_game}}{% endif -%}
+{% if type_game_ext -%}&type_game_ext={{type_game_ext}}{% endif -%}
+{% if type_misc -%}&type_misc={{type_misc}}{% endif -%}
 {% if sort is string -%}&sort={{sort}}{% endif -%}
 {% endmacro url_param -%}
 
@@ -23,6 +27,10 @@ delivery=state.filters.delivery,
 note=state.filters.note,
 max_price=state.filters.max_price,
 min_price=state.filters.min_price,
+type_ext = state.filers.type_ext,
+type_game_ext = state.filers.type_game_ext,
+type_game = state.filers.type_game,
+type_misc = state.filers.type_misc,
 sort=state.sort.sort) }}
 {% endmacro url_param_change_page -%}
 
@@ -39,6 +47,10 @@ delivery=state.filters.delivery,
 note=state.filters.note,
 max_price=state.filters.max_price,
 min_price=state.filters.min_price,
+type_ext = state.filers.type_ext,
+type_game_ext = state.filers.type_game_ext,
+type_game = state.filers.type_game,
+type_misc = state.filers.type_misc,
 sort=state.sort.sort) }}
 {% endmacro url_param_change_page -%}
 
@@ -46,6 +58,18 @@ sort=state.sort.sort) }}
 <html>
 
 <head>
+    {# {% set google_analytics = true -%} #}
+    {% if google_analytics %}
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6CQ12N3L3X"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-6CQ12N3L3X');
+    </script>
+    {% endif %}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{style_css}}">
@@ -107,6 +131,27 @@ sort=state.sort.sort) }}
                                     aria-hidden="true"></i></label>
                             <input type="checkbox" id="delivery" name="delivery_form" {% if state.filters.delivery
                                 -%}{{ "checked" }}{% endif -%}>
+                        </div>
+                        <div class="flex-col-center form-group" title="Type d'annonce">
+                            <fieldset>
+                                <details>
+                                    <summary>Type d'annonce</summary>
+                                    <div class="flex-col-left">
+                                        <div><label><input type="checkbox" name="type_game_form" {% if
+                                                    state.filters.type_game -%}{{ "checked" }}{% endif -%} />Jeu</label>
+                                        </div>
+                                        <div><label><input type="checkbox" name="type_game_ext_form" {% if
+                                                    state.filters.type_game_ext -%}{{ "checked" }}{% endif -%} />Jeu +
+                                                Extension</label></div>
+                                        <div><label><input type="checkbox" name="type_ext_form" {% if
+                                                    state.filters.type_ext -%}{{ "checked" }}{% endif
+                                                    -%} />Extension</label></div>
+                                        <div><label><input type="checkbox" name="type_misc_form" {% if
+                                                    state.filters.type_misc -%}{{ "checked" }}{% endif
+                                                    -%} />Autres</label></div>
+                                    </div>
+                                </details>
+                            </fieldset>
                         </div>
                         <div class="flex-col-center form-group" title="Items par page">
                             <label for="per_page">Jeux/page</label>

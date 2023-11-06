@@ -1,10 +1,7 @@
 Features:
 - add more website comparison
 - add if product in shop is available or not
-- add prom metrics
-- filter on jeu, jeu+ extension etc (need JS) 
 - add google ads
-- add google analytics
 
 Bugfix:
 

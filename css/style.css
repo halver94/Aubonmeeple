@@ -90,6 +90,9 @@ video {
   padding: 0.6em 0.6em;
 }
 
+fieldset {
+  border: none;
+}
 
 .okkazeo_price {
   font-size: larger;

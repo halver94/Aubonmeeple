@@ -26,6 +26,16 @@ pub struct Filters {
     pub note: Option<f32>,
     pub max_price: Option<i32>,
     pub min_price: Option<i32>,
+    pub type_game: Option<bool>,
+    pub type_game_ext: Option<bool>,
+    pub type_ext: Option<bool>,
+    pub type_misc: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Fildset {
+    pub red_form: Option<String>,
+    pub orange_form: Option<String>,
 }
 
 // this is ugly, but otherwise the Form from axum doesnt work properly
@@ -41,6 +51,10 @@ pub struct FiltersForm {
     pub max_price_form: Option<String>,
     pub min_price_form: Option<String>,
     pub per_page_form: Option<String>,
+    pub type_game_form: Option<String>,
+    pub type_game_ext_form: Option<String>,
+    pub type_ext_form: Option<String>,
+    pub type_misc_form: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
