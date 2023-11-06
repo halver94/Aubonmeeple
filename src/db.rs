@@ -423,10 +423,10 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
     ({} = true AND oa_extension = 'Extension') OR
     ({} = true AND oa_extension = 'Jeu + Extension') OR
     ({} = true AND oa_extension NOT IN ('Jeu', 'Jeu + Extension', 'Extension')))",
-        state.filters.type_game.is_some(),
-        state.filters.type_ext.is_some(),
-        state.filters.type_game_ext.is_some(),
-        state.filters.type_misc.is_some(),
+        state.filters.type_game,
+        state.filters.type_ext,
+        state.filters.type_game_ext,
+        state.filters.type_misc,
     );
 
     let select_req = format!(
@@ -583,10 +583,7 @@ pub async fn select_count_filtered_games_from_db(
     ({} = true AND oa_extension = 'Extension') OR
     ({} = true AND oa_extension = 'Jeu + Extension') OR
     ({} = true AND oa_extension NOT IN ('Jeu', 'Jeu + Extension', 'Extension')))",
-        filters.type_game.is_some(),
-        filters.type_ext.is_some(),
-        filters.type_game_ext.is_some(),
-        filters.type_misc.is_some(),
+        filters.type_game, filters.type_ext, filters.type_game_ext, filters.type_misc,
     );
 
     let select_req = format!(

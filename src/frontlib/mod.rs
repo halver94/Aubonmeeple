@@ -15,7 +15,7 @@ impl Default for Sort {
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Filters {
     pub date: Option<String>,
     pub city: Option<String>,
@@ -26,16 +26,30 @@ pub struct Filters {
     pub note: Option<f32>,
     pub max_price: Option<i32>,
     pub min_price: Option<i32>,
-    pub type_game: Option<bool>,
-    pub type_game_ext: Option<bool>,
-    pub type_ext: Option<bool>,
-    pub type_misc: Option<bool>,
+    pub type_game: bool,
+    pub type_game_ext: bool,
+    pub type_ext: bool,
+    pub type_misc: bool,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct Fildset {
-    pub red_form: Option<String>,
-    pub orange_form: Option<String>,
+impl Default for Filters {
+    fn default() -> Self {
+        Self {
+            type_ext: true,
+            type_game_ext: true,
+            type_game: true,
+            type_misc: true,
+            date: None,
+            city: None,
+            name: None,
+            vendor: None,
+            pro: None,
+            delivery: None,
+            note: None,
+            max_price: None,
+            min_price: None,
+        }
+    }
 }
 
 // this is ugly, but otherwise the Form from axum doesnt work properly

@@ -53,29 +53,10 @@ pub fn format_url_params(state: &State) -> String {
         } else {
             String::new()
         },
-        if state.filters.type_ext.is_some() {
-            format!("&type_ext={}", state.filters.type_ext.as_ref().unwrap())
-        } else {
-            String::new()
-        },
-        if state.filters.type_game_ext.is_some() {
-            format!(
-                "&type_game_ext={}",
-                state.filters.type_game_ext.as_ref().unwrap()
-            )
-        } else {
-            String::new()
-        },
-        if state.filters.type_game.is_some() {
-            format!("&type_game={}", state.filters.type_game.as_ref().unwrap())
-        } else {
-            String::new()
-        },
-        if state.filters.type_misc.is_some() {
-            format!("&type_misc={}", state.filters.type_misc.as_ref().unwrap())
-        } else {
-            String::new()
-        },
+        format!("&type_ext={}", state.filters.type_ext),
+        format!("&type_game_ext={}", state.filters.type_game_ext),
+        format!("&type_game={}", state.filters.type_game),
+        format!("&type_misc={}", state.filters.type_misc),
         if state.filters.delivery.is_some() {
             format!("&delivery={}", state.filters.delivery.as_ref().unwrap())
         } else {
@@ -109,10 +90,15 @@ pub async fn root(
 ) -> Html<String> {
     AXUM_ROOT_GET.inc();
     let mut pagination_param = pagination.unwrap_or_default().0;
+    let mut filters_param = filters.clone().unwrap_or_default().0;
+    let sort_param = sort.clone().unwrap_or_default().0;
+    log::debug!("PAGINATION url : {:?}", &pagination);
+    log::debug!("PAGINATION param : {:?}", &pagination_param);
+    log::debug!("SORT url : {:?}", &sort);
+    log::debug!("SORT param : {:?}", &sort_param);
+    log::debug!("FILTER URL : {:?}", &filters);
+    log::debug!("FILTER PARAM : {:?}", &filters_param);
     log::debug!("FILTER FORM : {:?}", &filters_form);
-    log::debug!("FILTER PARAM : {:?}", &filters);
-    let mut filters_param = filters.unwrap_or_default().0;
-    let sort_param = sort.unwrap_or_default().0;
 
     if filters_form.0.city_form.is_some() {
         let note = filters_form
@@ -156,27 +142,10 @@ pub async fn root(
         } else {
             None
         };
-        let type_ext: Option<bool> = if filters_form.0.type_ext_form == Some("on".to_string()) {
-            Some(true)
-        } else {
-            None
-        };
-        let type_game_ext: Option<bool> =
-            if filters_form.0.type_game_ext_form == Some("on".to_string()) {
-                Some(true)
-            } else {
-                None
-            };
-        let type_game: Option<bool> = if filters_form.0.type_game_form == Some("on".to_string()) {
-            Some(true)
-        } else {
-            None
-        };
-        let type_misc: Option<bool> = if filters_form.0.type_misc_form == Some("on".to_string()) {
-            Some(true)
-        } else {
-            None
-        };
+        let type_ext: bool = filters_form.0.type_ext_form == Some("on".to_string());
+        let type_game_ext: bool = filters_form.0.type_game_ext_form == Some("on".to_string());
+        let type_game: bool = filters_form.0.type_game_form == Some("on".to_string());
+        let type_misc: bool = filters_form.0.type_misc_form == Some("on".to_string());
         let delivery = if filters_form.0.delivery_form == Some("on".to_string()) {
             Some(true)
         } else {
