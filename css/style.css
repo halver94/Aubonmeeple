@@ -127,9 +127,9 @@ fieldset {
 
 /* Style pour le conteneur du formulaire */
 .form-container {
-  width: 65%;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
+  width: 90%;
+  margin-top: 0.3em;
+  margin-bottom: 0.1em;
 }
 
 
@@ -138,13 +138,13 @@ form {
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
-  align-items: left;
-  gap: 1em;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
 }
 
 /* Style pour chaque groupe label + input */
 .form-group {
-  margin-bottom: 0.5em;
   color: #fff;
 }
 
@@ -284,21 +284,26 @@ details {
   cursor: pointer;
   font-size: small;
   font-weight: bold;
-  margin-bottom: 0.5em;
-  padding: 0.6em 0.6em;
 
   summary {
     cursor: pointer;
     color: #ffffff;
-    border: 0.1em solid rgba(27, 31, 35, .15);
-    padding: 1rem;
-    border-bottom: 1px solid #ddd;
+    padding: 0.5rem;
+    display: flex;
+    align-content: center;
+    justify-content: center;
   }
 }
 
 details[open] {
   background-color: #000000;
   cursor: auto;
+  width: 100%;
+
+  summary {
+    padding: 0rem;
+    margin-top: 0.3rem;
+  }
 }
 
 summary:hover {

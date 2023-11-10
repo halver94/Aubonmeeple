@@ -121,6 +121,19 @@ sort=state.sort.sort) }}
                             <input class="nbrTextbox" type="number" step="1" id="max_price" name="max_price_form"
                                 value="{{ state.filters.max_price | default(value="") }}" min="0">
                         </div>
+                        <div class="flex-col-center form-group" title="Items par page">
+                            <label for="per_page">Jeux/page</label>
+                            <select id="per_page" name="per_page_form">
+                                <option value="25" {% if state.pagination.per_page==25 %}selected {% endif %}>25
+                                </option>
+                                <option value="50" {% if state.pagination.per_page==50 %}selected {% endif %}>50
+                                </option>
+                                <option value="100" {% if state.pagination.per_page==100 %}selected {% endif %}>100
+                                </option>
+                                <option value="200" {% if state.pagination.per_page==200 %}selected {% endif %}>200
+                                </option>
+                            </select>
+                        </div>
                         <div class="flex-col-center form-group" title="Exclure vendeurs pro">
                             <label for="pro">Exclure pro</label>
                             <input type="checkbox" id="pro" name="pro_form" {% if state.filters.pro -%}{{ "checked" }}{%
@@ -152,19 +165,6 @@ sort=state.sort.sort) }}
                                     </div>
                                 </details>
                             </fieldset>
-                        </div>
-                        <div class="flex-col-center form-group" title="Items par page">
-                            <label for="per_page">Jeux/page</label>
-                            <select id="per_page" name="per_page_form">
-                                <option value="25" {% if state.pagination.per_page==25 %}selected {% endif %}>25
-                                </option>
-                                <option value="50" {% if state.pagination.per_page==50 %}selected {% endif %}>50
-                                </option>
-                                <option value="100" {% if state.pagination.per_page==100 %}selected {% endif %}>100
-                                </option>
-                                <option value="200" {% if state.pagination.per_page==200 %}selected {% endif %}>200
-                                </option>
-                            </select>
                         </div>
                         <input class="button" type="submit" value="Filtrer">
                         <button class="button" type="button"
