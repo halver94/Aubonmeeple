@@ -67,11 +67,11 @@ pub fn are_names_similar(name1: &str, name2: &str) -> bool {
     log::trace!("difference raw: {:#?}", difference);
 
     let difference_tokens_unwanted: Vec<String> = difference
-        .map(|word| unidecode(&word).to_lowercase())
+        .map(|word| unidecode(word).to_lowercase())
         .filter(|word| !TOKENS_UNWANTED.contains(&word.as_str()))
         .collect();
 
-    if difference_tokens_unwanted.len() != 0 {
+    if !difference_tokens_unwanted.is_empty() {
         for word in difference_tokens_unwanted {
             log::trace!("Word not in tokens_unwanted: {}", word);
         }

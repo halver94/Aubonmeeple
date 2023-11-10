@@ -63,7 +63,7 @@ pub fn get_okkazeo_shipping(document: &Html) -> HashMap<String, f32> {
             .join("")
             .trim()
             .to_string()
-            .replace(",", ".")
+            .replace(',', ".")
             .replace(" €", "")
             .parse::<f32>()
             .unwrap_or_default();
@@ -102,7 +102,7 @@ pub fn get_okkazeo_seller(document: &Html) -> Option<Seller> {
         .unwrap();
 
     Some(Seller {
-        id: id,
+        id,
         name: seller_name.to_string(),
         url: format!(
             "https://www.okkazeo.com/{}",
@@ -147,7 +147,7 @@ pub fn get_okkazeo_announce_price(
     if let Some(price_element) = document.select(&price_selector).next() {
         let price = price_element.text().collect::<Vec<_>>().join("");
 
-        return Ok(price.replace("€", ".").parse::<f32>()?);
+        return Ok(price.replace('€', ".").parse::<f32>()?);
     };
 
     Err("error get_okkazeo_price, no entry in select".into())
@@ -254,7 +254,7 @@ pub async fn download_okkazeo_game_image(url: &str) -> Result<String, Box<dyn st
         image::ImageOutputFormat::Jpeg(60),
     )?;
 
-    let re = Regex::new(r#"/([^/]+)\.(jpg|png)$"#).unwrap();
+    let re = Regex::new(r"/([^/]+)\.(jpg|png)$").unwrap();
     let mut name: &str = "unknown";
     if let Some(captures) = re.captures(url) {
         if let Some(filename) = captures.get(1) {

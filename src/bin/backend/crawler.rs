@@ -39,14 +39,12 @@ pub async fn start_crawler() {
                                         e
                                     );
                                 }
-                            } else {
-                                if let Err(e) = update_game_from_db(&db_client, &g).await {
+                            } else if let Err(e) = update_game_from_db(&db_client, &g).await {
                                     log::error!(
                                         "erreur db, cannot update game {} : {}",
                                         g.okkazeo_announce.name,
                                         e
                                     );
-                                }
                             }
                         }
                     }

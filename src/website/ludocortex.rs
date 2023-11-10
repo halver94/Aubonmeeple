@@ -49,7 +49,7 @@ pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f3
     None
 }
 
-pub async fn get_ludocortex_price_and_url_by_name(name: &String) -> Option<(f32, String)> {
+pub async fn get_ludocortex_price_and_url_by_name(name: &str) -> Option<(f32, String)> {
     let search = format!(
         "https://www.ludocortex.fr/jolisearch?s={}",
         clean_name(name)
@@ -101,7 +101,7 @@ pub async fn get_ludocortex_price_and_url_by_name(name: &String) -> Option<(f32,
 }
 
 pub async fn get_ludocortex_price_and_url(
-    name: &String,
+    name: &str,
     barcode: Option<u64>,
 ) -> Option<(f32, String)> {
     if barcode.is_some() {

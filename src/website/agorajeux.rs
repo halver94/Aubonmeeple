@@ -10,7 +10,7 @@ pub async fn get_agorajeux_price_and_url_by_name(name: &str) -> Option<(f32, Str
     );
     log::debug!("[TASK] search on agorajeux: {}", &search);
     let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
-    parse_agorajeux_document(name, &std::str::from_utf8(&content).unwrap())
+    parse_agorajeux_document(name, std::str::from_utf8(&content).unwrap())
 }
 
 fn normalize_agorajeux_name(name: &str) -> String {

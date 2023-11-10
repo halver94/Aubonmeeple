@@ -44,7 +44,7 @@ pub async fn get_knapix_prices(game: &mut Game) -> Result<(), Box<dyn error::Err
                             String::from(alt_value.as_str()),
                             Reference {
                                 name: String::from(alt_value.as_str()),
-                                price: price,
+                                price,
                                 url,
                             },
                         );

@@ -25,9 +25,9 @@ pub struct State {
 
 pub fn format_url_params(state: &State) -> String {
     format!(
-        "?{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-        format!("page={}", state.pagination.page),
-        format!("&per_page={}", state.pagination.per_page),
+        "?page={}&per_page={}{}{}{}{}{}&type_ext={}&type_game_ext={}&type_game={}&type_misc={}{}{}{}{}&sort={}",
+        state.pagination.page,
+        state.pagination.per_page,
         state
             .filters
             .city
@@ -53,10 +53,10 @@ pub fn format_url_params(state: &State) -> String {
         } else {
             String::new()
         },
-        format!("&type_ext={}", state.filters.type_ext),
-        format!("&type_game_ext={}", state.filters.type_game_ext),
-        format!("&type_game={}", state.filters.type_game),
-        format!("&type_misc={}", state.filters.type_misc),
+        state.filters.type_ext,
+        state.filters.type_game_ext,
+        state.filters.type_game,
+        state.filters.type_misc,
         if state.filters.delivery.is_some() {
             format!("&delivery={}", state.filters.delivery.as_ref().unwrap())
         } else {
@@ -77,7 +77,7 @@ pub fn format_url_params(state: &State) -> String {
         } else {
             String::new()
         },
-        format!("&sort={}", state.sort.sort),
+        state.sort.sort,
     )
 }
 
@@ -111,7 +111,7 @@ pub async fn root(
                     log::error!("note parse error : {}", e);
                     None
                 },
-                |n| Some(n),
+                Some,
             );
         let max_price = filters_form
             .0
@@ -123,7 +123,7 @@ pub async fn root(
                     log::error!("max price parse error : {}", e);
                     None
                 },
-                |n| Some(n),
+                Some,
             );
         let min_price = filters_form
             .0
@@ -135,7 +135,7 @@ pub async fn root(
                     log::error!("max price parse error : {}", e);
                     None
                 },
-                |n| Some(n),
+                Some,
             );
         let pro: Option<bool> = if filters_form.0.pro_form == Some("on".to_string()) {
             Some(true)
@@ -180,21 +180,21 @@ pub async fn root(
             .map_or_else(
                 |e| {
                     log::error!("per page parse error : {}", e);
-                    25 as usize
+                    25_usize
                 },
                 |n| n as usize,
             );
 
         filters_param = Filters {
-            date: date,
-            city: city,
-            name: name,
-            vendor: vendor,
-            pro: pro,
-            delivery: delivery,
-            note: note,
-            max_price: max_price,
-            min_price: min_price,
+            date,
+            city,
+            name,
+            vendor,
+            pro,
+            delivery,
+            note,
+            max_price,
+            min_price,
             type_game,
             type_game_ext,
             type_ext,
@@ -240,16 +240,13 @@ pub async fn root(
         part_games.games.len()
     );
 
-    let tera;
-    match Tera::new("templates/*") {
-        Ok(t) => {
-            tera = t;
-        }
+    let tera= match Tera::new("templates/*") {
+        Ok(t) => t,
         Err(e) => {
             log::error!("error tera loading template : {}", e);
             return Html(String::new());
         }
-    }
+    };
     let mut ctx = Context::new();
     ctx.insert("style_css", &"css/style.css");
     ctx.insert("background_img", &"assets/banner.jpg");
@@ -281,11 +278,11 @@ pub async fn root(
 
     match tera.render("frontpage.tera", &ctx) {
         Ok(r) => {
-            return Html(r);
+            Html(r)
         }
         Err(e) => {
             log::error!("error tera rendering : {}", e);
-            return Html(String::new());
+            Html(String::new())
         }
     }
 }
