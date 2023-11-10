@@ -123,10 +123,10 @@ impl Game {
 
     pub async fn get_reviews(&mut self) {
         let reviewer = get_trictrac_note(&self.okkazeo_announce.name).await;
-        if reviewer.is_some() {
+        if let Some(r) = reviewer {
             self.review
                 .reviews
-                .insert("trictrac".to_string(), reviewer.unwrap());
+                .insert("trictrac".to_string(), r);
         } else {
             log::debug!(
                 "[TASK] cannot get trictrac note for {}",
@@ -135,10 +135,10 @@ impl Game {
         }
 
         let reviewer = get_bgg_note(&self.okkazeo_announce.name).await;
-        if reviewer.is_some() {
+        if let Some(r) = reviewer {
             self.review
                 .reviews
-                .insert("bgg".to_string(), reviewer.unwrap());
+                .insert("bgg".to_string(), r);
         } else {
             log::debug!(
                 "[TASK] cannot get bgg note for {}",

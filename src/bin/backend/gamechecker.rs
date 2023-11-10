@@ -35,7 +35,7 @@ pub async fn task(start_date_offset: Duration, duration: Duration) {
             if !game_still_available(id as u32).await {
                 // effectively removing ids that need to be removed
                 log::debug!("[GAMECHECKER] removing games with id {}", id);
-                if let Err(e) = delete_from_all_table_with_id(&db_client, id as i32).await {
+                if let Err(e) = delete_from_all_table_with_id(&db_client, id).await {
                     GAMECHECKER_REMOVED_GAME.inc();
                     log::error!("[GAMECHECKER] error deleting from db : {}", e);
                 }
@@ -52,9 +52,9 @@ pub async fn task(start_date_offset: Duration, duration: Duration) {
 pub async fn start_game_checker() {
     log::info!("[GAMECHECKER] starting game checker thread");
 
-    let _ = tokio::spawn(async move { task(Duration::zero(), Duration::days(7)).await });
-    let _ = tokio::spawn(async move { task(Duration::days(7), Duration::days(30)).await });
-    let _ = tokio::spawn(async move { task(Duration::days(30), Duration::weeks(52 * 100)).await });
+    let _ = tokio::spawn(async move { task(Duration::zero(), Duration::days(7)).await }).await;
+    let _ = tokio::spawn(async move { task(Duration::days(7), Duration::days(30)).await }).await;
+    let _ = tokio::spawn(async move { task(Duration::days(30), Duration::weeks(52 * 100)).await }).await;
     // ugly but it works..
 }
 

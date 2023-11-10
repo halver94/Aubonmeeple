@@ -58,10 +58,10 @@ pub async fn get_game_infos(
         game.okkazeo_announce.url = format!("https://www.okkazeo.com/annonces/view/{}", id);
         game.okkazeo_announce.price = get_okkazeo_announce_price(&document)?;
         game.okkazeo_announce.extension = get_okkazeo_announce_extension(&document)?;
-        game.okkazeo_announce.last_modification_date = if entry.is_none() {
-            get_okkazeo_announce_modification_date(&document)?
+        game.okkazeo_announce.last_modification_date = if let Some(e) = entry {
+            e.updated.unwrap()
         } else {
-            entry.unwrap().updated.unwrap()
+            get_okkazeo_announce_modification_date(&document)?
         };
         image_url = get_okkazeo_announce_image(&document)?;
         game.okkazeo_announce.barcode = get_okkazeo_barcode(&document);
@@ -270,8 +270,8 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
         interval.as_secs()
     );
 
-    let _ = tokio::spawn(async move { set_server().await });
-    let _ = tokio::spawn(async move { crawler::start_crawler().await });
+    let _ = tokio::spawn(async move { set_server().await }).await;
+    let _ = tokio::spawn(async move { crawler::start_crawler().await }).await;
     let _ = start_game_checker().await;
 
     loop {
