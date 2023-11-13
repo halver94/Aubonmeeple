@@ -1,4 +1,5 @@
-{% macro url_param(page, per_page, city, name, vendor, pro, date, delivery, note, max_price, min_price, sort) -%}
+{% macro url_param(page, per_page, city, name, vendor, pro, date, delivery, note, max_price, min_price, type_ext,
+type_game_ext, type_game, type_misc, sort) -%}
 ?page={{ page }}&per_page={{per_page}}&city={{city}}&name={{name}}
 {% if vendor is string -%}&vendor={{vendor}}{% endif -%}
 {% if pro -%}&pro={{pro}}{% endif -%}
@@ -7,10 +8,10 @@
 {% if note is number -%}&note={{note}}{% endif -%}
 {% if max_price is number -%}&max_price={{max_price}}{% endif -%}
 {% if min_price is number -%}&min_price={{min_price}}{% endif -%}
-{% if type_ext -%}&type_ext={{type_ext}}{% endif -%}
-{% if type_game -%}&type_game={{type_game}}{% endif -%}
-{% if type_game_ext -%}&type_game_ext={{type_game_ext}}{% endif -%}
-{% if type_misc -%}&type_misc={{type_misc}}{% endif -%}
+&type_ext={{type_ext}}
+&type_game={{type_game}}
+&type_game_ext={{type_game_ext}}
+&type_misc={{type_misc}}
 {% if sort is string -%}&sort={{sort}}{% endif -%}
 {% endmacro url_param -%}
 
@@ -27,10 +28,10 @@ delivery=state.filters.delivery,
 note=state.filters.note,
 max_price=state.filters.max_price,
 min_price=state.filters.min_price,
-type_ext = state.filers.type_ext,
-type_game_ext = state.filers.type_game_ext,
-type_game = state.filers.type_game,
-type_misc = state.filers.type_misc,
+type_ext = state.filters.type_ext,
+type_game_ext = state.filters.type_game_ext,
+type_game = state.filters.type_game,
+type_misc = state.filters.type_misc,
 sort=state.sort.sort) }}
 {% endmacro url_param_change_page -%}
 
@@ -47,10 +48,10 @@ delivery=state.filters.delivery,
 note=state.filters.note,
 max_price=state.filters.max_price,
 min_price=state.filters.min_price,
-type_ext = state.filers.type_ext,
-type_game_ext = state.filers.type_game_ext,
-type_game = state.filers.type_game,
-type_misc = state.filers.type_misc,
+type_ext = state.filters.type_ext,
+type_game_ext = state.filters.type_game_ext,
+type_game = state.filters.type_game,
+type_misc = state.filters.type_misc,
 sort=state.sort.sort) }}
 {% endmacro url_param_change_page -%}
 
@@ -168,7 +169,7 @@ sort=state.sort.sort) }}
                         </div>
                         <input class="button" type="submit" value="Filtrer">
                         <button class="button" type="button"
-                            onclick="window.location.href='/?page=0&sort={{state.sort.sort}}';">Effacer<br><br>
+                            onclick="window.location.href='/?page=0&sort={{state.sort.sort}}&type_game=true&type_ext=true&type_game_ext=true&type_misc=true';">Effacer<br><br>
                             filtres</button>
                     </form>
                     <div class="flex-row-center sort">
@@ -200,7 +201,11 @@ sort=state.sort.sort) }}
                                 </a>
                             </div>
                             <div class="game_name">
-                                {{game.okkazeo_announce.name}}<br>
+                                {{game.okkazeo_announce.name}}
+                                <a href="/?page={{ state.pagination.page }}&per_page={{state.pagination.per_page}}&name={{game.okkazeo_announce.name }}&sort={{state.sort.sort}}&type_game=true&type_ext=true&type_game_ext=true&type_misc=true"
+                                    target="_blank">
+                                    <img src="assets/filter.png" alt="fail" width="20" height="20" />
+                                </a><br>
                                 ({{game.okkazeo_announce.extension}})<br>
                                 {{game.okkazeo_announce.last_modification_date | date(format="%d/%m/%Y %H:%M")}}<br>
                             </div>
@@ -211,7 +216,7 @@ sort=state.sort.sort) }}
                                 <a href="{{game.okkazeo_announce.seller.url}}" target="_blank">
                                     {{game.okkazeo_announce.seller.name}}
                                     {% if game.okkazeo_announce.seller.is_pro -%} - PRO {% endif -%}
-                                    <a href="/?page={{ state.pagination.page }}&per_page={{state.pagination.per_page}}&vendor={{game.okkazeo_announce.seller.name }}&sort={{state.sort.sort}}"
+                                    <a href="/?page={{ state.pagination.page }}&per_page={{state.pagination.per_page}}&vendor={{game.okkazeo_announce.seller.name }}&sort={{state.sort.sort}}&type_game=true&type_ext=true&type_game_ext=true&type_misc=true"
                                         target="_blank">
                                         <img src="assets/filter.png" alt="fail" width="20" height="20" />
                                     </a>
