@@ -240,7 +240,7 @@ pub async fn root(
         part_games.games.len()
     );
 
-    let tera= match Tera::new("templates/*") {
+    let tera = match Tera::new("templates/*") {
         Ok(t) => t,
         Err(e) => {
             log::error!("error tera loading template : {}", e);
@@ -277,9 +277,7 @@ pub async fn root(
     ctx.insert("pages_vec", &pages_vec);
 
     match tera.render("frontpage.tera", &ctx) {
-        Ok(r) => {
-            Html(r)
-        }
+        Ok(r) => Html(r),
         Err(e) => {
             log::error!("error tera rendering : {}", e);
             Html(String::new())

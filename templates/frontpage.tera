@@ -71,7 +71,9 @@ sort=state.sort.sort) }}
         gtag('config', 'G-6CQ12N3L3X');
     </script>
     {% endif %}
+    <title>aubonmeeple.fr</title>
     <meta charset="utf-8" />
+    <meta name="referrer" content="no-referrer" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{style_css}}">
     <script src="https://kit.fontawesome.com/3882acb684.js" crossorigin="anonymous"></script>
