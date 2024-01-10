@@ -4,5 +4,6 @@ Features:
 - add google ads
 
 Bugfix:
+-crawler not woking properly, stopped after 278 pages
 
 Refacto:

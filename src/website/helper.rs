@@ -29,7 +29,7 @@ static TOKENS_UNWANTED: [&str; 23] = [
     "box",
 ];
 
-static CHAR_UNWANTED: [&str; 11] = [":", "-", "\'", "&", "[", "]", "=", ",", "!", "`", "’"];
+pub static CHAR_UNWANTED: [&str; 11] = [":", "-", "\'", "&", "[", "]", "=", ",", "!", "`", "’"];
 
 pub fn clean_name(name: &str) -> String {
     log::trace!("cleaning name : {}", name);
