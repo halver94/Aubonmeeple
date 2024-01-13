@@ -1,0 +1,17 @@
+version: "2"
+
+volumes:
+  postgres_data: {}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - 5432:5432/tcp
+    environment:
+      - POSTGRES_PASSWORD=aubonmeeple
+      - POSTGRES_USER=aubonmeeple
+      - POSTGRES_DB=aubonmeeple
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-schema.docker.sql:/docker-entrypoint-initdb.d/init-schema.docker.sql:ro
