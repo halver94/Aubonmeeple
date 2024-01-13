@@ -13,10 +13,10 @@ use lazy_static::lazy_static;
 use prometheus::{register_int_counter_vec, IntCounterVec};
 
 pub async fn connect_db() -> Result<Client, Error> {
-    let db_url = "postgres://scrapy:scrapyscrapy@localhost/scraper";
+    let db_url = std::env::var("DB_URL").expect("DB_URL is not defined");
 
     log::info!("connecting to DB");
-    let (client, connection) = tokio_postgres::connect(db_url, NoTls).await?;
+    let (client, connection) = tokio_postgres::connect(&db_url, NoTls).await?;
     log::info!("connected to DB");
 
     tokio::spawn(async move {
