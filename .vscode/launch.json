@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "cppdbg",
+            "request": "launch",
+            "preLaunchTask": "cargo build frontend",
+            "name": "run frontend",
+            "program": "${workspaceFolder}/target/debug/frontend",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "sourceFileMap": {},
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "cppdbg",
+            "request": "launch",
+            "preLaunchTask": "cargo build backend",
+            "name": "run backend",
+            "program": "${workspaceFolder}/target/debug/backend",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "sourceFileMap": {},
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
