@@ -1,0 +1,23 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "cargo build frontend",
+            "type": "cargo",
+            "command": "build",
+            "args": ["--bin", "frontend"],
+            "problemMatcher": [
+                "$rustc",
+            ]
+        },
+        {
+            "label": "cargo build backend",
+            "type": "cargo",
+            "command": "build",
+            "args": ["--bin", "backend"],
+            "problemMatcher": [
+                "$rustc",
+            ]
+        }
+    ]
+}
