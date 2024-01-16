@@ -27,6 +27,13 @@ cargo build
 
 To test your stuff, you can simply start the backend in one terminal and the frontend in another.
 
+### Docker build
+The provided `Dockerfile` has two target steps (`frontend` and `backend`) that extends on the same base build step
+```
+docker build --target backend -t aubonmeeple-backend .
+docker build --target frontend -t aubonmeeple-frontend .
+```
+
 ### Contribution
 
 Feel free to contribute or do feature requests :)
