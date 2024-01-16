@@ -1,0 +1,15 @@
+/home/halver/log/frontend.err
+/home/halver/log/backend.err {
+	daily
+	rotate 30
+	compress
+	delaycompress
+	missingok
+	notifempty
+	copytruncate
+	postrotate
+		day=$(date +%Y-%m-%d)
+		mv /home/halver/log/frontend.err.1 /home/halver/log/frontend-$day.err
+		mv /home/halver/log/backend.err.1 /home/halver/log/backend-$day.err
+	endscript
+}

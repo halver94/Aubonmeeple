@@ -1,0 +1,17 @@
+[Unit]
+Description=aubonmeeple backend service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+WorkingDirectory=/home/halver/
+Type=simple
+Restart=always
+RestartSec=1
+User=halver
+ExecStart=/home/halver/frontend
+StandardOutput=append:/home/halver/log/frontend.log
+StandardError=append:/home/halver/log/frontend.err
+
+[Install]
+WantedBy=multi-user.target
