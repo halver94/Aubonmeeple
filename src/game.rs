@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering, collections::HashMap};
 
-use crate::website::{bgg::get_bgg_note, trictrac::get_trictrac_note};
+use crate::website::bgg::get_bgg_note;
 
 #[derive(Debug, Default, Clone, Serialize)]
 pub struct Games {
@@ -122,23 +122,9 @@ impl Game {
     }
 
     pub async fn get_reviews(&mut self) {
-        let reviewer = get_trictrac_note(&self.okkazeo_announce.name).await;
-        if let Some(r) = reviewer {
-            self.review
-                .reviews
-                .insert("trictrac".to_string(), r);
-        } else {
-            log::debug!(
-                "[TASK] cannot get trictrac note for {}",
-                self.okkazeo_announce.name
-            );
-        }
-
         let reviewer = get_bgg_note(&self.okkazeo_announce.name).await;
         if let Some(r) = reviewer {
-            self.review
-                .reviews
-                .insert("bgg".to_string(), r);
+            self.review.reviews.insert("bgg".to_string(), r);
         } else {
             log::debug!(
                 "[TASK] cannot get bgg note for {}",
