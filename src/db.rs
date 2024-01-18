@@ -17,6 +17,7 @@ pub async fn connect_db() -> Result<Client, Error> {
 
     log::info!("[DB] connecting to DB");
     let (client, connection) = tokio_postgres::connect(db_url, NoTls).await?;
+    log::info!("connected to DB");
 
     tokio::spawn(async move {
         if let Err(e) = connection.await {
@@ -24,6 +25,7 @@ pub async fn connect_db() -> Result<Client, Error> {
         }
     });
 
+    log::debug!("spawn db listener, returning client");
     Ok(client)
 }
 
@@ -411,7 +413,7 @@ pub async fn select_game_with_id_from_db(db_client: &Client, id: u32) -> Option<
 }
 
 fn sql_partial_rating_filter(note: Option<f32>) -> String {
-   return note.map_or("".to_string(), |n| format!(
+    return note.map_or("".to_string(), |n| format!(
         "HAVING SUM(CASE WHEN r.reviewer_number > 0 THEN r.reviewer_note * r.reviewer_number ELSE 0 END) / SUM(CASE WHEN r.reviewer_number > 0 THEN r.reviewer_number ELSE 1 END) >= {}",
         n
     ));

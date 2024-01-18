@@ -9,12 +9,17 @@ use boardgame_finder::website::okkazeo::game_still_available;
 use prometheus::{register_int_counter, IntCounter};
 
 pub async fn task(start_date_offset: Duration, duration: Duration) {
+    log::info!(
+        "starting game checker task with start_date {} and duration {}",
+        start_date_offset,
+        duration
+    );
     let db_client = connect_db().await.unwrap();
     loop {
         let start_date = chrono::Utc::now() - start_date_offset;
         let end_date = start_date - duration;
         log::debug!(
-            "[GAMECHECKER] new loop start : {:?}, end : {:?}",
+            "new loop start : {:?}, end : {:?}",
             start_date_offset,
             duration
         );
@@ -30,14 +35,14 @@ pub async fn task(start_date_offset: Duration, duration: Duration) {
             };
 
         for id in ids {
-            log::debug!("[GAMECHECKER] checking game with id {})", id,);
+            log::debug!("checking game with id {})", id,);
             GAMECHECKER_CHECKED_GAME.inc();
             if !game_still_available(id as u32).await {
                 // effectively removing ids that need to be removed
-                log::debug!("[GAMECHECKER] removing games with id {}", id);
+                log::debug!("removing games with id {}", id);
                 if let Err(e) = delete_from_all_table_with_id(&db_client, id).await {
                     GAMECHECKER_REMOVED_GAME.inc();
-                    log::error!("[GAMECHECKER] error deleting from db : {}", e);
+                    log::error!("error deleting from db : {}", e);
                 }
             }
             let sleep_duration = {
@@ -49,12 +54,12 @@ pub async fn task(start_date_offset: Duration, duration: Duration) {
     }
 }
 
-pub async fn start_game_checker() {
-    log::info!("[GAMECHECKER] starting game checker thread");
+pub fn start_game_checker() {
+    log::info!("starting game checker thread");
 
-    let _ = tokio::spawn(async move { task(Duration::zero(), Duration::days(7)).await }).await;
-    let _ = tokio::spawn(async move { task(Duration::days(7), Duration::days(30)).await }).await;
-    let _ = tokio::spawn(async move { task(Duration::days(30), Duration::weeks(52 * 100)).await }).await;
+    let _ = tokio::spawn(async move { task(Duration::zero(), Duration::days(3)).await });
+    let _ = tokio::spawn(async move { task(Duration::days(3), Duration::days(10)).await });
+    let _ = tokio::spawn(async move { task(Duration::days(10), Duration::weeks(52 * 100)).await });
     // ugly but it works..
 }
 
