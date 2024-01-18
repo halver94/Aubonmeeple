@@ -161,13 +161,14 @@ pub async fn get_game_infos(
 }
 
 async fn parse_game_feed(db_client: &Client) -> Result<(), Box<dyn error::Error + Send + Sync>> {
-    log::debug!("[MAIN] parsing game feed");
+    log::debug!("parsing game feed");
     let feed = get_atom_feed().await?;
     GET_ATOM_FEED.inc();
+    log::debug!("game feed retrieved");
 
     let mut tasks = JoinSet::new();
     'outer: for entry in feed.entries {
-        log::trace!("[MAIN] entry : {:?}", entry);
+        log::trace!("entry : {:?}", entry);
 
         let price = entry
             .summary
@@ -190,10 +191,7 @@ async fn parse_game_feed(db_client: &Client) -> Result<(), Box<dyn error::Error 
         let fetched_game = select_game_with_id_from_db(db_client, id).await;
         if fetched_game.is_some() {
             let mut fetched_game = fetched_game.clone().unwrap();
-            log::debug!(
-                "[MAIN] updating game {}",
-                fetched_game.okkazeo_announce.name
-            );
+            log::debug!("updating game {}", fetched_game.okkazeo_announce.name);
             fetched_game.okkazeo_announce.last_modification_date =
                 entry.updated.unwrap_or_default();
             fetched_game.okkazeo_announce.price = price;
@@ -211,10 +209,9 @@ async fn parse_game_feed(db_client: &Client) -> Result<(), Box<dyn error::Error 
 
         tasks.spawn(async move { get_game_infos(Some(&entry), entry.id.parse::<u32>()?).await });
     }
-
     while let Some(res) = tasks.join_next().await {
         let game = res??;
-        log::debug!("[MAIN] got result for game {}", game.okkazeo_announce.name);
+        log::debug!("got result for game {}", game.okkazeo_announce.name);
 
         if let Err(e) = insert_announce_into_db(db_client, &game).await {
             log::error!(
@@ -242,6 +239,7 @@ pub async fn metrics() -> Html<String> {
 }
 
 async fn set_server() {
+    log::info!("starting metrics server");
     let app = Router::new().route("/metrics", get(metrics));
 
     axum::Server::bind(&"0.0.0.0:3002".parse().unwrap())
@@ -255,28 +253,24 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
     log_panics::init();
 
     //this one is for vscode
-    env::set_var("RUST_LOG", "boardgame_finder=trace");
     env_logger::Builder::from_env(
         env_logger::Env::default().default_filter_or(Level::Debug.as_str()),
     )
     .init();
 
-    let client = connect_db().await?;
+    let client = connect_db().await.expect("cannot connect to DB");
 
-    log::info!("[MAIN] starting program");
-    let interval = Duration::from_secs(60 * 5); // Remplacez X par le nombre de minutes souhaité
-    log::info!(
-        "[MAIN] parsing game feed every {} seconds",
-        interval.as_secs()
-    );
+    log::info!("starting program");
+    let interval = Duration::from_secs(60 * 5);
+    log::info!("parsing game feed every {} seconds", interval.as_secs());
 
-    let _ = tokio::spawn(async move { set_server().await }).await;
-    let _ = tokio::spawn(async move { crawler::start_crawler().await }).await;
-    let _ = start_game_checker().await;
+    let _ = tokio::spawn(async move { set_server().await });
+    let _ = tokio::spawn(async move { crawler::start_crawler().await });
+    let _ = start_game_checker();
 
     loop {
         let start = Instant::now();
-        log::debug!("[MAIN] scraping time : {:?}", start);
+        log::debug!("scraping time : {:?}", start);
         if let Err(e) = parse_game_feed(&client).await {
             log::error!("{}", e);
         }
