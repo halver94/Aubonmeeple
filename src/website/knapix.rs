@@ -1,11 +1,8 @@
 use std::error;
 
-use scraper::{Html, Selector};
+use scraper::Selector;
 
-use crate::{
-    game::{Game, Reference},
-    website::helper::clean_name,
-};
+use crate::{game::{Game, Reference}, httpclient, website::helper::clean_name};
 
 pub async fn get_knapix_prices(game: &mut Game) -> Result<(), Box<dyn error::Error>> {
     let name = clean_name(&game.okkazeo_announce.name).replace(' ', "+");
@@ -15,8 +12,7 @@ pub async fn get_knapix_prices(game: &mut Game) -> Result<(), Box<dyn error::Err
     );
 
     log::debug!("searching knapix {}", search);
-    let content = reqwest::get(search).await?.bytes().await?;
-    let document = Html::parse_document(std::str::from_utf8(&content)?);
+    let (document, _) = httpclient::get_doc(search).await?;
 
     // choper <tr data-href="/r/127347999"> pou rla redirection vers le site
     let row_selector = Selector::parse("tr[data-href]")?;

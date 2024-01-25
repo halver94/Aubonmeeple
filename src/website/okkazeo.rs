@@ -9,15 +9,14 @@ use std::{
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use feed_rs::{
     model::Feed,
-    parser::{self, ParseFeedError},
+    parser::{self},
 };
 use hyper::StatusCode;
 use image::io::Reader as ImageReader;
 use regex::Regex;
-use reqwest::{get, ClientBuilder};
 use scraper::{Html, Selector};
 
-use crate::game::Seller;
+use crate::{game::Seller, httpclient};
 
 pub async fn game_still_available(id: u32) -> bool {
     log::debug!("checking if game with id {} is still available", id);
@@ -225,23 +224,14 @@ pub async fn get_okkazeo_announce_page(id: u32) -> (Html, StatusCode) {
     let search = format!("https://www.okkazeo.com/annonces/view/{}", id);
     log::debug!("getting announce page from okkazeo : {}", id);
 
-    let client = ClientBuilder::new()
-        .redirect(reqwest::redirect::Policy::none())
-        .build()
-        .unwrap();
-    let response = client.get(search).send().await.unwrap();
-
-    let http_code = response.status();
-    let content = response.bytes().await.unwrap();
-    let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
-    (document, http_code)
+    httpclient::get_doc(search).await.unwrap()
 }
 
 pub async fn download_okkazeo_game_image(
     url: &str,
 ) -> Result<String, Box<dyn std::error::Error + Sync + Send>> {
     log::debug!("getting image from {}", url);
-    let response = get(url).await?;
+    let response = httpclient::get(url).await?;
     let image_bytes = response.bytes().await?;
 
     let image_reader = ImageReader::new(std::io::Cursor::new(image_bytes)).with_guessed_format()?;
@@ -274,7 +264,7 @@ pub async fn download_okkazeo_game_image(
 
 pub async fn get_atom_feed() -> Result<Feed, anyhow::Error> {
     log::debug!("getting atom feed");
-    let content = reqwest::get("https://www.okkazeo.com/annonces/atom/0/50")
+    let content = httpclient::get("https://www.okkazeo.com/annonces/atom/0/50")
         .await?
         .bytes()
         .await?;
@@ -286,13 +276,7 @@ pub async fn get_games_from_page(
 ) -> Result<Vec<u32>, Box<dyn error::Error + Send + Sync>> {
     let search = format!("https:///www.okkazeo.com/jeux/arrivages?page={}", page);
     log::debug!("getting okkazeo page : {}", &search);
-
-    let client = ClientBuilder::new()
-        .redirect(reqwest::redirect::Policy::none())
-        .build()?;
-    let response = client.get(search).send().await?;
-    let content = response.bytes().await?;
-    let document = Html::parse_document(std::str::from_utf8(&content)?);
+    let (document, _) = httpclient::get_doc(&search).await?;
 
     let mbs_selector = Selector::parse(".mbs").unwrap();
     let href_selector = Selector::parse(".mbs .h4-like.titre a[href]").unwrap();

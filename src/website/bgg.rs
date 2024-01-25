@@ -1,8 +1,7 @@
 use scraper::{Html, Selector};
 
 use crate::{
-    game::Reviewer,
-    website::helper::{are_names_similar, clean_name},
+    game::Reviewer, httpclient, website::helper::{are_names_similar, clean_name}
 };
 
 pub async fn get_bgg_note(name: &str) -> Result<Option<Reviewer>, anyhow::Error> {
@@ -12,17 +11,15 @@ pub async fn get_bgg_note(name: &str) -> Result<Option<Reviewer>, anyhow::Error>
         name
     );
     log::debug!("getting bgg note: {}\n", &name);
-    let content = reqwest::get(&search).await?.bytes().await?;
+    let (doc, _) = httpclient::get_doc(&search).await?;
     Ok(parse_bgg_document(
         &name,
         search,
-        std::str::from_utf8(&content)?,
+        &doc,
     ))
 }
 
-fn parse_bgg_document(name: &str, search: String, doc: &str) -> Option<Reviewer> {
-    let document = Html::parse_document(doc);
-
+fn parse_bgg_document(name: &str, search: String, document: &Html) -> Option<Reviewer> {
     let primary_selector = Selector::parse("a.primary").unwrap();
 
     // Sélecteur pour les éléments avec la classe 'collection_bggrating'
@@ -137,7 +134,8 @@ mod tests {
             let name = clean_name(test.name.as_str());
             let html_doc =
                 fs::read_to_string(test.document).expect("Should have been able to read the file");
-            let review = parse_bgg_document(&name, String::new(), &html_doc).unwrap();
+            let document = scraper::Html::parse_document(&html_doc);
+            let review = parse_bgg_document(&name, String::new(), &document).unwrap();
             assert_eq!(review.note, test.note);
             assert_eq!(review.number, test.review_cnt);
         }
