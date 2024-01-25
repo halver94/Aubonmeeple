@@ -16,7 +16,6 @@ use lazy_static::lazy_static;
 use prometheus::{register_int_counter, Encoder, IntCounter, TextEncoder};
 use std::collections::HashMap;
 use std::error;
-use std::error::Error;
 use std::time::{Duration, Instant};
 use tokio::task::JoinSet;
 use tokio::time;
@@ -292,7 +291,7 @@ async fn set_server() {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error + 'static>> {
+async fn main() {
     log_panics::init();
 
     std::panic::set_hook(Box::new(|panic_info| {
