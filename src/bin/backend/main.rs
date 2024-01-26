@@ -22,8 +22,6 @@ use tokio::task::JoinSet;
 use tokio::time;
 use tokio_postgres::Client;
 
-use log::Level;
-
 use crate::gamechecker::start_game_checker;
 use boardgame_finder::db::{
     connect_db, insert_announce_into_db, select_game_with_id_from_db, update_game_from_db,
@@ -284,11 +282,7 @@ async fn main() -> Result<(), Box<dyn Error + 'static>> {
         eprintln!("My backtrace: {:#?}", backtrace);
     }));
 
-    //this one is for vscode
-    env_logger::Builder::from_env(
-        env_logger::Env::default().default_filter_or(Level::Debug.as_str()),
-    )
-    .init();
+    env_logger::init();
 
     let client = connect_db().await.expect("cannot connect to DB");
 

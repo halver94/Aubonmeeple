@@ -4,6 +4,7 @@ use axum::Extension;
 use axum::{extract::Form, routing::get, Router};
 use prometheus::{register_int_counter_vec, Encoder, IntCounter, IntCounterVec, TextEncoder};
 use serde::Serialize;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 use tera::{Context, Tera};
 use tokio_postgres::Client;
@@ -300,8 +301,6 @@ pub async fn metrics() -> Html<String> {
 }
 
 pub async fn set_server() {
-    log::info!("[SERVER] starting server on 0.0.0.0:3001");
-
     let client = Arc::new(connect_db().await.unwrap());
     log::info!("[SERVER] connected with DB");
 
@@ -313,8 +312,17 @@ pub async fn set_server() {
         .layer(Extension(client))
         .route("/metrics", get(metrics));
 
-    // run our app with hyper, listening globally on port 3000
-    axum::Server::bind(&"0.0.0.0:3001".parse().unwrap())
+    let bind_addr = SocketAddr::new(
+        IpAddr::V4(Ipv4Addr::UNSPECIFIED),
+        std::env::var("FRONTEND_LISTEN_PORT").map_or(3001, |f| {
+            f.parse::<u16>()
+                .expect("Bad value for FRONTEND_LISTEN_PORT environment variable")
+        }),
+    );
+
+    log::info!("[SERVER] starting server on {}", bind_addr);
+
+    axum::Server::bind(&bind_addr)
         .serve(app.into_make_service())
         .await
         .unwrap();
