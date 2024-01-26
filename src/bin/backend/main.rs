@@ -15,9 +15,9 @@ use feed_rs::model::Entry;
 use lazy_static::lazy_static;
 use prometheus::{register_int_counter, Encoder, IntCounter, TextEncoder};
 use std::collections::HashMap;
+use std::error;
 use std::error::Error;
 use std::time::{Duration, Instant};
-use std::{env, error};
 use tokio::task::JoinSet;
 use tokio::time;
 use tokio_postgres::Client;
@@ -67,7 +67,9 @@ pub async fn get_game_infos(
         game.okkazeo_announce.barcode = get_okkazeo_barcode(&document);
         game.okkazeo_announce.city = get_okkazeo_city(&document);
         game.okkazeo_announce.shipping = get_okkazeo_shipping(&document);
-        game.okkazeo_announce.seller = get_okkazeo_seller(&document).unwrap();
+        if let Some(s) = get_okkazeo_seller(&document) {
+            game.okkazeo_announce.seller = s;
+        }
         game.okkazeo_announce.seller.is_pro = okkazeo_is_pro_seller(&document);
 
         let name = get_okkazeo_announce_name(&document)?;
@@ -92,64 +94,89 @@ pub async fn get_game_infos(
     }
 
     if game.references.get("philibert").is_none() {
-        if let Some((price, url)) =
-            get_philibert_price_and_url(&game.okkazeo_announce.name, game.okkazeo_announce.barcode)
-                .await
+        match get_philibert_price_and_url(
+            &game.okkazeo_announce.name,
+            game.okkazeo_announce.barcode,
+        )
+        .await
         {
-            game.references.insert(
-                "philibert".to_string(),
-                Reference {
-                    name: "philibert".to_string(),
-                    price,
-                    url,
-                },
-            );
-        }
-    }
-    if game.references.get("agorajeux").is_none() {
-        if let Some((price, url)) =
-            get_agorajeux_price_and_url_by_name(&game.okkazeo_announce.name).await
-        {
-            game.references.insert(
-                "agorajeux".to_string(),
-                Reference {
-                    name: "agorajeux".to_string(),
-                    price,
-                    url,
-                },
-            );
+            Err(e) => log::error!("error getting philibert price : {}", e),
+            Ok(v) => {
+                if let Some((price, url)) = v {
+                    game.references.insert(
+                        "philibert".to_string(),
+                        Reference {
+                            name: "philibert".to_string(),
+                            price,
+                            url,
+                        },
+                    );
+                }
+            }
         }
     }
 
-    if game.references.get("ultrajeux").is_none() {
-        if let Some((price, url)) =
-            get_ultrajeux_price_and_url(&game.okkazeo_announce.name, game.okkazeo_announce.barcode)
-                .await
-        {
-            game.references.insert(
-                "ultrajeux".to_string(),
-                Reference {
-                    name: "ultrajeux".to_string(),
-                    price,
-                    url,
-                },
-            );
+    if game.references.get("agorajeux").is_none() {
+        match get_agorajeux_price_and_url_by_name(&game.okkazeo_announce.name).await {
+            Err(e) => log::error!("error getting agorajeux price : {}", e),
+            Ok(v) => {
+                if let Some((price, url)) = v {
+                    game.references.insert(
+                        "agorajeux".to_string(),
+                        Reference {
+                            name: "agorajeux".to_string(),
+                            price,
+                            url,
+                        },
+                    );
+                }
+            }
         }
     }
+
+    /*if game.references.get("ultrajeux").is_none() {
+        match get_ultrajeux_price_and_url(
+            &game.okkazeo_announce.name,
+            game.okkazeo_announce.barcode,
+        )
+        .await
+        {
+            Err(e) => log::error!("error getting ultrajeux price : {}", e),
+            Ok(v) => {
+                if let Some((price, url)) = v {
+                    game.references.insert(
+                        "ultrajeux".to_string(),
+                        Reference {
+                            name: "ultrajeux".to_string(),
+                            price,
+                            url,
+                        },
+                    );
+                }
+            }
+        }
+    }*/
 
     if game.references.get("ludocortex").is_none() {
-        if let Some((price, url)) =
-            get_ludocortex_price_and_url(&game.okkazeo_announce.name, game.okkazeo_announce.barcode)
-                .await
+        match get_ludocortex_price_and_url(
+            &game.okkazeo_announce.name,
+            game.okkazeo_announce.barcode,
+        )
+        .await
         {
-            game.references.insert(
-                "ludocortex".to_string(),
-                Reference {
-                    name: "ludocortex".to_string(),
-                    price,
-                    url,
-                },
-            );
+            Err(e) => log::error!("error getting ultrajeux price : {}", e),
+            Ok(v) => {
+                if let Some((price, url)) = v {
+                    game.references.insert(
+                        "ludocortex".to_string(),
+                        Reference {
+                            name: "ludocortex".to_string(),
+                            price,
+                            url,
+                        },
+                    );
+                }
+            }
         }
     }
 
@@ -164,9 +191,9 @@ async fn parse_game_feed(db_client: &Client) -> Result<(), Box<dyn error::Error 
     log::debug!("parsing game feed");
     let feed = get_atom_feed().await?;
     GET_ATOM_FEED.inc();
-    log::debug!("game feed retrieved");
 
     let mut tasks = JoinSet::new();
+    log::debug!("checking {} games from feed", feed.entries.len());
     'outer: for entry in feed.entries {
         log::trace!("entry : {:?}", entry);
 
@@ -199,7 +226,7 @@ async fn parse_game_feed(db_client: &Client) -> Result<(), Box<dyn error::Error 
 
             if let Err(e) = update_game_from_db(db_client, &fetched_game).await {
                 log::error!(
-                    "erreur db, cannot update game {} : {}",
+                    "error db, cannot update game {} : {}",
                     fetched_game.okkazeo_announce.name,
                     e
                 );
@@ -215,7 +242,7 @@ async fn parse_game_feed(db_client: &Client) -> Result<(), Box<dyn error::Error 
 
         if let Err(e) = insert_announce_into_db(db_client, &game).await {
             log::error!(
-                "erreur db, cannot insert game {} : {}",
+                "error db, cannot insert game {} : {}",
                 game.okkazeo_announce.name,
                 e
             );
@@ -251,6 +278,11 @@ async fn set_server() {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + 'static>> {
     log_panics::init();
+
+    std::panic::set_hook(Box::new(|panic_info| {
+        let backtrace = std::backtrace::Backtrace::capture();
+        eprintln!("My backtrace: {:#?}", backtrace);
+    }));
 
     //this one is for vscode
     env_logger::Builder::from_env(

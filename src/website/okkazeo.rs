@@ -20,11 +20,11 @@ use scraper::{Html, Selector};
 use crate::game::Seller;
 
 pub async fn game_still_available(id: u32) -> bool {
-    log::debug!("[TASK] checking if game with id {} is still available", id);
+    log::debug!("checking if game with id {} is still available", id);
     let (_, code) = get_okkazeo_announce_page(id).await;
 
-    log::debug!(
-        "[TASK] game {} still available, is redirection: {} : code http {}",
+    log::trace!(
+        "game {} still available, is redirection: {} : code http {}",
         id,
         code.is_redirection(),
         code
@@ -223,7 +223,7 @@ pub fn get_okkazeo_announce_image(
 
 pub async fn get_okkazeo_announce_page(id: u32) -> (Html, StatusCode) {
     let search = format!("https://www.okkazeo.com/annonces/view/{}", id);
-    log::debug!("[TASK] getting announce page from okkazeo : {}", &search);
+    log::debug!("getting announce page from okkazeo : {}", id);
 
     let client = ClientBuilder::new()
         .redirect(reqwest::redirect::Policy::none())
@@ -237,16 +237,16 @@ pub async fn get_okkazeo_announce_page(id: u32) -> (Html, StatusCode) {
     (document, http_code)
 }
 
-pub async fn download_okkazeo_game_image(url: &str) -> Result<String, Box<dyn std::error::Error + Sync + Send>> {
-    log::debug!("[TASK] getting image from {}", url);
+pub async fn download_okkazeo_game_image(
+    url: &str,
+) -> Result<String, Box<dyn std::error::Error + Sync + Send>> {
+    log::debug!("getting image from {}", url);
     let response = get(url).await?;
     let image_bytes = response.bytes().await?;
 
-    let image_reader = ImageReader::new(std::io::Cursor::new(image_bytes))
-        .with_guessed_format()
-        .expect("Failed to guess image format");
+    let image_reader = ImageReader::new(std::io::Cursor::new(image_bytes)).with_guessed_format()?;
 
-    let image = image_reader.decode().unwrap();
+    let image = image_reader.decode()?;
 
     let mut bytes: Vec<u8> = Vec::new();
     image.write_to(
@@ -263,24 +263,22 @@ pub async fn download_okkazeo_game_image(url: &str) -> Result<String, Box<dyn st
     }
 
     if !std::path::Path::new("img").exists() {
-        std::fs::create_dir("img").unwrap();
+        std::fs::create_dir("img")?;
     }
     let output_path = Path::new("img").join(format!("{}{}", name, ".jpg"));
-    let mut output_file = File::create(&output_path).unwrap();
-    output_file.write_all(&bytes).unwrap();
+    let mut output_file = File::create(&output_path)?;
+    output_file.write_all(&bytes)?;
 
     Ok(output_path.to_str().unwrap().to_string())
 }
 
-pub async fn get_atom_feed() -> Result<Feed, ParseFeedError> {
-    log::debug!("[TASK] getting atom feed");
+pub async fn get_atom_feed() -> Result<Feed, anyhow::Error> {
+    log::debug!("getting atom feed");
     let content = reqwest::get("https://www.okkazeo.com/annonces/atom/0/50")
-        .await
-        .unwrap()
+        .await?
         .bytes()
-        .await
-        .unwrap();
-    parser::parse(content.as_ref())
+        .await?;
+    Ok(parser::parse(content.as_ref())?)
 }
 
 pub async fn get_games_from_page(
@@ -291,8 +289,7 @@ pub async fn get_games_from_page(
 
     let client = ClientBuilder::new()
         .redirect(reqwest::redirect::Policy::none())
-        .build()
-        .unwrap();
+        .build()?;
     let response = client.get(search).send().await?;
     let content = response.bytes().await?;
     let document = Html::parse_document(std::str::from_utf8(&content)?);

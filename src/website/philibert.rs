@@ -2,14 +2,16 @@ use scraper::{Html, Selector};
 
 use crate::website::helper::{are_names_similar, clean_name};
 
-pub async fn get_philibert_price_and_url_by_barcode(barcode: u64) -> Option<(f32, String)> {
+pub async fn get_philibert_price_and_url_by_barcode(
+    barcode: u64,
+) -> Result<Option<(f32, String)>, anyhow::Error> {
     let search = format!(
         "https://www.philibertnet.com/fr/recherche?search_query={}&submit_search=",
         barcode
     );
-    log::debug!("[TASK] search on philibert by barcode: {}", &search);
-    let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
-    let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
+    log::debug!("search on philibert by barcode: {}", &barcode);
+    let content = reqwest::get(&search).await?.bytes().await?;
+    let document = Html::parse_document(std::str::from_utf8(&content)?);
 
     let product_list_selector = Selector::parse(".product_list.grid .ajax_block_product").unwrap();
     let price_selector = Selector::parse(".price").unwrap();
@@ -37,23 +39,25 @@ pub async fn get_philibert_price_and_url_by_barcode(barcode: u64) -> Option<(f32
                     .contains(&barcode.to_string())
                 {
                     PHILIBERT_STAT.with_label_values(&["success"]).inc();
-                    return Some((price_text, href_attr.to_string()));
+                    return Ok(Some((price_text, href_attr.to_string())));
                 }
             }
         }
     }
     PHILIBERT_STAT.with_label_values(&["fail"]).inc();
-    None
+    Ok(None)
 }
 
-pub async fn get_philibert_price_and_url_by_name(name: &str) -> Option<(f32, String)> {
+pub async fn get_philibert_price_and_url_by_name(
+    name: &str,
+) -> Result<Option<(f32, String)>, anyhow::Error> {
     let search = format!(
         "https://www.philibertnet.com/fr/recherche?search_query={}&submit_search=",
         clean_name(name)
     );
-    log::debug!("[TASK] search on philibert by name: {}", &search);
-    let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
-    let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
+    log::debug!("search on philibert by name: {}", &name);
+    let content = reqwest::get(&search).await?.bytes().await?;
+    let document = Html::parse_document(std::str::from_utf8(&content)?);
 
     let product_list_selector = Selector::parse(".product_list.grid .ajax_block_product").unwrap();
     let price_selector = Selector::parse(".price").unwrap();
@@ -78,22 +82,22 @@ pub async fn get_philibert_price_and_url_by_name(name: &str) -> Option<(f32, Str
 
                 if are_names_similar(title_text, name) {
                     PHILIBERT_STAT.with_label_values(&["success"]).inc();
-                    return Some((price_text, href_attr.to_string()));
+                    return Ok(Some((price_text, href_attr.to_string())));
                 }
             }
         }
     }
     PHILIBERT_STAT.with_label_values(&["fail"]).inc();
-    None
+    Ok(None)
 }
 
 pub async fn get_philibert_price_and_url(
     name: &str,
     barcode: Option<u64>,
-) -> Option<(f32, String)> {
+) -> Result<Option<(f32, String)>, anyhow::Error> {
     if barcode.is_some() {
-        if let Some((a, b)) = get_philibert_price_and_url_by_barcode(barcode.unwrap()).await {
-            return Some((a, b));
+        if let Some((a, b)) = get_philibert_price_and_url_by_barcode(barcode.unwrap()).await? {
+            return Ok(Some((a, b)));
         }
     }
     get_philibert_price_and_url_by_name(name).await

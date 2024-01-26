@@ -2,15 +2,25 @@ use scraper::{Html, Selector};
 
 use crate::website::helper::are_names_similar;
 
-pub async fn get_agorajeux_price_and_url_by_name(name: &str) -> Option<(f32, String)> {
+pub async fn get_agorajeux_price_and_url_by_name(
+    name: &str,
+) -> Result<Option<(f32, String)>, anyhow::Error> {
     let name_clean = normalize_agorajeux_name(name);
     let search = format!(
         "https://www.agorajeux.com/fr/recherche?controller=search&s={}",
         name_clean
     );
-    log::debug!("[TASK] search on agorajeux: {}", &search);
-    let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
-    parse_agorajeux_document(name, std::str::from_utf8(&content).unwrap())
+    log::debug!(
+        "search on agorajeux: {} , cleaned_name : {}",
+        &name,
+        name_clean
+    );
+
+    let content = reqwest::get(&search).await?.bytes().await?;
+    Ok(parse_agorajeux_document(
+        name,
+        std::str::from_utf8(&content)?,
+    ))
 }
 
 fn normalize_agorajeux_name(name: &str) -> String {
@@ -25,7 +35,7 @@ fn parse_agorajeux_document(name: &str, doc: &str) -> Option<(f32, String)> {
     let price_selector = Selector::parse(".product-price-and-shipping .price").unwrap();
     let product_name_selector = Selector::parse("span.h3.product-title a").unwrap();
 
-    log::trace!("Parsing agorajeux document");
+    log::trace!("parsing agorajeux document for {}", name);
     for product in document.select(&product_selector) {
         let href_element = product.select(&href_selector).next();
         if let Some(href) = href_element {

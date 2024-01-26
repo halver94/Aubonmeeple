@@ -2,7 +2,10 @@ use std::error;
 
 use scraper::{Html, Selector};
 
-use crate::{game::{Game, Reference}, website::helper::clean_name};
+use crate::{
+    game::{Game, Reference},
+    website::helper::clean_name,
+};
 
 pub async fn get_knapix_prices(game: &mut Game) -> Result<(), Box<dyn error::Error>> {
     let name = clean_name(&game.okkazeo_announce.name).replace(' ', "+");
@@ -11,7 +14,7 @@ pub async fn get_knapix_prices(game: &mut Game) -> Result<(), Box<dyn error::Err
         name
     );
 
-    log::debug!("[TASK] searching knapix {}", search);
+    log::debug!("searching knapix {}", search);
     let content = reqwest::get(search).await?.bytes().await?;
     let document = Html::parse_document(std::str::from_utf8(&content)?);
 

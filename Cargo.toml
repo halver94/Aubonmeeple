@@ -41,4 +41,7 @@ unidecode = "0.3.0"
 prometheus = "0.13.3"
 lazy_static = "1.4.0"
 rand = "0.8.5"
+futures-util = "0.3.30"
+backtrace = "0.3.69"
+anyhow = "1.0.79"
 
