@@ -5,15 +5,19 @@ use crate::{
     website::helper::{are_names_similar, clean_name},
 };
 
-pub async fn get_bgg_note(name: &str) -> Option<Reviewer> {
+pub async fn get_bgg_note(name: &str) -> Result<Option<Reviewer>, anyhow::Error> {
     let name = clean_name(name);
     let search = format!(
         "https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q={}",
         name
     );
-    log::debug!("[TASK] getting bgg note: {}\n", &search);
-    let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
-    parse_bgg_document(&name, search, std::str::from_utf8(&content).unwrap())
+    log::debug!("getting bgg note: {}\n", &name);
+    let content = reqwest::get(&search).await?.bytes().await?;
+    Ok(parse_bgg_document(
+        &name,
+        search,
+        std::str::from_utf8(&content)?,
+    ))
 }
 
 fn parse_bgg_document(name: &str, search: String, doc: &str) -> Option<Reviewer> {

@@ -95,7 +95,7 @@ impl Game {
     pub fn get_deal_advantage(&mut self) {
         // okkazeo is counted as a ref, so we need at least 2 refs
         if self.references.is_empty() {
-            log::debug!("[TASK] no references for {}", self.okkazeo_announce.name);
+            log::debug!("no references for {}", self.okkazeo_announce.name);
             return;
         }
 
@@ -122,16 +122,16 @@ impl Game {
     }
 
     pub async fn get_reviews(&mut self) {
-        let reviewer = get_bgg_note(&self.okkazeo_announce.name).await;
-        if let Some(r) = reviewer {
-            self.review.reviews.insert("bgg".to_string(), r);
-        } else {
-            log::debug!(
-                "[TASK] cannot get bgg note for {}",
-                self.okkazeo_announce.name
-            );
+        match get_bgg_note(&self.okkazeo_announce.name).await {
+            Err(e) => log::error!("error getting bgg note : {}", e),
+            Ok(v) => {
+                if let Some(r) = v {
+                    self.review.reviews.insert("bgg".to_string(), r);
+                } else {
+                    log::debug!("cannot get bgg note for {}", self.okkazeo_announce.name);
+                }
+            }
         }
-
         self.review.compute_average_note();
     }
 }

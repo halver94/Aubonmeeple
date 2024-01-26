@@ -15,17 +15,16 @@ use prometheus::{register_int_counter_vec, IntCounterVec};
 pub async fn connect_db() -> Result<Client, Error> {
     let db_url = "postgres://scrapy:scrapyscrapy@localhost/scraper";
 
-    log::info!("[DB] connecting to DB");
+    log::info!("connecting to DB");
     let (client, connection) = tokio_postgres::connect(db_url, NoTls).await?;
     log::info!("connected to DB");
 
     tokio::spawn(async move {
         if let Err(e) = connection.await {
-            log::error!("Erreur de connexion: {}", e);
+            log::error!("connection error : {}", e);
         }
     });
 
-    log::debug!("spawn db listener, returning client");
     Ok(client)
 }
 

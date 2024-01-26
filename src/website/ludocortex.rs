@@ -2,11 +2,13 @@ use scraper::{Html, Selector};
 
 use crate::website::helper::{are_names_similar, clean_name};
 
-pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f32, String)> {
+pub async fn get_ludocortex_price_and_url_by_barcode(
+    barcode: u64,
+) -> Result<Option<(f32, String)>, anyhow::Error> {
     let search = format!("https://www.ludocortex.fr/jolisearch?s={}", barcode);
-    log::debug!("[TASK] search on ludocortex by barcode: {}", &search);
-    let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
-    let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
+    log::debug!("search on ludocortex by barcode: {}", barcode);
+    let content = reqwest::get(&search).await?.bytes().await?;
+    let document = Html::parse_document(std::str::from_utf8(&content)?);
 
     // Sélecteur pour l'article de produit
     let product_selector = Selector::parse(".product-miniature").unwrap();
@@ -26,7 +28,11 @@ pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f3
             .select(&Selector::parse(".regular-price").unwrap())
             .next()
             .map(|price| price.inner_html());
-        regular_price.as_ref()?;
+
+        if regular_price.is_none() {
+            return Ok(None);
+        }
+
         let regular_price = regular_price
             .unwrap()
             .trim()
@@ -36,28 +42,30 @@ pub async fn get_ludocortex_price_and_url_by_barcode(barcode: u64) -> Option<(f3
 
         if href.is_none() || title.is_none() || regular_price.is_err() {
             LUDOCORTEX_STAT.with_label_values(&["fail"]).inc();
-            return None;
+            return Ok(None);
         }
 
         if href.unwrap().contains(&barcode.to_string()) {
             LUDOCORTEX_STAT.with_label_values(&["success"]).inc();
-            return Some((regular_price.unwrap(), href.unwrap().to_string()));
+            return Ok(Some((regular_price.unwrap(), href.unwrap().to_string())));
         }
     }
 
     LUDOCORTEX_STAT.with_label_values(&["fail"]).inc();
-    None
+    Ok(None)
 }
 
-pub async fn get_ludocortex_price_and_url_by_name(name: &str) -> Option<(f32, String)> {
+pub async fn get_ludocortex_price_and_url_by_name(
+    name: &str,
+) -> Result<Option<(f32, String)>, anyhow::Error> {
     let search = format!(
         "https://www.ludocortex.fr/jolisearch?s={}",
         clean_name(name)
     );
-    log::debug!("[TASK] search on ludocortex by name: {}", &search);
+    log::debug!("search on ludocortex by name: {}", &name);
 
-    let content = reqwest::get(&search).await.unwrap().bytes().await.unwrap();
-    let document = Html::parse_document(std::str::from_utf8(&content).unwrap());
+    let content = reqwest::get(&search).await?.bytes().await?;
+    let document = Html::parse_document(std::str::from_utf8(&content)?);
 
     // Sélecteur pour l'article de produit
     let product_selector = Selector::parse(".product-miniature").unwrap();
@@ -77,7 +85,11 @@ pub async fn get_ludocortex_price_and_url_by_name(name: &str) -> Option<(f32, St
             .select(&Selector::parse(".regular-price").unwrap())
             .next()
             .map(|price| price.inner_html());
-        regular_price.as_ref()?;
+
+        if regular_price.is_none() {
+            return Ok(None);
+        }
+
         let regular_price = regular_price
             .unwrap()
             .trim()
@@ -87,26 +99,26 @@ pub async fn get_ludocortex_price_and_url_by_name(name: &str) -> Option<(f32, St
 
         if href.is_none() || title.is_none() || regular_price.is_err() {
             LUDOCORTEX_STAT.with_label_values(&["success"]).inc();
-            return None;
+            return Ok(None);
         }
 
         if are_names_similar(&(title.unwrap()), name) {
             LUDOCORTEX_STAT.with_label_values(&["success"]).inc();
-            return Some((regular_price.unwrap(), href.unwrap().to_string()));
+            return Ok(Some((regular_price.unwrap(), href.unwrap().to_string())));
         }
     }
 
     LUDOCORTEX_STAT.with_label_values(&["fail"]).inc();
-    None
+    Ok(None)
 }
 
 pub async fn get_ludocortex_price_and_url(
     name: &str,
     barcode: Option<u64>,
-) -> Option<(f32, String)> {
+) -> Result<Option<(f32, String)>, anyhow::Error> {
     if barcode.is_some() {
-        if let Some((a, b)) = get_ludocortex_price_and_url_by_barcode(barcode.unwrap()).await {
-            return Some((a, b));
+        if let Some((a, b)) = get_ludocortex_price_and_url_by_barcode(barcode.unwrap()).await? {
+            return Ok(Some((a, b)));
         }
     }
     get_ludocortex_price_and_url_by_name(name).await

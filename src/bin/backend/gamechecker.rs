@@ -10,18 +10,21 @@ use prometheus::{register_int_counter, IntCounter};
 
 pub async fn task(start_date_offset: Duration, duration: Duration) {
     log::info!(
-        "starting game checker task with start_date {} and duration {}",
+        "starting game checker task with start_date {:?} and duration {:?}",
         start_date_offset,
         duration
     );
     let db_client = connect_db().await.unwrap();
+    let min_loop_duration = Duration::hours(1);
+
     loop {
+        let start_loop_time = chrono::Utc::now();
         let start_date = chrono::Utc::now() - start_date_offset;
         let end_date = start_date - duration;
         log::debug!(
-            "new loop start : {:?}, end : {:?}",
-            start_date_offset,
-            duration
+            "gamechecker, new loop, start_date : {:?}, end : {:?}",
+            start_date,
+            end_date
         );
         let ids =
             match select_intervalled_ids_from_oa_table_from_db(&db_client, end_date, start_date)
@@ -34,6 +37,7 @@ pub async fn task(start_date_offset: Duration, duration: Duration) {
                 }
             };
 
+        log::debug!("gamechecking {} games", ids.len());
         for id in ids {
             log::debug!("checking game with id {})", id,);
             GAMECHECKER_CHECKED_GAME.inc();
@@ -47,9 +51,18 @@ pub async fn task(start_date_offset: Duration, duration: Duration) {
             }
             let sleep_duration = {
                 let mut rng = rand::thread_rng();
-                Duration::seconds(rng.gen_range(1..=7))
+                Duration::seconds(rng.gen_range(5..=10))
             };
             tokio::time::sleep(sleep_duration.to_std().unwrap()).await;
+        }
+
+        let loop_duration = chrono::Utc::now() - start_loop_time;
+        if loop_duration < min_loop_duration {
+            log::debug!(
+                "gamechecker loop was too fast, sleeping for {:?}",
+                min_loop_duration - loop_duration
+            );
+            tokio::time::sleep((min_loop_duration - loop_duration).to_std().unwrap()).await;
         }
     }
 }
