@@ -50,6 +50,11 @@ pub async fn delete_from_all_table_with_id(db_client: &Client, id: i32) -> Resul
     DB_IO.with_label_values(&["delete", "reviewer"]).inc();
 
     db_client
+        .execute("UPDATE seller SET seller_nb_announces = seller_nb_announces - 1 WHERE seller_id = (SELECT oa_seller FROM okkazeo_announce WHERE oa_id = $1);", &[&id])
+        .await?;
+    DB_IO.with_label_values(&["update", "seller"]).inc();
+
+    db_client
         .execute("DELETE FROM okkazeo_announce WHERE oa_id = $1", &[&id])
         .await?;
     DB_IO

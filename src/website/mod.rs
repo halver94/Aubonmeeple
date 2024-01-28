@@ -2,6 +2,7 @@ pub mod agorajeux;
 pub mod bgg;
 pub mod helper;
 pub mod knapix;
+pub mod ludifolie;
 pub mod ludocortex;
 pub mod okkazeo;
 pub mod philibert;
