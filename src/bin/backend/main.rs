@@ -4,13 +4,13 @@ use axum::Router;
 use boardgame_finder::game::{Game, OkkazeoAnnounce, Reference};
 use boardgame_finder::website::agorajeux::get_agorajeux_price_and_url_by_name;
 use boardgame_finder::website::knapix::get_knapix_prices;
+use boardgame_finder::website::ludifolie::get_ludifolie_price_and_url_by_name;
 use boardgame_finder::website::ludocortex::get_ludocortex_price_and_url;
 use boardgame_finder::website::okkazeo::{
     get_atom_feed, get_okkazeo_announce_page, get_okkazeo_barcode, get_okkazeo_city,
     get_okkazeo_seller,
 };
 use boardgame_finder::website::philibert::get_philibert_price_and_url;
-use boardgame_finder::website::ultrajeux::get_ultrajeux_price_and_url;
 use feed_rs::model::Entry;
 use lazy_static::lazy_static;
 use prometheus::{register_int_counter, Encoder, IntCounter, TextEncoder};
@@ -123,6 +123,24 @@ pub async fn get_game_infos(
                         "agorajeux".to_string(),
                         Reference {
                             name: "agorajeux".to_string(),
+                            price,
+                            url,
+                        },
+                    );
+                }
+            }
+        }
+    }
+
+    if game.references.get("ludifolie").is_none() {
+        match get_ludifolie_price_and_url_by_name(&game.okkazeo_announce.name).await {
+            Err(e) => log::error!("error getting ludifolie price : {}", e),
+            Ok(v) => {
+                if let Some((price, url)) = v {
+                    game.references.insert(
+                        "ludifolie".to_string(),
+                        Reference {
+                            name: "ludifolie".to_string(),
                             price,
                             url,
                         },
