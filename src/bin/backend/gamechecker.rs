@@ -1,6 +1,5 @@
 use chrono::Duration;
 use lazy_static::lazy_static;
-use rand::Rng;
 
 use boardgame_finder::db::{
     connect_db, delete_from_all_table_with_id, select_intervalled_ids_from_oa_table_from_db,
@@ -49,11 +48,6 @@ pub async fn task(start_date_offset: Duration, duration: Duration) {
                     log::error!("error deleting from db : {}", e);
                 }
             }
-            let sleep_duration = {
-                let mut rng = rand::thread_rng();
-                Duration::seconds(rng.gen_range(5..=10))
-            };
-            tokio::time::sleep(sleep_duration.to_std().unwrap()).await;
         }
 
         let loop_duration = chrono::Utc::now() - start_loop_time;
