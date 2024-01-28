@@ -1,7 +1,5 @@
 use lazy_static::lazy_static;
 use prometheus::{register_int_counter, IntCounter};
-use std::time::Duration;
-use tokio::time;
 
 use boardgame_finder::db::{
     connect_db, insert_announce_into_db, select_game_with_id_from_db, update_game_from_db,
@@ -14,8 +12,6 @@ pub async fn start_crawler() {
     log::info!("starting crawler thread");
 
     let db_client = connect_db().await.unwrap();
-
-    let mut interval_stream = time::interval(Duration::from_secs(20));
 
     let mut page = 1;
     loop {
@@ -54,7 +50,6 @@ pub async fn start_crawler() {
                             }
                         }
                     }
-                    interval_stream.tick().await;
                 }
             }
         }
