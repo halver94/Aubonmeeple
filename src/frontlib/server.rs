@@ -2,9 +2,8 @@ use axum::extract::Query;
 use axum::response::Html;
 use axum::Extension;
 use axum::{extract::Form, routing::get, Router};
-use prometheus::{register_int_counter_vec, Encoder, IntCounter, IntCounterVec, TextEncoder};
+use prometheus::{register_int_counter_vec, IntCounter, IntCounterVec};
 use serde::Serialize;
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 use tera::{Context, Tera};
 use tokio_postgres::Client;
@@ -286,21 +285,7 @@ pub async fn root(
     }
 }
 
-pub async fn metrics() -> Html<String> {
-    AXUM_METRICS_GET.inc();
-    let encoder = TextEncoder::new();
-    let mut buffer = vec![];
-    encoder
-        .encode(&prometheus::gather(), &mut buffer)
-        .expect("Failed to encode metrics");
-
-    let response = String::from_utf8(buffer.clone()).expect("Failed to convert bytes to string");
-    buffer.clear();
-
-    Html(response)
-}
-
-pub async fn set_server() {
+pub async fn run_server(bind_addr: String) {
     let client = Arc::new(connect_db().await.unwrap());
     log::info!("[SERVER] connected with DB");
 
@@ -309,34 +294,18 @@ pub async fn set_server() {
         .nest_service("/img", ServeDir::new("img"))
         .nest_service("/assets", ServeDir::new("assets"))
         .nest_service("/css", ServeDir::new("css"))
-        .layer(Extension(client))
-        .route("/metrics", get(metrics));
-
-    let bind_addr = SocketAddr::new(
-        IpAddr::V4(Ipv4Addr::UNSPECIFIED),
-        std::env::var("FRONTEND_LISTEN_PORT").map_or(3001, |f| {
-            f.parse::<u16>()
-                .expect("Bad value for FRONTEND_LISTEN_PORT environment variable")
-        }),
-    );
+        .layer(Extension(client));
 
     log::info!("[SERVER] starting server on {}", bind_addr);
+    let listener = tokio::net::TcpListener::bind(bind_addr).await.unwrap();
 
-    axum::Server::bind(&bind_addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
 
 lazy_static! {
     static ref AXUM_ROOT_GET: IntCounter = register_int_counter!(
         "axum_root_get",
         "Number of get or post resquests to root route"
-    )
-    .unwrap();
-    static ref AXUM_METRICS_GET: IntCounter = register_int_counter!(
-        "axum_metrics_get",
-        "Number of get resquests to metrics route"
     )
     .unwrap();
     static ref DB_ERRORS: IntCounterVec =

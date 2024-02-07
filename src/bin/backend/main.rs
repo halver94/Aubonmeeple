@@ -1,7 +1,5 @@
-use axum::response::Html;
-use axum::routing::get;
-use axum::Router;
 use boardgame_finder::game::{Game, OkkazeoAnnounce, Reference};
+use boardgame_finder::metrics;
 use boardgame_finder::website::agorajeux::get_agorajeux_price_and_url_by_name;
 use boardgame_finder::website::knapix::get_knapix_prices;
 use boardgame_finder::website::ludifolie::get_ludifolie_price_and_url_by_name;
@@ -13,7 +11,7 @@ use boardgame_finder::website::okkazeo::{
 use boardgame_finder::website::philibert::get_philibert_price_and_url;
 use feed_rs::model::Entry;
 use lazy_static::lazy_static;
-use prometheus::{register_int_counter, Encoder, IntCounter, TextEncoder};
+use prometheus::{register_int_counter, IntCounter};
 use std::collections::HashMap;
 use std::error;
 use std::time::{Duration, Instant};
@@ -25,6 +23,7 @@ use crate::gamechecker::start_game_checker;
 use boardgame_finder::db::{
     connect_db, insert_announce_into_db, select_game_with_id_from_db, update_game_from_db,
 };
+
 use boardgame_finder::website::okkazeo::{
     download_okkazeo_game_image, get_okkazeo_announce_extension, get_okkazeo_announce_image,
     get_okkazeo_announce_modification_date, get_okkazeo_announce_name, get_okkazeo_announce_price,
@@ -267,29 +266,6 @@ async fn parse_game_feed(db_client: &Client) -> Result<(), Box<dyn error::Error 
     Ok(())
 }
 
-pub async fn metrics() -> Html<String> {
-    let encoder = TextEncoder::new();
-    let mut buffer = vec![];
-    encoder
-        .encode(&prometheus::gather(), &mut buffer)
-        .expect("Failed to encode metrics");
-
-    let response = String::from_utf8(buffer.clone()).expect("Failed to convert bytes to string");
-    buffer.clear();
-
-    Html(response)
-}
-
-async fn set_server() {
-    log::info!("starting metrics server");
-    let app = Router::new().route("/metrics", get(metrics));
-
-    axum::Server::bind(&"0.0.0.0:3002".parse().unwrap())
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
-}
-
 #[tokio::main]
 async fn main() {
     log_panics::init();
@@ -301,13 +277,15 @@ async fn main() {
 
     env_logger::init();
 
+    let backend_metrics_bind_addr = std::env::var("BACKEND_METRICS_ADDR").unwrap_or("127.0.0.1:3003".to_string());
+
     let client = connect_db().await.expect("cannot connect to DB");
 
     log::info!("starting program");
     let interval = Duration::from_secs(60 * 5);
     log::info!("parsing game feed every {} seconds", interval.as_secs());
 
-    let _ = tokio::spawn(async move { set_server().await });
+    tokio::spawn(async { metrics::run_metrics(backend_metrics_bind_addr).await });
     let _ = tokio::spawn(async move { crawler::start_crawler().await });
     let _ = start_game_checker();
 
