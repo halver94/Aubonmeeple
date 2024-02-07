@@ -1,14 +1,13 @@
-use scraper::{Html, Selector};
+use scraper::Selector;
 
-use crate::website::helper::{are_names_similar, clean_name};
+use crate::{httpclient, website::helper::{are_names_similar, clean_name}};
 
 pub async fn get_ludocortex_price_and_url_by_barcode(
     barcode: u64,
 ) -> Result<Option<(f32, String)>, anyhow::Error> {
     let search = format!("https://www.ludocortex.fr/jolisearch?s={}", barcode);
     log::debug!("search on ludocortex by barcode: {}", barcode);
-    let content = reqwest::get(&search).await?.bytes().await?;
-    let document = Html::parse_document(std::str::from_utf8(&content)?);
+    let (document, _) = httpclient::get_doc(&search).await?;
 
     // Sélecteur pour l'article de produit
     let product_selector = Selector::parse(".product-miniature").unwrap();
@@ -64,8 +63,7 @@ pub async fn get_ludocortex_price_and_url_by_name(
     );
     log::debug!("search on ludocortex by name: {}", &name);
 
-    let content = reqwest::get(&search).await?.bytes().await?;
-    let document = Html::parse_document(std::str::from_utf8(&content)?);
+    let (document, _) = httpclient::get_doc(&search).await?;
 
     // Sélecteur pour l'article de produit
     let product_selector = Selector::parse(".product-miniature").unwrap();

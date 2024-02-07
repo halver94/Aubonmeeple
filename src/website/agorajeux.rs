@@ -1,6 +1,6 @@
 use scraper::{Html, Selector};
 
-use crate::website::helper::are_names_similar;
+use crate::{httpclient, website::helper::are_names_similar};
 
 pub async fn get_agorajeux_price_and_url_by_name(
     name: &str,
@@ -16,10 +16,10 @@ pub async fn get_agorajeux_price_and_url_by_name(
         name_clean
     );
 
-    let content = reqwest::get(&search).await?.bytes().await?;
+    let (doc, _) = httpclient::get_doc(&search).await?;
     Ok(parse_agorajeux_document(
         name,
-        std::str::from_utf8(&content)?,
+        &doc,
     ))
 }
 
@@ -27,9 +27,7 @@ fn normalize_agorajeux_name(name: &str) -> String {
     name.replace('&', " ")
 }
 
-fn parse_agorajeux_document(name: &str, doc: &str) -> Option<(f32, String)> {
-    let document = Html::parse_document(doc);
-
+fn parse_agorajeux_document(name: &str, document: &Html) -> Option<(f32, String)> {
     let product_selector = Selector::parse(".js-product-miniature").unwrap();
     let href_selector = Selector::parse("a.thumbnail.product-thumbnail").unwrap();
     let price_selector = Selector::parse(".product-price-and-shipping .price").unwrap();
@@ -134,7 +132,8 @@ mod tests {
             let name_clean = normalize_agorajeux_name(&test.name);
             let doc =
                 fs::read_to_string(test.document).expect("Should have been able to read the file");
-            if let Some((price, href)) = parse_agorajeux_document(&(name_clean), &doc) {
+            let document = scraper::Html::parse_document(&doc);
+            if let Some((price, href)) = parse_agorajeux_document(&(name_clean), &document) {
                 assert_eq!(price, test.price);
                 assert_eq!(href, test.href);
             } else {

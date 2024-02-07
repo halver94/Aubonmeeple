@@ -1,6 +1,7 @@
 use scraper::{Html, Selector};
 
 use crate::website::helper::are_names_similar;
+use crate::httpclient;
 
 pub async fn get_ludifolie_price_and_url_by_name(
     name: &str,
@@ -16,10 +17,10 @@ pub async fn get_ludifolie_price_and_url_by_name(
         name_clean
     );
 
-    let content = reqwest::get(&search).await?.bytes().await?;
+    let (doc, _) = httpclient::get_doc(&search).await?;
     Ok(parse_ludifolie_document(
         name,
-        std::str::from_utf8(&content)?,
+        &doc,
     ))
 }
 
@@ -27,9 +28,7 @@ fn normalize_ludifolie_name(name: &str) -> String {
     name.replace('&', " ")
 }
 
-fn parse_ludifolie_document(name: &str, doc: &str) -> Option<(f32, String)> {
-    let document = Html::parse_document(doc);
-
+fn parse_ludifolie_document(name: &str, document: &Html) -> Option<(f32, String)> {
     let product_selector = Selector::parse(".product-miniature-wrapper").unwrap();
     let href_selector = Selector::parse(".product-title a").unwrap();
     let price_selector = Selector::parse(".product-price-and-shipping .price").unwrap();
