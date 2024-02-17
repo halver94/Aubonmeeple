@@ -106,37 +106,19 @@ pub async fn root(
             .note_form
             .unwrap()
             .parse::<f32>()
-            .map_or_else(
-                |e| {
-                    log::error!("note parse error : {}", e);
-                    None
-                },
-                Some,
-            );
+            .map_or_else(|_| None, Some);
         let max_price = filters_form
             .0
             .max_price_form
             .unwrap()
             .parse::<i32>()
-            .map_or_else(
-                |e| {
-                    log::error!("max price parse error : {}", e);
-                    None
-                },
-                Some,
-            );
+            .map_or_else(|_| None, Some);
         let min_price = filters_form
             .0
             .min_price_form
             .unwrap()
             .parse::<i32>()
-            .map_or_else(
-                |e| {
-                    log::error!("max price parse error : {}", e);
-                    None
-                },
-                Some,
-            );
+            .map_or_else(|_| None, Some);
         let pro: Option<bool> = if filters_form.0.pro_form == Some("on".to_string()) {
             Some(true)
         } else {
