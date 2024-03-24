@@ -1,7 +1,9 @@
 use scraper::{Html, Selector};
 
 use crate::{
-    game::Reviewer, httpclient, website::helper::{are_names_similar, clean_name}
+    game::Reviewer,
+    httpclient,
+    website::helper::{are_names_similar, clean_name},
 };
 
 pub async fn get_bgg_note(name: &str) -> Result<Option<Reviewer>, anyhow::Error> {
@@ -12,11 +14,7 @@ pub async fn get_bgg_note(name: &str) -> Result<Option<Reviewer>, anyhow::Error>
     );
     log::debug!("getting bgg note: {}\n", &name);
     let (doc, _) = httpclient::get_doc(&search).await?;
-    Ok(parse_bgg_document(
-        &name,
-        search,
-        &doc,
-    ))
+    Ok(parse_bgg_document(&name, search, &doc))
 }
 
 fn parse_bgg_document(name: &str, search: String, document: &Html) -> Option<Reviewer> {

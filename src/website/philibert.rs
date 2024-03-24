@@ -1,6 +1,9 @@
 use scraper::Selector;
 
-use crate::{httpclient, website::helper::{are_names_similar, clean_name}};
+use crate::{
+    httpclient,
+    website::helper::{are_names_similar, clean_name},
+};
 
 pub async fn get_philibert_price_and_url_by_barcode(
     barcode: u64,

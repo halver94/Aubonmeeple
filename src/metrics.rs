@@ -1,6 +1,6 @@
 use axum::{routing::get, Router};
-use prometheus::{register_int_counter, IntCounter, TextEncoder, Encoder};
 use lazy_static::lazy_static;
+use prometheus::{register_int_counter, Encoder, IntCounter, TextEncoder};
 
 async fn metrics() -> String {
     AXUM_METRICS_GET.inc();

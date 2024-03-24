@@ -58,9 +58,9 @@ pub async fn get_ultrajeux_price_and_url(
     get_ultrajeux_price_and_url_by_name(name).await
 }
 
+use crate::httpclient;
 use lazy_static::lazy_static;
 use prometheus::{register_int_counter_vec, IntCounterVec};
-use crate::httpclient;
 lazy_static! {
     static ref ULTRAJEUX_STAT: IntCounterVec = register_int_counter_vec!(
         "ultrajeux_stat",

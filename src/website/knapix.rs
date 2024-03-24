@@ -2,7 +2,11 @@ use std::error;
 
 use scraper::Selector;
 
-use crate::{game::{Game, Reference}, httpclient, website::helper::clean_name};
+use crate::{
+    game::{Game, Reference},
+    httpclient,
+    website::helper::clean_name,
+};
 
 pub async fn get_knapix_prices(game: &mut Game) -> Result<(), Box<dyn error::Error>> {
     let name = clean_name(&game.okkazeo_announce.name).replace(' ', "+");

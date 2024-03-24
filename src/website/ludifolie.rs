@@ -1,7 +1,7 @@
 use scraper::{Html, Selector};
 
-use crate::website::helper::are_names_similar;
 use crate::httpclient;
+use crate::website::helper::are_names_similar;
 
 pub async fn get_ludifolie_price_and_url_by_name(
     name: &str,
@@ -18,10 +18,7 @@ pub async fn get_ludifolie_price_and_url_by_name(
     );
 
     let (doc, _) = httpclient::get_doc(&search).await?;
-    Ok(parse_ludifolie_document(
-        name,
-        &doc,
-    ))
+    Ok(parse_ludifolie_document(name, &doc))
 }
 
 fn normalize_ludifolie_name(name: &str) -> String {

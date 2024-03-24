@@ -1,13 +1,34 @@
+use boardgame_finder::metrics;
 use chrono::Duration;
 use lazy_static::lazy_static;
+use prometheus::{register_int_counter, IntCounter};
+use tokio::task::JoinSet;
 
 use boardgame_finder::db::{
     connect_db, delete_from_all_table_with_id, select_intervalled_ids_from_oa_table_from_db,
 };
 use boardgame_finder::website::okkazeo::game_still_available;
-use prometheus::{register_int_counter, IntCounter};
 
-pub async fn task(start_date_offset: Duration, duration: Duration) {
+#[tokio::main]
+async fn main() {
+    env_logger::init();
+
+    let backend_metrics_bind_addr =
+        std::env::var("BACKEND_METRICS_ADDR").unwrap_or("127.0.0.1:3003".to_string());
+
+    log::info!("starting program");
+    let mut set = JoinSet::new();
+    set.spawn(async { metrics::run_metrics(backend_metrics_bind_addr).await });
+    set.spawn(async move { task(Duration::zero(), Duration::days(3)).await });
+    set.spawn(async move { task(Duration::days(3), Duration::days(10)).await });
+    set.spawn(async move { task(Duration::days(10), Duration::weeks(52 * 100)).await });
+
+    while let Some(Err(res)) = set.join_next().await {
+        log::error!("error joining set : {}", res);
+    }
+}
+
+async fn task(start_date_offset: Duration, duration: Duration) {
     log::info!(
         "starting game checker task with start_date {:?} and duration {:?}",
         start_date_offset,
@@ -59,15 +80,6 @@ pub async fn task(start_date_offset: Duration, duration: Duration) {
             tokio::time::sleep((min_loop_duration - loop_duration).to_std().unwrap()).await;
         }
     }
-}
-
-pub fn start_game_checker() {
-    log::info!("starting game checker thread");
-
-    let _ = tokio::spawn(async move { task(Duration::zero(), Duration::days(3)).await });
-    let _ = tokio::spawn(async move { task(Duration::days(3), Duration::days(10)).await });
-    let _ = tokio::spawn(async move { task(Duration::days(10), Duration::weeks(52 * 100)).await });
-    // ugly but it works..
 }
 
 lazy_static! {

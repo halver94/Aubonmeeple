@@ -1,3 +1,6 @@
+use boardgame_finder::game::get_game_infos;
+use boardgame_finder::metrics;
+
 use lazy_static::lazy_static;
 use prometheus::{register_int_counter, IntCounter};
 
@@ -6,10 +9,15 @@ use boardgame_finder::db::{
 };
 use boardgame_finder::website::okkazeo::get_games_from_page;
 
-use crate::get_game_infos;
+#[tokio::main]
+async fn main() {
+    env_logger::init();
 
-pub async fn start_crawler() {
-    log::info!("starting crawler thread");
+    let backend_metrics_bind_addr =
+        std::env::var("BACKEND_METRICS_ADDR").unwrap_or("127.0.0.1:3003".to_string());
+
+    log::info!("starting program");
+    tokio::spawn(async { metrics::run_metrics(backend_metrics_bind_addr).await });
 
     let db_client = connect_db().await.unwrap();
 

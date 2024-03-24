@@ -17,10 +17,7 @@ pub async fn get_agorajeux_price_and_url_by_name(
     );
 
     let (doc, _) = httpclient::get_doc(&search).await?;
-    Ok(parse_agorajeux_document(
-        name,
-        &doc,
-    ))
+    Ok(parse_agorajeux_document(name, &doc))
 }
 
 fn normalize_agorajeux_name(name: &str) -> String {

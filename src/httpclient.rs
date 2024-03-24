@@ -1,10 +1,10 @@
-use std::num::NonZeroU32;
+use governor::state::keyed::DefaultKeyedStateStore;
+use governor::{clock, DefaultKeyedRateLimiter, Quota, RateLimiter};
 use hyper::StatusCode;
+use nonzero_ext::nonzero;
 use reqwest::{Client, ClientBuilder, IntoUrl, Response};
 use scraper::Html;
-use governor::{Quota, RateLimiter, DefaultKeyedRateLimiter, clock};
-use governor::state::keyed::DefaultKeyedStateStore;
-use nonzero_ext::nonzero;
+use std::num::NonZeroU32;
 
 /// DEFAULT_QUOTA is the default requests per minutes if not specified
 const DEFAULT_QUOTA: Quota = Quota::per_minute(nonzero!(30u32));
@@ -26,10 +26,15 @@ fn create_limiter() -> DefaultKeyedRateLimiter<String> {
     let quota = std::env::var("RATELIMIT_PER_MINUTE")
         .map_err(|v| v.to_string())
         .and_then(|v| v.parse::<u32>().map_err(|v| v.to_string()))
-        .and_then(|v| NonZeroU32::new(v).ok_or_else(|| "Cannot convert to non-zero u32".to_string()))
+        .and_then(|v| {
+            NonZeroU32::new(v).ok_or_else(|| "Cannot convert to non-zero u32".to_string())
+        })
         .map(Quota::per_minute)
         .unwrap_or_else(|err| {
-            log::warn!("Cannot initialize quota from environment, fallback to default: {}", err);
+            log::warn!(
+                "Cannot initialize quota from environment, fallback to default: {}",
+                err
+            );
             DEFAULT_QUOTA
         })
         .allow_burst(nonzero!(1u32));
@@ -38,7 +43,6 @@ fn create_limiter() -> DefaultKeyedRateLimiter<String> {
     let state = DefaultKeyedStateStore::default();
     RateLimiter::new(quota, state, &LIMITER_CLOCK)
 }
-
 
 /// Execute a request using the shared http client
 pub async fn get<U: IntoUrl>(url: U) -> Result<Response, reqwest::Error> {

@@ -46,4 +46,5 @@ rand = "0.8.5"
 futures-util = "0.3.30"
 backtrace = "0.3.69"
 anyhow = "1.0.79"
+async-trait = "0.1.77"
 
