@@ -340,8 +340,14 @@ pub async fn update_reviewer_table(
 pub async fn update_game_from_db(db_client: &Client, game: &Game) -> Result<(), Error> {
     update_okkazeo_announce_table_from_db(db_client, game).await?;
     update_deal_table(db_client, game.okkazeo_announce.id as i32, &game.deal).await?;
-    update_reviewer_table(db_client, game.okkazeo_announce.id as i32, &game.review).await?;
-    update_reference_table(db_client, game.okkazeo_announce.id as i32, &game.references).await?;
+    /*update_shipping_table(
+        db_client,
+        game.okkazeo_announce.id as i32,
+        &game.okkazeo_announce.shipping,
+    )
+    .await?;*/
+    //update_reviewer_table(db_client, game.okkazeo_announce.id as i32, &game.review).await?;
+    //update_reference_table(db_client, game.okkazeo_announce.id as i32, &game.references).await?;
     Ok(())
 }
 
@@ -382,6 +388,28 @@ pub async fn craft_game_from_row(db_client: &Client, row: Row) -> Result<Game, E
     };
 
     Ok(game)
+}
+
+pub async fn update_sellers_nb_announces_from_db(db_client: &Client) -> u64 {
+    log::debug!("[DB] updating sellers nb_announces from db");
+    let select_req = format!(
+        "UPDATE seller
+         SET seller_nb_announces = subquery.nb_announces
+        FROM (
+            SELECT oa_seller, COUNT(*) AS nb_announces
+            FROM okkazeo_announce
+            GROUP BY oa_seller
+        ) AS subquery
+        WHERE seller.seller_id = subquery.oa_seller"
+    );
+
+    match db_client.execute(&select_req, &[]).await {
+        Ok(r) => r,
+        Err(e) => {
+            log::error!("error updating sellers nb_announces : {}", e);
+            return 0;
+        }
+    }
 }
 
 pub async fn select_game_with_id_from_db(db_client: &Client, id: u32) -> Option<Game> {
@@ -434,8 +462,8 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
     let type_filter = format!(
         "AND (({} = true AND oa_extension = 'Jeu') OR
     ({} = true AND oa_extension = 'Extension') OR
-    ({} = true AND oa_extension = 'Jeu + Extension') OR
-    ({} = true AND oa_extension NOT IN ('Jeu', 'Jeu + Extension', 'Extension')))",
+    ({} = true AND oa_extension = 'Jeu + extension') OR
+    ({} = true AND oa_extension NOT IN ('Jeu', 'Jeu + extension', 'Extension')))",
         state.filters.type_game,
         state.filters.type_ext,
         state.filters.type_game_ext,
@@ -468,7 +496,7 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
                     FROM okkazeo_announce oa
                     LEFT JOIN reviewer r on r.reviewer_oa_id = oa.oa_id
                     JOIN seller s on s.seller_id = oa.oa_seller
-                    WHERE unaccent(oa.oa_name) ilike unaccent($1) AND unaccent(oa.oa_city) ilike unaccent($2)
+                    WHERE {} AND unaccent(oa.oa_city) ilike unaccent($2)
                     AND unaccent(s.seller_name) ilike unaccent($3)
                     AND oa.oa_price > $4
                     AND oa.oa_price < $5
@@ -497,6 +525,11 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
                     d.deal_price,
                     d.deal_percentage
                 ORDER BY {} LIMIT $6 OFFSET $7;",
+        if state.filters.exact_match.is_some() {
+            "oa.oa_name = $1"
+        } else {
+            "unaccent(oa.oa_name) ilike unaccent($1)"
+        },
         if state.filters.pro.is_some() {
             "AND NOT s.seller_is_pro"
         } else {
@@ -504,7 +537,10 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
         },
         type_filter,
         if state.filters.date.is_some() {
-            format!("AND oa.oa_last_modification_date >= '{}'", state.filters.date.as_ref().unwrap())
+            format!(
+                "AND oa.oa_last_modification_date >= '{}'",
+                state.filters.date.as_ref().unwrap()
+            )
         } else {
             String::new()
         },
@@ -528,14 +564,17 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
         match_start = "(";
     }
 
+    let name_match = if state.filters.exact_match.is_some() {
+        &format!("{}", state.filters.name.clone().unwrap_or_default())
+    } else {
+        &format!("%{}%", state.filters.name.clone().unwrap_or_default())
+    };
+
     let res = db_client
         .query(
             &select_req,
             &[
-                &format!(
-                    "%{}%",
-                    state.filters.name.as_ref().unwrap_or(&String::new())
-                ),
+                name_match,
                 &format!(
                     "%{}{}%",
                     match_start,
@@ -585,8 +624,8 @@ pub async fn select_count_filtered_games_from_db(
     let type_filter = format!(
         "AND (({} = true AND oa_extension = 'Jeu') OR
     ({} = true AND oa_extension = 'Extension') OR
-    ({} = true AND oa_extension = 'Jeu + Extension') OR
-    ({} = true AND oa_extension NOT IN ('Jeu', 'Jeu + Extension', 'Extension')))",
+    ({} = true AND oa_extension = 'Jeu + extension') OR
+    ({} = true AND oa_extension NOT IN ('Jeu', 'Jeu + extension', 'Extension')))",
         filters.type_game, filters.type_ext, filters.type_game_ext, filters.type_misc,
     );
 
@@ -597,7 +636,7 @@ pub async fn select_count_filtered_games_from_db(
                 JOIN deal d on d.deal_oa_id = oa.oa_id
                 LEFT JOIN reviewer r on r.reviewer_oa_id = oa.oa_id
                 JOIN seller s on s.seller_id = oa.oa_seller
-                WHERE unaccent(oa.oa_name) ilike unaccent($1) AND unaccent(oa.oa_city) ilike unaccent($2)
+                WHERE {} AND unaccent(oa.oa_city) ilike unaccent($2)
                 AND unaccent(s.seller_name) ilike unaccent($3)
                 AND oa.oa_price > $4 AND oa.oa_price < $5
                 {}
@@ -607,6 +646,11 @@ pub async fn select_count_filtered_games_from_db(
                 GROUP BY oa.oa_id
                 {}
         ) AS c;",
+        if filters.exact_match.is_some() {
+            "oa.oa_name = $1"
+        } else {
+            "unaccent(oa.oa_name) ilike unaccent($1)"
+        },
         if filters.pro.is_some() {
             "AND NOT s.seller_is_pro"
         } else {
@@ -614,7 +658,10 @@ pub async fn select_count_filtered_games_from_db(
         },
         type_filter,
         if filters.date.is_some() {
-            format!("AND oa.oa_last_modification_date >= '{}'", filters.date.as_ref().unwrap())
+            format!(
+                "AND oa.oa_last_modification_date >= '{}'",
+                filters.date.as_ref().unwrap()
+            )
         } else {
             String::new()
         },
@@ -631,11 +678,17 @@ pub async fn select_count_filtered_games_from_db(
         match_start = "(";
     }
 
+    let name_match = if filters.exact_match.is_some() {
+        &format!("{}", filters.name.unwrap_or_default())
+    } else {
+        &format!("%{}%", filters.name.unwrap_or_default())
+    };
+
     let res = db_client
         .query(
             &select_req,
             &[
-                &format!("%{}%", filters.name.unwrap_or_default()),
+                name_match,
                 &format!("%{}{}%", match_start, filters.city.unwrap_or_default()),
                 &format!("%{}%", filters.vendor.unwrap_or_default()),
                 &(filters.min_price.unwrap_or_default() as f32),

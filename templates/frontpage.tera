@@ -1,8 +1,10 @@
-{% macro url_param(page, per_page, city, name, vendor, pro, date, delivery, note, max_price, min_price, type_ext,
+{% macro url_param(page, per_page, city, name, vendor, pro, exact_match, date, delivery, note, max_price, min_price,
+type_ext,
 type_game_ext, type_game, type_misc, sort) -%}
 ?page={{ page }}&per_page={{per_page}}&city={{city}}&name={{name}}
 {% if vendor is string -%}&vendor={{vendor}}{% endif -%}
 {% if pro -%}&pro={{pro}}{% endif -%}
+{% if exact_match -%}&exact_match={{exact_match}}{% endif -%}
 {% if date -%}&date={{date}}{% endif -%}
 {% if delivery -%}&delivery={{delivery}}{% endif -%}
 {% if note is number -%}&note={{note}}{% endif -%}
@@ -23,6 +25,7 @@ city=state.filters.city,
 name=state.filters.name,
 vendor=state.filters.vendor,
 pro=state.filters.pro,
+exact_match=state.filters.exact_match,
 date=state.filters.date,
 delivery=state.filters.delivery,
 note=state.filters.note,
@@ -43,6 +46,7 @@ city=state.filters.city,
 name=state.filters.name,
 vendor=state.filters.vendor,
 pro=state.filters.pro,
+exact_match=state.filters.exact_match,
 date=state.filters.date,
 delivery=state.filters.delivery,
 note=state.filters.note,
@@ -148,6 +152,11 @@ sort=state.sort.sort) }}
                             <input type="checkbox" id="delivery" name="delivery_form" {% if state.filters.delivery
                                 -%}{{ "checked" }}{% endif -%}>
                         </div>
+                        <div class="flex-col-center form-group" title="Exact match nom">
+                            <label for="exact_match">Exact match</label>
+                            <input type="checkbox" id="exact_match" name="exact_match_form" {% if
+                                state.filters.exact_match -%}{{ "checked" }}{% endif -%}>
+                        </div>
                         <div class="flex-col-center form-group" title="Type d'annonce">
                             <fieldset>
                                 <details>
@@ -204,7 +213,7 @@ sort=state.sort.sort) }}
                             </div>
                             <div class="game_name">
                                 {{game.okkazeo_announce.name}}
-                                <a href="/?page={{ state.pagination.page }}&per_page={{state.pagination.per_page}}&name={{game.okkazeo_announce.name }}&sort={{state.sort.sort}}&type_game=true&type_ext=true&type_game_ext=true&type_misc=true"
+                                <a href="/?page={{ state.pagination.page }}&per_page={{state.pagination.per_page}}&name={{game.okkazeo_announce.name }}&sort={{state.sort.sort}}&type_game=true&type_ext=true&type_game_ext=true&type_misc=true&exact_match=true"
                                     target="_blank">
                                     <img src="assets/filter.png" alt="fail" width="20" height="20" />
                                 </a><br>

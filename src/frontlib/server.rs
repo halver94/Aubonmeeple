@@ -25,7 +25,7 @@ pub struct State {
 
 pub fn format_url_params(state: &State) -> String {
     format!(
-        "?page={}&per_page={}{}{}{}{}{}&type_ext={}&type_game_ext={}&type_game={}&type_misc={}{}{}{}{}&sort={}",
+        "?page={}&per_page={}{}{}{}{}{}{}&type_ext={}&type_game_ext={}&type_game={}&type_misc={}{}{}{}{}&sort={}",
         state.pagination.page,
         state.pagination.per_page,
         state
@@ -50,6 +50,11 @@ pub fn format_url_params(state: &State) -> String {
         },
         if state.filters.pro.is_some() {
             format!("&pro={}", state.filters.pro.as_ref().unwrap())
+        } else {
+            String::new()
+        },
+        if state.filters.exact_match.is_some() {
+            format!("&exact_match={}", state.filters.exact_match.as_ref().unwrap())
         } else {
             String::new()
         },
@@ -124,6 +129,12 @@ pub async fn root(
         } else {
             None
         };
+        let exact_match: Option<bool> = if filters_form.0.exact_match_form == Some("on".to_string())
+        {
+            Some(true)
+        } else {
+            None
+        };
         let type_ext: bool = filters_form.0.type_ext_form == Some("on".to_string());
         let type_game_ext: bool = filters_form.0.type_game_ext_form == Some("on".to_string());
         let type_game: bool = filters_form.0.type_game_form == Some("on".to_string());
@@ -173,6 +184,7 @@ pub async fn root(
             name,
             vendor,
             pro,
+            exact_match,
             delivery,
             note,
             max_price,

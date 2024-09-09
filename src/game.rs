@@ -2,22 +2,15 @@ use crate::website::agorajeux::get_agorajeux_price_and_url_by_name;
 use crate::website::knapix::get_knapix_prices;
 use crate::website::ludifolie::get_ludifolie_price_and_url_by_name;
 use crate::website::ludocortex::get_ludocortex_price_and_url;
-use crate::website::okkazeo::{
-    get_okkazeo_announce_page, get_okkazeo_barcode, get_okkazeo_city, get_okkazeo_seller,
-};
 use crate::website::philibert::get_philibert_price_and_url;
-use chrono::{DateTime, Utc};
-use feed_rs::model::Entry;
+use crate::website::ultrajeux::get_ultrajeux_price_and_url;
+use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::error;
 
-use crate::website::okkazeo::{
-    download_okkazeo_game_image, get_okkazeo_announce_extension, get_okkazeo_announce_image,
-    get_okkazeo_announce_modification_date, get_okkazeo_announce_name, get_okkazeo_announce_price,
-    get_okkazeo_shipping, okkazeo_is_pro_seller,
-};
+use crate::website::okkazeo::{download_okkazeo_game_image, Row};
 
 use crate::website::bgg::get_bgg_note;
 
@@ -151,6 +144,52 @@ impl Game {
         }
         self.review.compute_average_note();
     }
+
+    pub fn update_game(&mut self, row: Row) {
+        self.okkazeo_announce.price = row.prix_annonce;
+
+        let naive_date: NaiveDateTime =
+            match NaiveDateTime::parse_from_str(row.date.as_str(), "%Y-%m-%d %H:%M:%S") {
+                Ok(dt) => dt,
+                Err(e) => {
+                    log::error!("Failed to parse datetime \"{}\" : {}", row.date, e);
+                    return;
+                }
+            };
+        let datetime_utc = DateTime::from_naive_utc_and_offset(naive_date, Utc);
+        self.okkazeo_announce.last_modification_date = datetime_utc;
+
+        self.get_deal_advantage();
+
+        if let Some(v) = row.shop2shop {
+            self.okkazeo_announce
+                .shipping
+                .insert("shop2shop".to_string(), v);
+        }
+        if let Some(v) = row.colissimo {
+            self.okkazeo_announce
+                .shipping
+                .insert("colissimo".to_string(), v);
+        }
+
+        if let Some(v) = row.mondial_relay {
+            self.okkazeo_announce
+                .shipping
+                .insert("mondial_relay".to_string(), v);
+        }
+
+        if let Some(v) = row.relais_colis {
+            self.okkazeo_announce
+                .shipping
+                .insert("relais_colis".to_string(), v);
+        }
+
+        if row.rmp {
+            self.okkazeo_announce
+                .shipping
+                .insert("hand_delivery".to_string(), 0.0);
+        }
+    }
 }
 
 impl Games {
@@ -178,55 +217,97 @@ impl Review {
     }
 }
 
-pub async fn get_game_infos(
-    entry: Option<&Entry>,
-    id: u32,
-) -> Result<Box<Game>, Box<dyn error::Error + Send + Sync>> {
-    log::debug!("fetching game infos for id {:?}", id);
-
-    let image_url: String;
+pub async fn get_game_infos(row: Row) -> Result<Box<Game>, Box<dyn error::Error + Send + Sync>> {
+    log::debug!("Getting game infos, parsing row");
     let mut game = Box::new(Game {
         okkazeo_announce: OkkazeoAnnounce {
-            id,
+            id: row.id,
+            price: row.prix_annonce,
+            url: row.url_announce,
+            extension: row.kind,
+            barcode: row.ean,
+            shipping: HashMap::new(),
+            city: Some(match row.zipcode {
+                Some(z) => format!("{} ({})", row.city, z),
+                None => format!("{}", row.city),
+            }),
             ..Default::default()
         },
         references: HashMap::<String, Reference>::new(),
         ..Default::default()
     });
 
-    {
-        let (document, _) = get_okkazeo_announce_page(id).await;
-        game.okkazeo_announce.url = format!("https://www.okkazeo.com/annonces/view/{}", id);
-        game.okkazeo_announce.price = get_okkazeo_announce_price(&document)?;
-        game.okkazeo_announce.extension = get_okkazeo_announce_extension(&document)?;
-        game.okkazeo_announce.last_modification_date = if let Some(e) = entry {
-            e.updated.unwrap()
-        } else {
-            get_okkazeo_announce_modification_date(&document)?
-        };
-        image_url = get_okkazeo_announce_image(&document)?;
-        game.okkazeo_announce.barcode = get_okkazeo_barcode(&document);
-        game.okkazeo_announce.city = get_okkazeo_city(&document);
-        game.okkazeo_announce.shipping = get_okkazeo_shipping(&document);
-        if let Some(s) = get_okkazeo_seller(&document) {
-            game.okkazeo_announce.seller = s;
-        }
-        game.okkazeo_announce.seller.is_pro = okkazeo_is_pro_seller(&document);
-
-        let name = get_okkazeo_announce_name(&document)?;
-        let mut inside_parentheses = false;
-        let mut name_result = String::new();
-
-        for c in name.chars() {
-            match c {
-                '(' => inside_parentheses = true,
-                ')' => inside_parentheses = false,
-                _ if !inside_parentheses => name_result.push(c),
-                _ => (),
+    let naive_date: NaiveDateTime =
+        match NaiveDateTime::parse_from_str(row.date.as_str(), "%Y-%m-%d %H:%M:%S") {
+            Ok(dt) => dt,
+            Err(e) => {
+                log::error!("Failed to parse datetime \"{}\" : {}", row.date, e);
+                return Err(Box::new(e));
             }
-        }
-        game.okkazeo_announce.name = name_result;
+        };
+    let datetime_utc = DateTime::from_naive_utc_and_offset(naive_date, Utc);
+    game.okkazeo_announce.last_modification_date = datetime_utc;
+
+    let vendor_id = row
+        .url_vendor
+        .split('/')
+        .last()
+        .unwrap_or("")
+        .parse::<u32>()
+        .unwrap_or(0);
+
+    game.okkazeo_announce.seller = Seller {
+        id: vendor_id,
+        name: row.vendor,
+        url: row.url_vendor,
+        nb_announces: 0,
+        is_pro: row.pro,
+    };
+
+    if let Some(v) = row.shop2shop {
+        game.okkazeo_announce
+            .shipping
+            .insert("shop2shop".to_string(), v);
     }
+    if let Some(v) = row.colissimo {
+        game.okkazeo_announce
+            .shipping
+            .insert("colissimo".to_string(), v);
+    }
+
+    if let Some(v) = row.mondial_relay {
+        game.okkazeo_announce
+            .shipping
+            .insert("mondial_relay".to_string(), v);
+    }
+
+    if let Some(v) = row.relais_colis {
+        game.okkazeo_announce
+            .shipping
+            .insert("relais_colis".to_string(), v);
+    }
+
+    if row.rmp {
+        game.okkazeo_announce
+            .shipping
+            .insert("hand_delivery".to_string(), 0.0);
+    }
+
+    let name = row.name;
+    let mut inside_parentheses = false;
+    let mut name_result = String::new();
+
+    for c in name.chars() {
+        match c {
+            '(' => inside_parentheses = true,
+            ')' => inside_parentheses = false,
+            _ if !inside_parentheses => name_result.push(c),
+            _ => (),
+        }
+    }
+    game.okkazeo_announce.name = name_result;
+
+    let image_url = row.url_image;
     let image = download_okkazeo_game_image(&image_url).await?;
     game.okkazeo_announce.image = image;
 
@@ -293,7 +374,8 @@ pub async fn get_game_infos(
         }
     }
 
-    /*if game.references.get("ultrajeux").is_none() {
+    /*
+    if game.references.get("ultrajeux").is_none() {
         match get_ultrajeux_price_and_url(
             &game.okkazeo_announce.name,
             game.okkazeo_announce.barcode,

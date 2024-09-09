@@ -1,82 +1,14 @@
-use boardgame_finder::game::get_game_infos;
 use boardgame_finder::metrics;
-use boardgame_finder::website::okkazeo::get_atom_feed;
-use lazy_static::lazy_static;
-use prometheus::{register_int_counter, IntCounter};
-use std::error;
+use boardgame_finder::website::okkazeo::get_okkazeo_csv;
+use boardgame_finder::{db::select_all_ids_from_oa_table_from_db, game::get_game_infos};
 use std::time::{Duration, Instant};
-use tokio::task::JoinSet;
-use tokio::time;
-use tokio_postgres::Client;
+use tokio::time::{self};
+use tokio_postgres::row;
 
 use boardgame_finder::db::{
-    connect_db, insert_announce_into_db, select_game_with_id_from_db, update_game_from_db,
+    connect_db, delete_from_all_table_with_id, insert_announce_into_db,
+    select_game_with_id_from_db, update_game_from_db, update_sellers_nb_announces_from_db,
 };
-
-async fn parse_game_feed(db_client: &Client) -> Result<(), Box<dyn error::Error + Send + Sync>> {
-    log::debug!("parsing game feed");
-    let feed = get_atom_feed().await?;
-    GET_ATOM_FEED.inc();
-
-    let mut tasks = JoinSet::new();
-    log::debug!("checking {} games from feed", feed.entries.len());
-    'outer: for entry in feed.entries {
-        log::trace!("entry : {:?}", entry);
-
-        let price = entry
-            .summary
-            .as_ref()
-            .unwrap()
-            .content
-            .split('>')
-            .collect::<Vec<&str>>()
-            .last()
-            .unwrap()
-            .split('€')
-            .collect::<Vec<&str>>()
-            .first()
-            .unwrap()
-            .parse::<f32>()?;
-
-        // if same id, then it is an update
-        let id = entry.id.parse::<u32>()?;
-
-        let fetched_game = select_game_with_id_from_db(db_client, id).await;
-        if fetched_game.is_some() {
-            let mut fetched_game = fetched_game.clone().unwrap();
-            log::debug!("updating game {}", fetched_game.okkazeo_announce.name);
-            fetched_game.okkazeo_announce.last_modification_date =
-                entry.updated.unwrap_or_default();
-            fetched_game.okkazeo_announce.price = price;
-            fetched_game.get_deal_advantage();
-
-            if let Err(e) = update_game_from_db(db_client, &fetched_game).await {
-                log::error!(
-                    "error db, cannot update game {} : {}",
-                    fetched_game.okkazeo_announce.name,
-                    e
-                );
-            }
-            continue 'outer;
-        }
-
-        tasks.spawn(async move { get_game_infos(Some(&entry), entry.id.parse::<u32>()?).await });
-    }
-    while let Some(res) = tasks.join_next().await {
-        let game = res??;
-        log::debug!("got result for game {}", game.okkazeo_announce.name);
-
-        if let Err(e) = insert_announce_into_db(db_client, &game).await {
-            log::error!(
-                "error db, cannot insert game {} : {}",
-                game.okkazeo_announce.name,
-                e
-            );
-        }
-    }
-
-    Ok(())
-}
 
 #[tokio::main]
 async fn main() {
@@ -88,26 +20,102 @@ async fn main() {
     let client = connect_db().await.expect("cannot connect to DB");
 
     log::info!("starting program");
-    let interval = Duration::from_secs(60 * 5);
-    log::info!("parsing game feed every {} seconds", interval.as_secs());
+    let csv_fetch_interval = Duration::from_secs(60 * 60 * 3); // every 6 hours
+    log::info!(
+        "parsing game csv every {} seconds",
+        csv_fetch_interval.as_secs()
+    );
 
     tokio::spawn(async { metrics::run_metrics(backend_metrics_bind_addr).await });
 
     loop {
         let start = Instant::now();
-        log::debug!("scraping time : {:?}", start);
-        if let Err(e) = parse_game_feed(&client).await {
-            log::error!("{}", e);
-        }
-        let duration = start.elapsed();
+        log::debug!("fetching time : {:?}", start);
 
-        if duration < interval {
-            time::sleep(interval - duration).await;
+        // fetch csv
+        let rows = get_okkazeo_csv("https://www.okkazeo.com/aubonmeeple.csv".to_string())
+            .await
+            .unwrap();
+
+        if rows.len() < 10 {
+            let duration = start.elapsed();
+            log::error!("CSV is empty !");
+            time::sleep(csv_fetch_interval - duration).await;
+        }
+
+        log::info!("csv containing {} row", rows.len());
+        let mut csv_ids = vec![];
+        for row in &rows {
+            csv_ids.push(row.id as i32);
+            log::debug!("treating record : {:?}", row);
+            let fetched_game = select_game_with_id_from_db(&client, row.id).await;
+            match fetched_game {
+                None => match get_game_infos(row.clone()).await {
+                    Err(e) => log::error!("error getting game info {}", e),
+                    Ok(g) => {
+                        if fetched_game.is_none() {
+                            if let Err(e) = insert_announce_into_db(&client, &g).await {
+                                log::error!(
+                                    "error db, cannot insert game {} : {}",
+                                    g.okkazeo_announce.name,
+                                    e
+                                );
+                            }
+                        }
+                    }
+                },
+                Some(mut game) => {
+                    log::debug!(
+                        "game {} already in DB, updating it",
+                        game.okkazeo_announce.id
+                    );
+                    game.update_game(row.clone());
+                    if let Err(e) = update_game_from_db(&client, &game).await {
+                        log::error!(
+                            "error db, cannot update game {} : {}",
+                            game.okkazeo_announce.name,
+                            e
+                        );
+                    }
+                }
+            }
+        }
+
+        let db_ids = match select_all_ids_from_oa_table_from_db(&client).await {
+            Ok(ids) => {
+                log::debug!("fetched {} ids", ids.len());
+                ids
+            }
+            Err(e) => {
+                log::error!("error fetching ids from db : {}", e);
+                continue;
+            }
+        };
+        let csv_set: std::collections::HashSet<i32> =
+            rows.iter().cloned().map(|r| r.id as i32).collect();
+        let ids_to_remove: Vec<i32> = db_ids
+            .iter()
+            .filter(|&x| !csv_set.contains(x))
+            .cloned()
+            .collect();
+
+        log::debug!("removing {:?} games", ids_to_remove.len());
+        for id in ids_to_remove {
+            log::debug!("removing {} from db", id);
+            if let Err(e) = delete_from_all_table_with_id(&client, id).await {
+                log::error!("error deleting from db : {}", e);
+            }
+        }
+
+        log::debug!(
+            "updated {} sellers",
+            update_sellers_nb_announces_from_db(&client).await
+        );
+
+        let duration = start.elapsed();
+        log::info!("treated CSV in {:?} ", duration);
+        if duration < csv_fetch_interval {
+            time::sleep(csv_fetch_interval - duration).await;
         }
     }
-}
-
-lazy_static! {
-    static ref GET_ATOM_FEED: IntCounter =
-        register_int_counter!("get_atom_feed", "Number of time we get the atom feed").unwrap();
 }

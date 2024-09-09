@@ -50,3 +50,10 @@ COPY --from=builder /build/target/release/backend ./
 
 USER abc:abc
 CMD ["./backend"]
+
+FROM app-base as crawler
+
+COPY --from=builder /build/target/release/crawler ./
+
+USER abc:abc
+CMD ["./crawler"]
