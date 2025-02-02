@@ -42,7 +42,6 @@ pub struct Reviewer {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Seller {
-    pub id: u32,
     pub name: String,
     pub url: String,
     pub nb_announces: u32,
@@ -248,16 +247,7 @@ pub async fn get_game_infos(row: Row) -> Result<Box<Game>, Box<dyn error::Error 
     let datetime_utc = DateTime::from_naive_utc_and_offset(naive_date, Utc);
     game.okkazeo_announce.last_modification_date = datetime_utc;
 
-    let vendor_id = row
-        .url_vendor
-        .split('/')
-        .last()
-        .unwrap_or("")
-        .parse::<u32>()
-        .unwrap_or(0);
-
     game.okkazeo_announce.seller = Seller {
-        id: vendor_id,
         name: row.vendor,
         url: row.url_vendor,
         nb_announces: 0,

@@ -50,7 +50,7 @@ pub async fn delete_from_all_table_with_id(db_client: &Client, id: i32) -> Resul
     DB_IO.with_label_values(&["delete", "reviewer"]).inc();
 
     db_client
-        .execute("UPDATE seller SET seller_nb_announces = seller_nb_announces - 1 WHERE seller_id = (SELECT oa_seller FROM okkazeo_announce WHERE oa_id = $1);", &[&id])
+        .execute("UPDATE seller SET seller_nb_announces = seller_nb_announces - 1 WHERE seller_name = (SELECT oa_seller FROM okkazeo_announce WHERE oa_id = $1);", &[&id])
         .await?;
     DB_IO.with_label_values(&["update", "seller"]).inc();
 
@@ -92,7 +92,7 @@ pub async fn insert_into_okkazeo_announce_table(
                 &game.okkazeo_announce.price,
                 &game.okkazeo_announce.url,
                 &game.okkazeo_announce.extension,
-                &(game.okkazeo_announce.seller.id as i32),
+                &(game.okkazeo_announce.seller.name),
                 &(game.okkazeo_announce.barcode.unwrap_or_default() as i64),
                 &game
                     .okkazeo_announce
@@ -132,14 +132,13 @@ pub async fn insert_into_shipping_table(
 pub async fn insert_into_seller_table(db_client: &Client, seller: &Seller) -> Result<(), Error> {
     log::debug!("insertin into seller table");
     let seller_insert_req = format!(
-        r#"INSERT INTO seller ({}, {}, {}, {}, {}) VALUES ($1, $2, $3, $4, $5)"#,
-        "seller_id", "seller_name", "seller_url", "seller_nb_announces", "seller_is_pro",
+        r#"INSERT INTO seller ({}, {}, {}, {}) VALUES ($1, $2, $3, $4)"#,
+        "seller_name", "seller_url", "seller_nb_announces", "seller_is_pro",
     );
     let _ = db_client
         .query(
             &seller_insert_req,
             &[
-                &(seller.id as i32),
                 &seller.name,
                 &seller.url,
                 &(seller.nb_announces as i32),
@@ -214,7 +213,7 @@ pub async fn insert_into_reviewer_table(
 pub async fn insert_announce_into_db(db_client: &Client, game: &Box<Game>) -> Result<(), Error> {
     log::debug!("inserting {} into DB ", game.okkazeo_announce.name);
     //chck if seller already hs announes, if yes update, if not insert
-    if check_if_seller_in_db(db_client, game.okkazeo_announce.seller.id as i32).await? > 0 {
+    if check_if_seller_in_db(db_client, game.okkazeo_announce.seller.name.clone()).await? > 0 {
         log::debug!("seller {:?} present in DB", game.okkazeo_announce.seller);
         update_seller_table_from_db(db_client, &game.okkazeo_announce.seller).await?;
     } else {
@@ -238,13 +237,13 @@ pub async fn update_seller_table_from_db(db_client: &Client, seller: &Seller) ->
     log::debug!("updating seller table");
     let references_insert_req = format!(
         r#"UPDATE seller SET {} = $1 WHERE {} = $2"#,
-        "seller_nb_announces", "seller_id",
+        "seller_nb_announces", "seller_name",
     );
 
     let _ = db_client
         .query(
             &references_insert_req,
-            &[&(seller.nb_announces as i32), &(seller.id as i32)],
+            &[&(seller.nb_announces as i32), &(seller.name)],
         )
         .await?;
     DB_IO.with_label_values(&["update", "seller"]).inc();
@@ -255,8 +254,8 @@ pub async fn update_okkazeo_announce_table_from_db(
     game: &Game,
 ) -> Result<(), Error> {
     let references_insert_req = format!(
-        r#"UPDATE okkazeo_announce SET {} = $1, {} = $2 WHERE {} = $3"#,
-        "oa_last_modification_date", "oa_price", "oa_id",
+        r#"UPDATE okkazeo_announce SET {} = $1, {} = $2, {} = $3 WHERE {} = $4"#,
+        "oa_last_modification_date", "oa_price", "oa_seller", "oa_id",
     );
 
     let _ = db_client
@@ -265,6 +264,7 @@ pub async fn update_okkazeo_announce_table_from_db(
             &[
                 &game.okkazeo_announce.last_modification_date,
                 &game.okkazeo_announce.price,
+                &game.okkazeo_announce.seller.name,
                 &(game.okkazeo_announce.id as i32),
             ],
         )
@@ -354,7 +354,6 @@ pub async fn update_game_from_db(db_client: &Client, game: &Game) -> Result<(), 
 pub async fn craft_game_from_row(db_client: &Client, row: Row) -> Result<Game, Error> {
     let id: i32 = row.try_get("oa_id")?;
     let nb_announces: i32 = row.try_get("seller_nb_announces")?;
-    let seller_id: i32 = row.try_get("seller_id")?;
 
     let game = Game {
         okkazeo_announce: OkkazeoAnnounce {
@@ -366,7 +365,6 @@ pub async fn craft_game_from_row(db_client: &Client, row: Row) -> Result<Game, E
             extension: row.try_get("oa_extension").unwrap_or_default(),
             shipping: select_shipping_from_db(db_client, id).await?,
             seller: Seller {
-                id: seller_id as u32,
                 name: row.try_get("seller_name")?,
                 url: row.try_get("seller_url")?,
                 nb_announces: nb_announces as u32,
@@ -400,7 +398,7 @@ pub async fn update_sellers_nb_announces_from_db(db_client: &Client) -> u64 {
             FROM okkazeo_announce
             GROUP BY oa_seller
         ) AS subquery
-        WHERE seller.seller_id = subquery.oa_seller"
+        WHERE seller.seller_name = subquery.oa_seller"
     );
 
     match db_client.execute(&select_req, &[]).await {
@@ -418,7 +416,7 @@ pub async fn select_game_with_id_from_db(db_client: &Client, id: u32) -> Option<
         "SELECT *
                 FROM okkazeo_announce oa
                 JOIN deal d on d.deal_oa_id = oa.oa_id
-                JOIN seller s on s.seller_id = oa.oa_seller
+                JOIN seller s on s.seller_name = oa.oa_seller
                 WHERE oa.oa_id = $1"
     );
 
@@ -480,7 +478,6 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
             oa.oa_extension,
             oa.oa_image,
             oa.oa_city,
-            s.seller_id,
             s.seller_name,
             s.seller_url,
             s.seller_is_pro,
@@ -490,12 +487,12 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
          FROM okkazeo_announce oa
                 JOIN deal d on d.deal_oa_id = oa.oa_id
                 LEFT JOIN reviewer r on r.reviewer_oa_id = oa.oa_id
-                JOIN seller s on s.seller_id = oa.oa_seller
+                JOIN seller s on s.seller_name = oa.oa_seller
                 WHERE oa.oa_id IN (
                     SELECT oa.oa_id
                     FROM okkazeo_announce oa
                     LEFT JOIN reviewer r on r.reviewer_oa_id = oa.oa_id
-                    JOIN seller s on s.seller_id = oa.oa_seller
+                    JOIN seller s on s.seller_name = oa.oa_seller
                     WHERE {} AND unaccent(oa.oa_city) ilike unaccent($2)
                     AND unaccent(s.seller_name) ilike unaccent($3)
                     AND oa.oa_price > $4
@@ -517,7 +514,6 @@ pub async fn select_games_from_db(db_client: &Client, state: &State) -> Result<G
                     oa.oa_barcode,
                     oa.oa_image,
                     oa.oa_city,
-                    s.seller_id,
                     s.seller_name,
                     s.seller_url,
                     s.seller_is_pro,
@@ -635,7 +631,7 @@ pub async fn select_count_filtered_games_from_db(
                 FROM okkazeo_announce oa
                 JOIN deal d on d.deal_oa_id = oa.oa_id
                 LEFT JOIN reviewer r on r.reviewer_oa_id = oa.oa_id
-                JOIN seller s on s.seller_id = oa.oa_seller
+                JOIN seller s on s.seller_name = oa.oa_seller
                 WHERE {} AND unaccent(oa.oa_city) ilike unaccent($2)
                 AND unaccent(s.seller_name) ilike unaccent($3)
                 AND oa.oa_price > $4 AND oa.oa_price < $5
@@ -703,15 +699,15 @@ pub async fn select_count_filtered_games_from_db(
     Ok(nbr)
 }
 
-pub async fn check_if_seller_in_db(db_client: &Client, id: i32) -> Result<i32, Error> {
+pub async fn check_if_seller_in_db(db_client: &Client, name: String) -> Result<i32, Error> {
     log::debug!("checkin if seller is in db");
     let select_req = format!(
-        "SELECT seller_id
+        "SELECT seller_name
                 FROM seller
-                WHERE seller_id = $1"
+                WHERE seller_name = $1"
     );
 
-    let res = db_client.query(&select_req, &[&id]).await?;
+    let res = db_client.query(&select_req, &[&name]).await?;
     DB_IO.with_label_values(&["select", "seller"]).inc();
 
     Ok(res.len() as i32)

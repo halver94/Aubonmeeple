@@ -23,7 +23,7 @@ GRANT ALL PRIVILEGES ON DATABASE scraper TO scrapy;
 CREATE EXTENSION unaccent;
 
 CREATE TABLE "seller" (
-  "seller_id" integer PRIMARY KEY,
+  "seller_id" SERIAL PRIMARY KEY,
   "seller_name" text,
   "seller_url" text,
   "seller_nb_announces" integer,
@@ -38,7 +38,7 @@ CREATE TABLE "okkazeo_announce" (
   "oa_price" real NOT NULL,
   "oa_url" text NOT NULL,
   "oa_extension" text,
-  "oa_seller" integer REFERENCES seller("seller_id"),
+  "oa_seller" text REFERENCES seller("seller_name"),
   "oa_barcode" bigint,
   "oa_city" text,
   "oa_nbr_player" integer
